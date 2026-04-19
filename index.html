@@ -42,11 +42,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .event-icon{font-size:40px;margin-bottom:16px}
 .event-name{font-size:18px;font-weight:700;margin-bottom:8px;line-height:1.3}
 .event-meta{font-size:14px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.event-date-edit{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.event-date-input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);background:var(--bg);flex:1}
-.event-date-input:focus{outline:none;border-color:var(--text)}
-.btn-save-date{padding:8px 16px;background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
-.btn-save-date:hover{background:#333}
 .event-actions{display:flex;gap:8px;margin-top:20px}
 .btn{padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font)}
 .btn-primary{background:var(--text);color:var(--bg);flex:1}
@@ -57,10 +52,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .upload-header{text-align:center;margin-bottom:24px}
 .upload-header h2{font-family:var(--cinzel);font-size:24px;font-weight:600;margin-bottom:8px}
 .upload-header p{font-size:14px;color:var(--text2)}
-.date-picker-section{margin-bottom:24px;max-width:400px;margin-left:auto;margin-right:auto}
-.date-picker-label{font-size:14px;font-weight:600;margin-bottom:8px;display:block}
-.date-picker-input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:var(--font);background:var(--bg)}
-.date-picker-input:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(0,0,0,0.05)}
 .upload-zone{background:#F8F8F8;border:2px dashed var(--border);border-radius:12px;padding:50px 20px;text-align:center;cursor:pointer;transition:all 0.2s}
 .upload-zone:hover{border-color:var(--accent);background:#F0F0F0}
 .upload-zone.dragover{border-color:var(--accent);background:#F0F0F0;border-style:solid}
@@ -128,7 +119,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   </div>
   <div class="filter-tabs">
     <div class="filter-tab active" onclick="filterEvents('all')">All Events</div>
-    <div class="filter-tab" onclick="filterEvents('upcoming')">Upcoming</div>
     <div class="filter-tab" onclick="filterEvents('recent')">Recent</div>
   </div>
   <div class="events-header">
@@ -142,10 +132,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="upload-header">
       <h2>Upload New Event</h2>
       <p>Share your event details with the community</p>
-    </div>
-    <div class="date-picker-section">
-      <label class="date-picker-label">Event Date</label>
-      <input type="date" class="date-picker-input" id="event-date-picker">
     </div>
     <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
       <div class="upload-icon">📄</div>
@@ -183,7 +169,6 @@ let isUploading=false;
 const fileInput=document.getElementById('file-input');
 const uploadZone=document.getElementById('upload-zone');
 const uploadStatus=document.getElementById('upload-status');
-const eventDatePicker=document.getElementById('event-date-picker');
 
 fileInput.addEventListener('change',handleFiles);
 uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('dragover')});
@@ -202,13 +187,6 @@ async function handleFiles(e){
   }
   
   const files=Array.from(e.target.files);
-  const selectedDate=eventDatePicker.value;
-  
-  if(!selectedDate){
-    uploadStatus.textContent='✗ Please select an event date first';
-    uploadStatus.className='upload-status error';
-    return;
-  }
   
   isUploading=true;
   uploadStatus.textContent='Uploading...';
@@ -230,7 +208,6 @@ async function handleFiles(e){
             body:JSON.stringify({
               name:file.name.replace('.pdf',''),
               size:(file.size/1024).toFixed(1)+' KB',
-              event_date:selectedDate,
               pdf_data:e.target.result
             })
           });
@@ -266,7 +243,7 @@ async function handleFiles(e){
 
 async function loadEvents(){
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?order=event_date.desc`,{
+    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`}
     });
     if(r.ok){
@@ -296,11 +273,8 @@ function renderEvents(){
   let filtered=allEvents.filter(e=>{
     const matchesSearch=e.name.toLowerCase().includes(searchTerm);
     if(currentFilter==='all')return matchesSearch;
-    const eventDate=new Date(e.event_date);
-    const today=new Date();
-    today.setHours(0,0,0,0);
-    if(currentFilter==='upcoming')return matchesSearch&&eventDate>=today;
-    if(currentFilter==='recent')return matchesSearch&&eventDate<today;
+    const daysDiff=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
+    if(currentFilter==='recent')return matchesSearch&&daysDiff<=7;
     return matchesSearch;
   });
   
@@ -312,20 +286,14 @@ function renderEvents(){
   }
   
   grid.innerHTML=filtered.map(e=>{
-    const eventDate=new Date(e.event_date);
-    const today=new Date();
-    today.setHours(0,0,0,0);
-    const isUpcoming=eventDate>=today;
-    const badge=isUpcoming?'Upcoming':'Past';
+    const daysDiff=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
+    const badge=daysDiff<=7?'New':'';
     return `
     <div class="event-card">
-      <div class="event-badge">${badge}</div>
+      ${badge?`<div class="event-badge">${badge}</div>`:''}
       <div class="event-icon">📄</div>
       <div class="event-name">${e.name}</div>
-      <div class="event-date-edit">
-        <input type="date" class="event-date-input" value="${e.event_date}" id="date-${e.id}">
-        <button class="btn-save-date" onclick="updateEventDate(${e.id})">Save</button>
-      </div>
+      <div class="event-meta"><span>📅</span>${new Date(e.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
       <div class="event-meta"><span>📦</span>${e.size}</div>
       <div class="event-actions">
         <button class="btn btn-primary" onclick="viewEvent(${e.id})">View Details</button>
@@ -333,31 +301,6 @@ function renderEvents(){
       </div>
     </div>
   `}).join('');
-}
-
-async function updateEventDate(id){
-  const newDate=document.getElementById(`date-${id}`).value;
-  if(!newDate)return;
-  
-  try{
-    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
-      method:'PATCH',
-      headers:{
-        'apikey':SB_ANON,
-        'Authorization':`Bearer ${SB_ANON}`,
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({event_date:newDate})
-    });
-    
-    if(r.ok){
-      await loadEvents();
-    }else{
-      alert('Failed to update date');
-    }
-  }catch(err){
-    alert('Error updating date');
-  }
 }
 
 async function deleteEvent(id){
