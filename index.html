@@ -108,8 +108,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="title">RISING LIGHT</div>
     <div class="subtitle">Compassion Has No Borders</div>
   </div>
-  
-  <!-- Stats -->
   <div class="stats-section">
     <div class="stat-card">
       <div class="stat-number">3</div>
@@ -124,8 +122,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       <div class="stat-label">Lives Touched</div>
     </div>
   </div>
-
-  <!-- Search & Filters -->
   <div class="search-container">
     <input type="text" class="search-input" id="search-input" placeholder="Search events...">
     <span class="search-icon">🔍</span>
@@ -135,8 +131,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="filter-tab" onclick="filterEvents('upcoming')">Upcoming</div>
     <div class="filter-tab" onclick="filterEvents('recent')">Recent</div>
   </div>
-
-  <!-- Events -->
   <div class="events-header">
     <div class="events-title">Events</div>
     <div class="events-count" id="event-count">0 events</div>
@@ -144,8 +138,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   <div class="events-grid" id="events-grid">
     <div class="loading">Loading events...</div>
   </div>
-
-  <!-- Upload Section (Moved to Bottom) -->
   <div class="upload-section">
     <div class="upload-header">
       <h2>Upload New Event</h2>
@@ -163,8 +155,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     </div>
     <div class="upload-status" id="upload-status"></div>
   </div>
-
-  <!-- Footer -->
   <div class="footer">
     <div class="footer-logo">
       <div class="footer-icon">S</div>
@@ -174,7 +164,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <a href="https://77media-hq.vercel.app" class="footer-cta" target="_blank">Explore SVN Studio OS →</a>
   </div>
 </div>
-
 <div class="modal" id="pdf-modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -184,12 +173,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="modal-body"><iframe id="pdf-viewer"></iframe></div>
   </div>
 </div>
-
 <script>
 const SB_URL='https://vtvniushkftodhlvdkom.supabase.co';
 const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0dm5pdXNoa2Z0b2RobHZka29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMTY4NzAsImV4cCI6MjA5MTY5Mjg3MH0.a8R36vH_KRnruIcj39ivrkTuVNtH7YX8OXabbSn3jgg';
 let allEvents=[];
 let currentFilter='all';
+let isUploading=false;
 
 const fileInput=document.getElementById('file-input');
 const uploadZone=document.getElementById('upload-zone');
@@ -206,6 +195,12 @@ uploadZone.addEventListener('drop',e=>{
 });
 
 async function handleFiles(e){
+  if(isUploading){
+    uploadStatus.textContent='⏳ Please wait for current upload to finish...';
+    uploadStatus.className='upload-status';
+    return;
+  }
+  
   const files=Array.from(e.target.files);
   const selectedDate=eventDatePicker.value;
   
@@ -215,6 +210,7 @@ async function handleFiles(e){
     return;
   }
   
+  isUploading=true;
   uploadStatus.textContent='Uploading...';
   uploadStatus.className='upload-status';
   
@@ -240,9 +236,8 @@ async function handleFiles(e){
           });
           
           if(r.ok){
-            uploadStatus.textContent='✓ Upload successful! Synced across all devices.';
+            uploadStatus.textContent='✓ Upload successful! Ready for next upload.';
             uploadStatus.className='upload-status success';
-            eventDatePicker.value='';
             await loadEvents();
             setTimeout(()=>{
               uploadStatus.textContent='';
@@ -255,12 +250,15 @@ async function handleFiles(e){
         }catch(err){
           uploadStatus.textContent=`✗ Upload error: ${err.message}`;
           uploadStatus.className='upload-status error';
+        }finally{
+          isUploading=false;
         }
       };
       reader.readAsDataURL(file);
     }else{
       uploadStatus.textContent='✗ Please upload PDF files only.';
       uploadStatus.className='upload-status error';
+      isUploading=false;
     }
   }
   fileInput.value='';
