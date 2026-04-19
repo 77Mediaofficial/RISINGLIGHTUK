@@ -69,8 +69,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .modal-title{font-size:20px;font-weight:700}
 .modal-close{background:var(--card);border:none;width:36px;height:36px;border-radius:8px;font-size:20px;cursor:pointer;color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center}
 .modal-close:hover{background:#E0E0E0}
-.modal-body{flex:1;overflow:auto}
-#pdf-viewer{width:100%;height:650px;border:none}
+.modal-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
+.pdf-container{width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#525659;padding:20px}
+.pdf-page{margin:0 auto 20px;display:block;box-shadow:0 4px 12px rgba(0,0,0,0.3);background:white;max-width:100%}
+.pdf-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:var(--card);border-bottom:1px solid var(--border)}
+.pdf-controls button{background:var(--text);color:var(--bg);border:none;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.pdf-controls button:disabled{background:#ccc;cursor:not-allowed}
+.pdf-page-info{font-size:14px;font-weight:600}
 .footer{border-top:1px solid var(--border);padding-top:60px;margin-top:100px;text-align:center}
 .footer-logo{display:inline-flex;align-items:center;gap:14px;margin-bottom:16px}
 .footer-icon{width:44px;height:44px;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;border-radius:10px;font-weight:700;font-size:22px}
@@ -156,15 +161,30 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       <div class="modal-title" id="modal-title">Event Details</div>
       <button class="modal-close" onclick="closeViewer()">×</button>
     </div>
-    <div class="modal-body"><iframe id="pdf-viewer"></iframe></div>
+    <div class="pdf-controls">
+      <button id="pdf-prev" onclick="changePDFPage(-1)">◀ Prev</button>
+      <span class="pdf-page-info"><span id="pdf-page-num">1</span> / <span id="pdf-page-count">1</span></span>
+      <button id="pdf-next" onclick="changePDFPage(1)">Next ▶</button>
+      <button onclick="downloadPDF()" style="margin-left:auto">Download</button>
+    </div>
+    <div class="modal-body">
+      <div class="pdf-container" id="pdf-container"></div>
+    </div>
   </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const SB_URL='https://vtvniushkftodhlvdkom.supabase.co';
 const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0dm5pdXNoa2Z0b2RobHZka29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMTY4NzAsImV4cCI6MjA5MTY5Mjg3MH0.a8R36vH_KRnruIcj39ivrkTuVNtH7YX8OXabbSn3jgg';
 let allEvents=[];
 let currentFilter='all';
 let isUploading=false;
+let currentPDF=null;
+let currentPDFData=null;
+let currentPage=1;
+let totalPages=0;
+
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const fileInput=document.getElementById('file-input');
 const uploadZone=document.getElementById('upload-zone');
@@ -320,17 +340,88 @@ async function deleteEvent(id){
   }
 }
 
-function viewEvent(id){
+async function viewEvent(id){
   const e=allEvents.find(ev=>ev.id===id);
   if(!e)return;
+  
   document.getElementById('modal-title').textContent=e.name;
-  document.getElementById('pdf-viewer').src=e.pdf_data;
   document.getElementById('pdf-modal').classList.add('active');
+  
+  currentPDFData=e.pdf_data;
+  currentPage=1;
+  
+  try{
+    const loadingTask=pdfjsLib.getDocument(e.pdf_data);
+    currentPDF=await loadingTask.promise;
+    totalPages=currentPDF.numPages;
+    document.getElementById('pdf-page-count').textContent=totalPages;
+    await renderAllPages();
+  }catch(err){
+    console.error('PDF loading error:',err);
+    document.getElementById('pdf-container').innerHTML='<div style="color:white;text-align:center;padding:40px">Error loading PDF. Please try again.</div>';
+  }
+}
+
+async function renderAllPages(){
+  const container=document.getElementById('pdf-container');
+  container.innerHTML='';
+  
+  for(let pageNum=1;pageNum<=totalPages;pageNum++){
+    const page=await currentPDF.getPage(pageNum);
+    const scale=1.5;
+    const viewport=page.getViewport({scale});
+    
+    const canvas=document.createElement('canvas');
+    canvas.className='pdf-page';
+    const context=canvas.getContext('2d');
+    canvas.height=viewport.height;
+    canvas.width=viewport.width;
+    
+    const renderContext={canvasContext:context,viewport:viewport};
+    await page.render(renderContext).promise;
+    
+    container.appendChild(canvas);
+  }
+  
+  updatePageControls();
+}
+
+function updatePageControls(){
+  document.getElementById('pdf-prev').disabled=currentPage<=1;
+  document.getElementById('pdf-next').disabled=currentPage>=totalPages;
+  document.getElementById('pdf-page-num').textContent=currentPage;
+}
+
+function changePDFPage(delta){
+  const newPage=currentPage+delta;
+  if(newPage<1||newPage>totalPages)return;
+  
+  currentPage=newPage;
+  updatePageControls();
+  
+  // Scroll to the page
+  const container=document.getElementById('pdf-container');
+  const pages=container.getElementsByClassName('pdf-page');
+  if(pages[currentPage-1]){
+    pages[currentPage-1].scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+function downloadPDF(){
+  if(!currentPDFData)return;
+  const link=document.createElement('a');
+  link.href=currentPDFData;
+  link.download=document.getElementById('modal-title').textContent+'.pdf';
+  link.click();
 }
 
 function closeViewer(){
   document.getElementById('pdf-modal').classList.remove('active');
-  document.getElementById('pdf-viewer').src='';
+  document.getElementById('pdf-container').innerHTML='';
+  currentPDF=null;
+  currentPDFData=null;
+  currentPage=1;
+  totalPages=0;
 }
 
 document.getElementById('pdf-modal').addEventListener('click',e=>{if(e.target.id==='pdf-modal')closeViewer()});
