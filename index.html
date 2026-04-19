@@ -293,8 +293,6 @@ function renderEvents(){
       ${badge?`<div class="event-badge">${badge}</div>`:''}
       <div class="event-icon">📄</div>
       <div class="event-name">${e.name}</div>
-      <div class="event-meta"><span>📅</span>${new Date(e.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
-      <div class="event-meta"><span>📦</span>${e.size}</div>
       <div class="event-actions">
         <button class="btn btn-primary" onclick="viewEvent(${e.id})">View Details</button>
         <button class="btn btn-delete" onclick="deleteEvent(${e.id})">Delete</button>
