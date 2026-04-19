@@ -22,6 +22,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .title{font-family:var(--cinzel);font-size:56px;font-weight:700;margin-bottom:12px;letter-spacing:2px;color:var(--text)}
 .subtitle{font-family:var(--cinzel);font-size:18px;font-weight:400;letter-spacing:4px;color:var(--text2);text-transform:uppercase}
 
+/* Upload Section */
+.upload-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:60px}
+.upload-header{text-align:center;margin-bottom:24px}
+.upload-header h2{font-family:var(--cinzel);font-size:24px;font-weight:600;margin-bottom:8px}
+.upload-header p{font-size:14px;color:var(--text2)}
+.upload-zone{background:#F8F8F8;border:2px dashed var(--border);border-radius:12px;padding:50px 20px;text-align:center;cursor:pointer;transition:all 0.2s}
+.upload-zone:hover{border-color:var(--accent);background:#F0F0F0}
+.upload-zone.dragover{border-color:var(--accent);background:#F0F0F0;border-style:solid}
+.upload-icon{font-size:48px;margin-bottom:16px}
+.upload-title{font-size:18px;font-weight:700;margin-bottom:8px}
+.upload-hint{font-size:14px;color:var(--text2)}
+#file-input{display:none}
+.upload-status{margin-top:16px;font-size:13px;color:var(--text2);font-weight:600}
+.upload-status.success{color:#15803D}
+.upload-status.error{color:#DC2626}
+
 /* Stats Cards */
 .stats-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:60px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:all 0.3s}
@@ -84,6 +100,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   .container{padding:40px 16px}
   .title{font-size:36px}
   .subtitle{font-size:14px;letter-spacing:2px}
+  .upload-zone{padding:40px 16px}
   .stats-section{grid-template-columns:repeat(2,1fr)}
   .stat-number{font-size:36px}
   .events-grid{grid-template-columns:1fr}
@@ -97,6 +114,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
     <div class="subtitle">Compassion Has No Borders</div>
   </div>
 
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <div class="upload-header">
+      <h2>Upload Event</h2>
+      <p>Share your event details with the community</p>
+    </div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📄</div>
+      <div class="upload-title">Click to Upload PDF</div>
+      <div class="upload-hint">or drag and drop your event PDF here</div>
+      <input type="file" id="file-input" accept=".pdf" multiple>
+    </div>
+    <div class="upload-status" id="upload-status"></div>
+  </div>
+
   <!-- Stats -->
   <div class="stats-section">
     <div class="stat-card">
@@ -104,7 +136,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
       <div class="stat-label">Countries</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number">4</div>
+      <div class="stat-number" id="total-events">4</div>
       <div class="stat-label">Total Events</div>
     </div>
     <div class="stat-card">
@@ -165,6 +197,70 @@ const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 let allEvents=[];
 let currentFilter='all';
 
+// File upload handling
+const fileInput=document.getElementById('file-input');
+const uploadZone=document.getElementById('upload-zone');
+const uploadStatus=document.getElementById('upload-status');
+
+fileInput.addEventListener('change',handleFiles);
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('dragover')});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop',e=>{
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  handleFiles({target:{files:e.dataTransfer.files}});
+});
+
+async function handleFiles(e){
+  const files=Array.from(e.target.files);
+  uploadStatus.textContent='Uploading...';
+  uploadStatus.className='upload-status';
+  
+  for(const file of files){
+    if(file.type==='application/pdf'){
+      const reader=new FileReader();
+      reader.onload=async(e)=>{
+        try{
+          const r=await fetch(`${SB_URL}/rest/v1/risinglight_events`,{
+            method:'POST',
+            headers:{
+              'apikey':SB_ANON,
+              'Authorization':`Bearer ${SB_ANON}`,
+              'Content-Type':'application/json',
+              'Prefer':'return=representation'
+            },
+            body:JSON.stringify({
+              name:file.name.replace('.pdf',''),
+              size:(file.size/1024).toFixed(1)+' KB',
+              pdf_data:e.target.result
+            })
+          });
+          
+          if(r.ok){
+            uploadStatus.textContent='✓ Upload successful! Synced across all devices.';
+            uploadStatus.className='upload-status success';
+            await loadEvents();
+            setTimeout(()=>{
+              uploadStatus.textContent='';
+            },3000);
+          }else{
+            uploadStatus.textContent='✗ Upload failed. Please try again.';
+            uploadStatus.className='upload-status error';
+          }
+        }catch(err){
+          uploadStatus.textContent='✗ Upload error. Please check your connection.';
+          uploadStatus.className='upload-status error';
+        }
+      };
+      reader.readAsDataURL(file);
+    }else{
+      uploadStatus.textContent='✗ Please upload PDF files only.';
+      uploadStatus.className='upload-status error';
+    }
+  }
+  fileInput.value='';
+}
+
 // Events functionality
 async function loadEvents(){
   try{
@@ -173,6 +269,7 @@ async function loadEvents(){
     });
     if(r.ok){
       allEvents=await r.json();
+      document.getElementById('total-events').textContent=allEvents.length;
       renderEvents();
     }
   }catch(e){
