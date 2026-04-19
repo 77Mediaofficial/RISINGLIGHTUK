@@ -3,391 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rising Light UK · Event Hub</title>
+<title>Rising Light UK · Events</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#F5F5F3;
-  --card:#FFFFFF;
-  --text:#0A0A0A;
-  --text2:#5C5C5C;
-  --text3:#9A9A9A;
-  --border:#E5E5E3;
-  --accent:#DC2626;
-  --ok:#15803D;
-  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --bg:#FFFFFF;--card:#FAFAFA;--text:#0A0A0A;--text2:#666666;--text3:#999999;
+  --border:#E8E8E8;--accent:#000000;--font:'Inter',system-ui,sans-serif;
+  --cinzel:'Cinzel',serif;
 }
-body{
-  font-family:var(--font);
-  background:var(--bg);
-  color:var(--text);
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
-.container{
-  max-width:900px;
-  margin:0 auto;
-  padding:40px 20px;
-}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:1200px;margin:0 auto;padding:60px 20px}
 
 /* Header */
-.header{
-  text-align:center;
-  margin-bottom:60px;
-}
-.logo{
-  font-size:32px;
-  font-weight:700;
-  margin-bottom:8px;
-  letter-spacing:-1px;
-}
-.tagline{
-  font-size:13px;
-  color:var(--text2);
-  text-transform:uppercase;
-  letter-spacing:2px;
-  font-weight:600;
-}
+.header{text-align:center;margin-bottom:80px}
+.title{font-family:var(--cinzel);font-size:56px;font-weight:700;margin-bottom:12px;letter-spacing:2px;color:var(--text)}
+.subtitle{font-family:var(--cinzel);font-size:18px;font-weight:400;letter-spacing:4px;color:var(--text2);text-transform:uppercase}
 
-/* Upload Section - Admin Only */
-.admin-section{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:24px;
-  margin-bottom:40px;
-}
-.admin-toggle{
-  font-size:13px;
-  color:var(--text2);
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 16px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:var(--card);
-  transition:all 0.2s;
-  font-weight:600;
-}
-.admin-toggle:hover{
-  background:var(--bg);
-}
-.admin-controls{
-  display:none;
-  margin-top:20px;
-}
-.admin-controls.active{
-  display:block;
-}
-.upload-zone{
-  background:var(--bg);
-  border:2px dashed var(--border);
-  border-radius:12px;
-  padding:40px 20px;
-  text-align:center;
-  cursor:pointer;
-  transition:all 0.2s;
-  margin-top:16px;
-}
-.upload-zone:hover{
-  border-color:var(--accent);
-  background:#FEF2F2;
-}
-.upload-zone.dragover{
-  border-color:var(--accent);
-  background:#FEF2F2;
-}
-.upload-icon{
-  font-size:40px;
-  margin-bottom:12px;
-}
-.upload-title{
-  font-size:16px;
-  font-weight:700;
-  margin-bottom:6px;
-}
-.upload-hint{
-  font-size:13px;
-  color:var(--text2);
-}
-#file-input{
-  display:none;
-}
+/* Stats Cards */
+.stats-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:60px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:all 0.3s}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.08)}
+.stat-number{font-family:var(--cinzel);font-size:48px;font-weight:700;margin-bottom:8px}
+.stat-label{font-size:14px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:600}
 
-/* Events Grid */
-.events-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:24px;
-}
-.events-title{
-  font-size:20px;
-  font-weight:700;
-}
-.events-count{
-  font-size:13px;
-  color:var(--text2);
-  background:var(--card);
-  padding:6px 12px;
-  border-radius:20px;
-  font-weight:600;
-  border:1px solid var(--border);
-}
-.events-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:20px;
-  margin-bottom:60px;
-}
-.event-card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:24px;
-  transition:all 0.2s;
-}
-.event-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 4px 20px rgba(0,0,0,0.08);
-  border-color:#D1D1D1;
-}
-.event-icon{
-  font-size:32px;
-  margin-bottom:12px;
-}
-.event-name{
-  font-size:16px;
-  font-weight:700;
-  margin-bottom:4px;
-}
-.event-meta{
-  font-size:13px;
-  color:var(--text2);
-  margin-bottom:8px;
-}
-.event-actions{
-  display:flex;
-  gap:8px;
-  margin-top:16px;
-}
-.btn{
-  padding:8px 16px;
-  border:none;
-  border-radius:8px;
-  font-size:13px;
-  font-weight:600;
-  cursor:pointer;
-  transition:all 0.2s;
-  font-family:var(--font);
-}
-.btn-primary{
-  background:var(--text);
-  color:var(--card);
-  flex:1;
-}
-.btn-primary:hover{
-  background:#333;
-}
-.btn-delete{
-  background:transparent;
-  color:var(--accent);
-  border:1px solid var(--border);
-  padding:8px 12px;
-}
-.btn-delete:hover{
-  background:#FEF2F2;
-  border-color:var(--accent);
-}
+/* Search & Filters */
+.search-container{max-width:600px;margin:0 auto 40px;position:relative}
+.search-input{width:100%;padding:16px 50px 16px 20px;border:1px solid var(--border);border-radius:12px;font-size:15px;font-family:var(--font);background:var(--card);transition:all 0.2s}
+.search-input:focus{outline:none;border-color:var(--text);box-shadow:0 0 0 3px rgba(0,0,0,0.05)}
+.search-icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:20px}
+.filter-tabs{display:flex;gap:12px;justify-content:center;margin-bottom:40px;flex-wrap:wrap}
+.filter-tab{padding:10px 20px;border:1px solid var(--border);border-radius:10px;background:var(--card);cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s;color:var(--text2)}
+.filter-tab:hover{background:#F5F5F5;border-color:var(--text)}
+.filter-tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 
-/* Empty State */
-.empty{
-  text-align:center;
-  padding:80px 20px;
-  color:var(--text3);
-}
-.empty-icon{
-  font-size:64px;
-  margin-bottom:16px;
-  opacity:0.3;
-}
+/* Events */
+.events-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.events-title{font-family:var(--cinzel);font-size:28px;font-weight:600}
+.events-count{font-size:14px;color:var(--text2);background:var(--card);padding:8px 16px;border-radius:20px;font-weight:600;border:1px solid var(--border)}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:80px}
+.event-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;cursor:pointer;transition:all 0.3s;position:relative}
+.event-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.08);border-color:#D0D0D0}
+.event-badge{position:absolute;top:16px;right:16px;background:var(--text);color:var(--bg);font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px}
+.event-icon{font-size:40px;margin-bottom:16px}
+.event-name{font-size:18px;font-weight:700;margin-bottom:8px;line-height:1.3}
+.event-meta{font-size:14px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.event-actions{display:flex;gap:8px;margin-top:20px}
+.btn{padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font)}
+.btn-primary{background:var(--text);color:var(--bg);flex:1}
+.btn-primary:hover{background:#333}
 
-/* Footer - SVN OS Branding */
-.footer{
-  border-top:1px solid var(--border);
-  padding-top:40px;
-  margin-top:80px;
-  text-align:center;
-}
-.footer-logo{
-  display:inline-flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:12px;
-}
-.footer-icon{
-  width:40px;
-  height:40px;
-  background:var(--text);
-  color:var(--card);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:8px;
-  font-weight:700;
-  font-size:20px;
-}
-.footer-text{
-  font-size:24px;
-  font-weight:700;
-}
-.footer-subtext{
-  font-size:13px;
-  color:var(--text2);
-  margin-bottom:20px;
-  max-width:600px;
-  margin-left:auto;
-  margin-right:auto;
-}
-.footer-cta{
-  display:inline-block;
-  padding:12px 24px;
-  background:var(--text);
-  color:var(--card);
-  text-decoration:none;
-  border-radius:10px;
-  font-size:14px;
-  font-weight:600;
-  transition:all 0.2s;
-}
-.footer-cta:hover{
-  background:#333;
-  transform:translateY(-1px);
-}
+/* Modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal.active{display:flex}
+.modal-content{background:var(--bg);border-radius:20px;width:100%;max-width:950px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:20px;font-weight:700}
+.modal-close{background:var(--card);border:none;width:36px;height:36px;border-radius:8px;font-size:20px;cursor:pointer;color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#E0E0E0}
+.modal-body{flex:1;overflow:auto}
+#pdf-viewer{width:100%;height:650px;border:none}
 
-/* PDF Viewer Modal */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.8);
-  z-index:1000;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-.modal.active{
-  display:flex;
-}
-.modal-content{
-  background:var(--card);
-  border-radius:16px;
-  width:100%;
-  max-width:900px;
-  max-height:90vh;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
-.modal-header{
-  padding:20px 24px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.modal-title{
-  font-size:18px;
-  font-weight:700;
-}
-.modal-close{
-  background:transparent;
-  border:none;
-  font-size:24px;
-  cursor:pointer;
-  color:var(--text2);
-  width:32px;
-  height:32px;
-  border-radius:8px;
-  transition:all 0.2s;
-}
-.modal-close:hover{
-  background:var(--bg);
-}
-.modal-body{
-  flex:1;
-  overflow:auto;
-}
-#pdf-viewer{
-  width:100%;
-  height:600px;
-  border:none;
-}
+/* Footer */
+.footer{border-top:1px solid var(--border);padding-top:60px;margin-top:100px;text-align:center}
+.footer-logo{display:inline-flex;align-items:center;gap:14px;margin-bottom:16px}
+.footer-icon{width:44px;height:44px;background:var(--text);color:var(--bg);display:flex;align-items:center;justify-content:center;border-radius:10px;font-weight:700;font-size:22px}
+.footer-text{font-size:26px;font-weight:700}
+.footer-subtext{font-size:14px;color:var(--text2);margin-bottom:24px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.6}
+.footer-cta{display:inline-block;padding:14px 28px;background:var(--text);color:var(--bg);text-decoration:none;border-radius:10px;font-size:15px;font-weight:600;transition:all 0.2s}
+.footer-cta:hover{background:#333;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+
+.loading{text-align:center;padding:60px;color:var(--text2);font-size:15px}
+.empty{text-align:center;padding:100px 20px;color:var(--text3)}
+.empty-icon{font-size:72px;margin-bottom:20px;opacity:0.3}
+.empty-title{font-size:20px;font-weight:600;margin-bottom:8px;color:var(--text2)}
 
 @media(max-width:768px){
-  .container{padding:20px 16px}
+  .container{padding:40px 16px}
+  .title{font-size:36px}
+  .subtitle{font-size:14px;letter-spacing:2px}
+  .stats-section{grid-template-columns:repeat(2,1fr)}
+  .stat-number{font-size:36px}
   .events-grid{grid-template-columns:1fr}
-  .upload-zone{padding:30px 16px}
 }
 </style>
 </head>
 <body>
-
 <div class="container">
-  <!-- Header -->
   <div class="header">
-    <div class="logo">Rising Light UK</div>
-    <div class="tagline">Compassion has no borders</div>
+    <div class="title">RISING LIGHT</div>
+    <div class="subtitle">Compassion Has No Borders</div>
   </div>
 
-  <!-- Admin Section (Upload) -->
-  <div class="admin-section">
-    <button class="admin-toggle" onclick="toggleAdmin()">
-      🔒 Admin Controls
-    </button>
-    <div class="admin-controls" id="admin-controls">
-      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-        <div class="upload-icon">📄</div>
-        <div class="upload-title">Upload Event PDF</div>
-        <div class="upload-hint">Click or drag and drop your event details PDF here</div>
-        <input type="file" id="file-input" accept=".pdf" multiple>
-      </div>
+  <!-- Stats -->
+  <div class="stats-section">
+    <div class="stat-card">
+      <div class="stat-number">3</div>
+      <div class="stat-label">Countries</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">4</div>
+      <div class="stat-label">Total Events</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">320</div>
+      <div class="stat-label">Lives Touched</div>
     </div>
   </div>
 
-  <!-- Events List -->
+  <!-- Search & Filters -->
+  <div class="search-container">
+    <input type="text" class="search-input" id="search-input" placeholder="Search events...">
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <div class="filter-tabs">
+    <div class="filter-tab active" onclick="filterEvents('all')">All Events</div>
+    <div class="filter-tab" onclick="filterEvents('upcoming')">Upcoming</div>
+    <div class="filter-tab" onclick="filterEvents('recent')">Recent</div>
+  </div>
+
+  <!-- Events -->
   <div class="events-header">
-    <div class="events-title">Upcoming Events</div>
+    <div class="events-title">Events</div>
     <div class="events-count" id="event-count">0 events</div>
   </div>
   
   <div class="events-grid" id="events-grid">
-    <div class="empty">
-      <div class="empty-icon">📅</div>
-      <div>No events uploaded yet</div>
-      <div style="font-size:13px;margin-top:8px">Check back soon for upcoming events</div>
-    </div>
+    <div class="loading">Loading events...</div>
   </div>
 
-  <!-- Footer - SVN OS Branding -->
+  <!-- Footer -->
   <div class="footer">
     <div class="footer-logo">
       <div class="footer-icon">S</div>
       <div class="footer-text">SVN OS</div>
     </div>
     <div class="footer-subtext">This hub is powered by SVN Studio OS — The operating system for the business you're building</div>
-    <a href="https://77media-hq.vercel.app" class="footer-cta" target="_blank">
-      Explore SVN Studio OS →
-    </a>
+    <a href="https://77media-hq.vercel.app" class="footer-cta" target="_blank">Explore SVN Studio OS →</a>
   </div>
 </div>
 
-<!-- PDF Viewer Modal -->
+<!-- Modal -->
 <div class="modal" id="pdf-modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -401,130 +160,90 @@ body{
 </div>
 
 <script>
-// Storage
-let events = JSON.parse(localStorage.getItem('risinglight_events') || '[]');
-let adminUnlocked = false;
+const SB_URL='https://vtvniushkftodhlvdkom.supabase.co';
+const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0dm5pdXNoa2Z0b2RobHZka29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU5MzY4NTQsImV4cCI6MjA1MTUxMjg1NH0.BrKQCfJ2JJpEuIRTqv4rwK3qWfqN52xAFRWHbvz-mMM';
+let allEvents=[];
+let currentFilter='all';
 
-// Toggle admin controls
-function toggleAdmin() {
-  if (!adminUnlocked) {
-    const password = prompt('Enter admin password:');
-    if (password === 'risinglight2025') {
-      adminUnlocked = true;
-      document.getElementById('admin-controls').classList.add('active');
-      document.querySelector('.admin-toggle').textContent = '🔓 Admin Controls';
-    } else {
-      alert('Incorrect password');
+// Events functionality
+async function loadEvents(){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?order=created_at.desc`,{
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`}
+    });
+    if(r.ok){
+      allEvents=await r.json();
+      renderEvents();
     }
-  } else {
-    adminUnlocked = false;
-    document.getElementById('admin-controls').classList.remove('active');
-    document.querySelector('.admin-toggle').textContent = '🔒 Admin Controls';
+  }catch(e){
+    document.getElementById('events-grid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div></div>';
   }
 }
 
-// File upload handling
-const fileInput = document.getElementById('file-input');
-const uploadZone = document.getElementById('upload-zone');
-
-fileInput.addEventListener('change', handleFiles);
-
-uploadZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  uploadZone.classList.add('dragover');
-});
-
-uploadZone.addEventListener('dragleave', () => {
-  uploadZone.classList.remove('dragover');
-});
-
-uploadZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  uploadZone.classList.remove('dragover');
-  handleFiles({target: {files: e.dataTransfer.files}});
-});
-
-function handleFiles(e) {
-  const files = Array.from(e.target.files);
-  files.forEach(file => {
-    if (file.type === 'application/pdf') {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const event = {
-          id: Date.now() + Math.random(),
-          name: file.name.replace('.pdf', ''),
-          size: (file.size / 1024).toFixed(1) + ' KB',
-          date: new Date().toLocaleDateString('en-GB'),
-          data: e.target.result
-        };
-        events.push(event);
-        localStorage.setItem('risinglight_events', JSON.stringify(events));
-        renderEvents();
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-  fileInput.value = '';
-}
-
-function renderEvents() {
-  const grid = document.getElementById('events-grid');
-  const count = document.getElementById('event-count');
-  
-  count.textContent = events.length + ' event' + (events.length !== 1 ? 's' : '');
-  
-  if (events.length === 0) {
-    grid.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">📅</div>
-        <div>No events uploaded yet</div>
-        <div style="font-size:13px;margin-top:8px">Check back soon for upcoming events</div>
-      </div>
-    `;
-    return;
-  }
-  
-  grid.innerHTML = events.map(event => `
-    <div class="event-card">
-      <div class="event-icon">📄</div>
-      <div class="event-name">${event.name}</div>
-      <div class="event-meta">Uploaded ${event.date} · ${event.size}</div>
-      <div class="event-actions">
-        <button class="btn btn-primary" onclick="viewEvent(${event.id})">View Details</button>
-        ${adminUnlocked ? `<button class="btn btn-delete" onclick="deleteEvent(${event.id})">×</button>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function viewEvent(id) {
-  const event = events.find(e => e.id === id);
-  if (!event) return;
-  
-  document.getElementById('modal-title').textContent = event.name;
-  document.getElementById('pdf-viewer').src = event.data;
-  document.getElementById('pdf-modal').classList.add('active');
-}
-
-function closeViewer() {
-  document.getElementById('pdf-modal').classList.remove('active');
-  document.getElementById('pdf-viewer').src = '';
-}
-
-function deleteEvent(id) {
-  if (!confirm('Delete this event?')) return;
-  events = events.filter(e => e.id !== id);
-  localStorage.setItem('risinglight_events', JSON.stringify(events));
+function filterEvents(filter){
+  currentFilter=filter;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
   renderEvents();
 }
 
-// Close modal on outside click
-document.getElementById('pdf-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'pdf-modal') closeViewer();
-});
+document.getElementById('search-input').addEventListener('input',renderEvents);
 
-// Initial render
-renderEvents();
+function renderEvents(){
+  const grid=document.getElementById('events-grid');
+  const count=document.getElementById('event-count');
+  const searchTerm=document.getElementById('search-input').value.toLowerCase();
+  
+  let filtered=allEvents.filter(e=>{
+    const matchesSearch=e.name.toLowerCase().includes(searchTerm);
+    if(currentFilter==='all')return matchesSearch;
+    const daysDiff=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
+    if(currentFilter==='upcoming')return matchesSearch&&daysDiff<=7;
+    if(currentFilter==='recent')return matchesSearch&&daysDiff>7;
+    return matchesSearch;
+  });
+  
+  count.textContent=filtered.length+' event'+(filtered.length!==1?'s':'');
+  
+  if(filtered.length===0){
+    grid.innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No events found</div><div style="font-size:14px;margin-top:8px;color:var(--text3)">Check back soon for upcoming events</div></div>';
+    return;
+  }
+  
+  grid.innerHTML=filtered.map(e=>{
+    const daysDiff=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
+    const badge=daysDiff<=7?'New':'';
+    return `
+    <div class="event-card">
+      ${badge?`<div class="event-badge">${badge}</div>`:''}
+      <div class="event-icon">📄</div>
+      <div class="event-name">${e.name}</div>
+      <div class="event-meta"><span>📅</span>${new Date(e.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>
+      <div class="event-meta"><span>📦</span>${e.size}</div>
+      <div class="event-actions">
+        <button class="btn btn-primary" onclick="viewEvent(${e.id})">View Details</button>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function viewEvent(id){
+  const e=allEvents.find(ev=>ev.id===id);
+  if(!e)return;
+  document.getElementById('modal-title').textContent=e.name;
+  document.getElementById('pdf-viewer').src=e.pdf_data;
+  document.getElementById('pdf-modal').classList.add('active');
+}
+
+function closeViewer(){
+  document.getElementById('pdf-modal').classList.remove('active');
+  document.getElementById('pdf-viewer').src='';
+}
+
+document.getElementById('pdf-modal').addEventListener('click',e=>{if(e.target.id==='pdf-modal')closeViewer()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
+
+loadEvents();
 </script>
 </body>
 </html>
