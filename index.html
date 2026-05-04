@@ -420,6 +420,38 @@ body.dark .btn-primary:hover{background:#E0E0E0}
     <div class="footer-meta">Operating with SVN Studio OS</div>
   </div>
 </div>
+<!-- Admin login modal — replaces the old prompt() + hardcoded password -->
+<div class="modal" id="admin-login-modal">
+  <div class="modal-content" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title" style="font-family:var(--cinzel)">Admin Sign In</div>
+      <button class="modal-close" onclick="closeAdminModal()" aria-label="Close">×</button>
+    </div>
+    <div style="padding:28px">
+      <div id="admin-login-err" style="display:none;background:#FEF2F2;color:#DC2626;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:500"></div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;color:var(--text2)">Email</label>
+        <input type="email" id="admin-email" placeholder="admin@risinglight.org.uk"
+          style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--text)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')document.getElementById('admin-pw').focus()">
+      </div>
+      <div style="margin-bottom:22px">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;color:var(--text2)">Password</label>
+        <input type="password" id="admin-pw" placeholder="••••••••"
+          style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--text)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <button id="admin-login-btn" onclick="doAdminLogin()"
+        style="width:100%;padding:13px;background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--cinzel);letter-spacing:0.5px;transition:opacity .2s">
+        Sign In
+      </button>
+      <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;line-height:1.5">Admin access only.<br>Contact your administrator to set up credentials.</p>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="pdf-modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -441,6 +473,13 @@ body.dark .btn-primary:hover{background:#E0E0E0}
 <script>
 const SB_URL='https://vtvniushkftodhlvdkom.supabase.co';
 const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0dm5pdXNoa2Z0b2RobHZka29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMTY4NzAsImV4cCI6MjA5MTY5Mjg3MH0.a8R36vH_KRnruIcj39ivrkTuVNtH7YX8OXabbSn3jgg';
+
+/* SECURITY: RL_TOKEN is a real Supabase JWT set only after email+password
+   authentication against /auth/v1/token. It is NEVER set client-side from
+   a URL param or hardcoded password. The anon key above is safe to expose
+   only for public reads — all writes require RL_TOKEN. */
+let RL_TOKEN=null;
+
 let allEvents=[];
 let currentFilter='all';
 let currentCountry='all';
@@ -498,8 +537,13 @@ uploadZone.addEventListener('drop',e=>{
 });
 
 async function handleFiles(e){
-  if(!document.body.classList.contains('admin')){
-    uploadStatus.textContent='✗ Admin access required to upload events.';
+  /* SECURITY FIX: Require a verified admin JWT (RL_TOKEN), not just
+     a client-side sessionStorage flag.
+     ARCHITECTURE FIX: Upload to Supabase Storage (binary), store only the
+     public URL in the DB. Old approach stored base64 (~4-5× larger) directly
+     in the postgres column, which hits row-size limits and bloats the DB. */
+  if(!RL_TOKEN){
+    uploadStatus.textContent='✗ Admin sign-in required to upload events.';
     uploadStatus.className='upload-status error';
     return;
   }
@@ -509,7 +553,7 @@ async function handleFiles(e){
     return;
   }
 
-  const MAX_BYTES=5*1024*1024; /* 5 MB */
+  const MAX_BYTES=10*1024*1024; /* 10 MB */
   const files=Array.from(e.target.files);
 
   isUploading=true;
@@ -524,46 +568,80 @@ async function handleFiles(e){
       break;
     }
     if(file.size>MAX_BYTES){
-      uploadStatus.textContent=`✗ File too large (${(file.size/1024/1024).toFixed(1)} MB). Maximum is 5 MB.`;
+      uploadStatus.textContent=`✗ File too large (${(file.size/1024/1024).toFixed(1)} MB). Maximum is 10 MB.`;
       uploadStatus.className='upload-status error';
       isUploading=false;
       break;
     }
-    const reader=new FileReader();
-    reader.onload=async(ev)=>{
-      try{
-        const r=await fetch(`${SB_URL}/rest/v1/risinglight_events`,{
-          method:'POST',
-          headers:{
-            'apikey':SB_ANON,
-            'Authorization':`Bearer ${SB_ANON}`,
-            'Content-Type':'application/json',
-            'Prefer':'return=representation'
-          },
-          body:JSON.stringify({
-            name:file.name.replace('.pdf',''),
-            size:(file.size/1024).toFixed(1)+' KB',
-            pdf_data:ev.target.result
-          })
-        });
-        if(r.ok){
-          uploadStatus.textContent='✓ Upload successful! Ready for next upload.';
-          uploadStatus.className='upload-status success';
-          await loadEvents();
-          setTimeout(()=>{uploadStatus.textContent='';},3000);
-        }else{
-          const errorText=await r.text();
-          uploadStatus.textContent=`✗ Upload failed: ${errorText}`;
-          uploadStatus.className='upload-status error';
-        }
-      }catch(err){
-        uploadStatus.textContent=`✗ Upload error: ${err.message}`;
+
+    try{
+      /* Step 1: Upload binary PDF to Supabase Storage */
+      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const storagePath=`${Date.now()}-${safeName}`;
+
+      const storageR=await fetch(`${SB_URL}/storage/v1/object/event-pdfs/${storagePath}`,{
+        method:'POST',
+        headers:{
+          'Authorization':`Bearer ${RL_TOKEN}`,
+          'Content-Type':'application/pdf',
+          'x-upsert':'false'
+        },
+        body:file
+      });
+
+      if(storageR.status===401||storageR.status===403){
+        clearAdminSession();
+        uploadStatus.textContent='✗ Session expired — please sign in again.';
         uploadStatus.className='upload-status error';
-      }finally{
         isUploading=false;
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+      if(!storageR.ok){
+        const errTxt=await storageR.text().catch(()=>'');
+        throw new Error(`Storage upload failed (${storageR.status}): ${errTxt}`);
+      }
+
+      /* Step 2: Build the public URL — bucket must be set to public in Supabase */
+      const publicUrl=`${SB_URL}/storage/v1/object/public/event-pdfs/${storagePath}`;
+
+      /* Step 3: Insert DB row with pdf_url (not base64) */
+      const dbR=await fetch(`${SB_URL}/rest/v1/risinglight_events`,{
+        method:'POST',
+        headers:{
+          'apikey':SB_ANON,
+          'Authorization':`Bearer ${RL_TOKEN}`,
+          'Content-Type':'application/json',
+          'Prefer':'return=representation'
+        },
+        body:JSON.stringify({
+          name:file.name.replace(/\.pdf$/i,''),
+          size:(file.size/1024).toFixed(1)+' KB',
+          pdf_url:publicUrl
+        })
+      });
+
+      if(dbR.status===401||dbR.status===403){
+        clearAdminSession();
+        uploadStatus.textContent='✗ Session expired — please sign in again.';
+        uploadStatus.className='upload-status error';
+        isUploading=false;
+        return;
+      }
+      if(dbR.ok){
+        uploadStatus.textContent='✓ Upload successful! Ready for next upload.';
+        uploadStatus.className='upload-status success';
+        await loadEvents();
+        setTimeout(()=>{uploadStatus.textContent='';},3000);
+      }else{
+        const errTxt=await dbR.text().catch(()=>'');
+        throw new Error(`DB insert failed (${dbR.status}): ${errTxt}`);
+      }
+    }catch(err){
+      uploadStatus.textContent=`✗ Upload error: ${err.message}`;
+      uploadStatus.className='upload-status error';
+    }finally{
+      isUploading=false;
+    }
   }
   fileInput.value='';
 }
@@ -648,42 +726,74 @@ function renderEvents(){
 function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 async function deleteEvent(id){
-  if(!document.body.classList.contains('admin')){alert('Admin access required to delete events.');return;}
+  /* SECURITY FIX: Require RL_TOKEN (real JWT). Previously used SB_ANON as
+     Bearer — any visitor who knew an event ID could DELETE it via curl. */
+  if(!RL_TOKEN){alert('Admin sign-in required to delete events.');return;}
   if(!confirm('Delete this event? This cannot be undone.'))return;
+
+  const ev=allEvents.find(e=>e.id===id);
+
   try{
     const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
       method:'DELETE',
-      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`}
+      headers:{
+        'apikey':SB_ANON,
+        'Authorization':`Bearer ${RL_TOKEN}`
+      }
     });
+    if(r.status===401||r.status===403){
+      clearAdminSession();
+      alert('Session expired — please sign in again.');
+      return;
+    }
     if(r.ok){
+      /* Best-effort: also remove the file from Storage */
+      if(ev&&ev.pdf_url){
+        const match=ev.pdf_url.match(/\/event-pdfs\/(.+)$/);
+        if(match){
+          fetch(`${SB_URL}/storage/v1/object/event-pdfs/${match[1]}`,{
+            method:'DELETE',
+            headers:{'Authorization':`Bearer ${RL_TOKEN}`}
+          }).catch(()=>{});
+        }
+      }
       await loadEvents();
     }else{
       alert('Delete failed');
     }
   }catch(err){
-    alert('Delete error');
+    alert('Delete error: '+err.message);
   }
 }
 
 async function viewEvent(id){
   const e=allEvents.find(ev=>ev.id===id);
   if(!e)return;
-  
+
+  /* Support both new (pdf_url → Storage) and old (pdf_data → base64) records */
+  const pdfSource=e.pdf_url||e.pdf_data||null;
+  if(!pdfSource){
+    alert('No PDF available for this event.');
+    return;
+  }
+
   document.getElementById('modal-title').textContent=e.name;
   document.getElementById('pdf-modal').classList.add('active');
-  
-  currentPDFData=e.pdf_data;
+
+  currentPDFData=pdfSource;
   currentPage=1;
-  
+
+  document.getElementById('pdf-container').innerHTML='<div style="color:#aaa;text-align:center;padding:40px;font-family:inherit">Loading PDF…</div>';
+
   try{
-    const loadingTask=pdfjsLib.getDocument(e.pdf_data);
+    const loadingTask=pdfjsLib.getDocument(pdfSource);
     currentPDF=await loadingTask.promise;
     totalPages=currentPDF.numPages;
     document.getElementById('pdf-page-count').textContent=totalPages;
     await renderAllPages();
   }catch(err){
     console.error('PDF loading error:',err);
-    document.getElementById('pdf-container').innerHTML='<div style="color:white;text-align:center;padding:40px">Error loading PDF. Please try again.</div>';
+    document.getElementById('pdf-container').innerHTML='<div style="color:white;text-align:center;padding:40px">Error loading PDF. The file may have been removed.</div>';
   }
 }
 
@@ -750,7 +860,8 @@ function closeViewer(){
 }
 
 document.getElementById('pdf-modal').addEventListener('click',e=>{if(e.target.id==='pdf-modal')closeViewer()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
+document.getElementById('admin-login-modal').addEventListener('click',e=>{if(e.target.id==='admin-login-modal')closeAdminModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeViewer();closeAdminModal();}});
 
 /* ─── COUNTRY FILTERS ──────────────────────────────────────────────────── */
 function renderCountryFilters(){
@@ -849,39 +960,107 @@ function applyStoredTheme(){
   }
 }
 
-/* ─── ADMIN MODE ─────────────────────────────────────────────────────
-   Visit ?admin=YOUR_PASSWORD on the URL to unlock upload + delete.
-   Stored in sessionStorage so it persists for the tab session but doesn't
-   leak across browser restarts. Change ADMIN_PASS below to your secret.
+/* ─── ADMIN AUTH ──────────────────────────────────────────────────────
+   SECURITY FIX: Replaces the old URL-param + hardcoded-password system.
+
+   Old approach (INSECURE):
+     - ADMIN_PASS='riselight2026' visible in source → anyone could become admin
+     - ?admin=riselight2026 in URL → logged in browser history + shareable
+     - Only a sessionStorage flag — any client-side code could set it
+
+   New approach (SECURE):
+     - Real Supabase email+password auth via /auth/v1/token
+     - JWT stored in localStorage — validated against /auth/v1/user on boot
+     - All writes use Authorization: Bearer ${RL_TOKEN} (real JWT)
+     - RLS on the DB table enforces auth server-side, independent of client
+
+   Setup: In Supabase → Authentication → Users, create an account for your
+   admin (email + password). That person uses the lock-icon button to sign in.
 */
-const ADMIN_PASS='riselight2026';
 
-function checkAdmin(){
-  const params=new URLSearchParams(location.search);
-  const queryPass=params.get('admin');
-  if(queryPass===ADMIN_PASS){
-    sessionStorage.setItem('rl_admin','1');
-    history.replaceState({},'',location.pathname);
+async function checkAdmin(){
+  const token=localStorage.getItem('rl_token');
+  if(!token)return;
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/user`,{
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`}
+    });
+    if(r.ok){
+      RL_TOKEN=token;
+      document.body.classList.add('admin');
+    }else{
+      localStorage.removeItem('rl_token');
+    }
+  }catch(e){
+    /* Network error on boot — leave token in localStorage, user can retry */
+    console.warn('Admin session check failed:',e.message);
   }
-  if(sessionStorage.getItem('rl_admin')==='1'){
-    document.body.classList.add('admin');
-  }
-}
-
-function exitAdmin(){
-  sessionStorage.removeItem('rl_admin');
-  document.body.classList.remove('admin');
 }
 
 function promptAdmin(){
-  const entered=prompt('Enter admin password:');
-  if(entered===null)return;
-  if(entered===ADMIN_PASS){
-    sessionStorage.setItem('rl_admin','1');
-    document.body.classList.add('admin');
-  }else if(entered.trim()!==''){
-    alert('Incorrect password.');
+  const modal=document.getElementById('admin-login-modal');
+  modal.classList.add('active');
+  setTimeout(()=>document.getElementById('admin-email').focus(),80);
+}
+
+function closeAdminModal(){
+  document.getElementById('admin-login-modal').classList.remove('active');
+  document.getElementById('admin-email').value='';
+  document.getElementById('admin-pw').value='';
+  const err=document.getElementById('admin-login-err');
+  err.style.display='none';
+  err.textContent='';
+}
+
+async function doAdminLogin(){
+  const email=document.getElementById('admin-email').value.trim();
+  const pw=document.getElementById('admin-pw').value;
+  const errEl=document.getElementById('admin-login-err');
+  const btn=document.getElementById('admin-login-btn');
+
+  errEl.style.display='none';
+  if(!email||!pw){
+    errEl.textContent='Please enter your email and password.';
+    errEl.style.display='block';
+    return;
   }
+
+  btn.disabled=true;
+  btn.textContent='Signing in…';
+
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/token?grant_type=password`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pw})
+    });
+    const data=await r.json();
+    if(!r.ok){
+      errEl.textContent=data.error_description||data.msg||'Invalid credentials.';
+      errEl.style.display='block';
+      return;
+    }
+    RL_TOKEN=data.access_token;
+    localStorage.setItem('rl_token',RL_TOKEN);
+    document.body.classList.add('admin');
+    closeAdminModal();
+  }catch(e){
+    errEl.textContent='Network error — please try again.';
+    errEl.style.display='block';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='Sign In';
+  }
+}
+
+function clearAdminSession(){
+  RL_TOKEN=null;
+  localStorage.removeItem('rl_token');
+  document.body.classList.remove('admin');
+}
+
+function exitAdmin(){
+  clearAdminSession();
 }
 
 /* ─── GLOBE ──────────────────────────────────────────────────────────────
@@ -1042,7 +1221,7 @@ document.addEventListener('visibilitychange',()=>{
 
 /* ─── BOOT ──────────────────────────────────────────────────────────── */
 applyStoredTheme();
-checkAdmin();
+checkAdmin();  /* async — restores admin session if JWT still valid */
 renderGlobe();
 requestAnimationFrame(animateGlobe);
 loadEvents().then(()=>animateAllCounters());
