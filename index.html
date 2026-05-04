@@ -34,7 +34,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .title-logo{
   display:block;
   margin:0 auto 12px;
-  max-width:min(280px,60vw);
+  max-width:min(220px,45vw);
   height:auto;
   filter:invert(1);
   transition:filter 0.25s;
@@ -42,7 +42,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
   user-select:none;
 }
 body.dark .title-logo{filter:none}
-@media(max-width:768px){.title-logo{max-width:min(200px,65vw)}}
+@media(max-width:768px){.title-logo{max-width:min(160px,55vw)}}
 
 /* Mission overview text below header */
 .overview{
@@ -154,13 +154,12 @@ body.dark .title-logo{filter:none}
 }
 @media(max-width:480px){.globe-stage{width:300px;height:300px}}
 
-/* The globe itself — radial gradient gives the spherical "lit from upper-left" feel */
+/* The globe itself */
 .globe-svg{
   width:100%;height:100%;
-  filter:drop-shadow(0 30px 60px rgba(0,0,0,0.08));
 }
 body.dark .globe-svg{
-  filter:drop-shadow(0 0 80px rgba(255,255,255,0.04)) drop-shadow(0 30px 60px rgba(0,0,0,0.5));
+  filter:none;
 }
 
 /* Globe sphere base — subtle radial gradient simulates lighting */
@@ -311,14 +310,28 @@ body.dark .btn-primary:hover{background:#E0E0E0}
 <!-- Theme toggle (top-right floating) -->
 <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" aria-label="Toggle dark mode">🌙</button>
 
-<!-- Admin status bar (only visible when ?admin in URL) -->
+<!-- Admin status bar (only visible when logged in as admin) -->
 <div class="admin-bar" id="admin-bar">
   <span>● ADMIN MODE</span>
   <button onclick="exitAdmin()">Exit</button>
 </div>
 
-<!-- Subtle admin entry button (lock icon) — opens password prompt -->
-<button class="admin-entry" onclick="promptAdmin()" aria-label="Admin login" title="Admin">🔒</button>
+<!-- Admin login modal -->
+<div id="admin-login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:32px;width:320px;max-width:90vw">
+    <div style="font-family:var(--cinzel);font-size:18px;margin-bottom:20px">Admin Sign In</div>
+    <div id="admin-login-err" style="color:#DC2626;font-size:13px;margin-bottom:12px;display:none"></div>
+    <input id="adm-email" type="email" placeholder="Email" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);margin-bottom:12px;font-family:var(--font)">
+    <input id="adm-pass" type="password" placeholder="Password" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);margin-bottom:16px;font-family:var(--font)">
+    <div style="display:flex;gap:8px">
+      <button onclick="doAdminLogin()" id="adm-btn" style="flex:1;padding:10px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:var(--font);cursor:pointer">Sign In</button>
+      <button onclick="closeAdminLogin()" style="flex:1;padding:10px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:var(--font);cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Subtle admin entry button (lock icon) — opens login modal -->
+<button class="admin-entry" onclick="showAdminLogin()" aria-label="Admin login" title="Admin">🔒</button>
 
 <div class="container">
   <div class="header">
@@ -499,63 +512,84 @@ uploadZone.addEventListener('drop',e=>{
 });
 
 async function handleFiles(e){
+  /* SECURITY FIX: Require a valid admin session before uploading.
+     Previously any visitor could POST to the DB using the anon key.
+     Also enforces a 5 MB per-file limit — the previous version had
+     no limit, meaning a single upload could exhaust Supabase row-size
+     limits and corrupt the table. */
+  if(!RL_TOKEN){
+    uploadStatus.textContent='✗ Admin sign-in required to upload events.';
+    uploadStatus.className='upload-status error';
+    return;
+  }
   if(isUploading){
     uploadStatus.textContent='⏳ Please wait for current upload to finish...';
     uploadStatus.className='upload-status';
     return;
   }
-  
+
+  const MAX_BYTES=5*1024*1024; /* 5 MB */
   const files=Array.from(e.target.files);
-  
+
   isUploading=true;
   uploadStatus.textContent='Uploading...';
   uploadStatus.className='upload-status';
-  
+
   for(const file of files){
-    if(file.type==='application/pdf'){
-      const reader=new FileReader();
-      reader.onload=async(e)=>{
-        try{
-          const r=await fetch(`${SB_URL}/rest/v1/risinglight_events`,{
-            method:'POST',
-            headers:{
-              'apikey':SB_ANON,
-              'Authorization':`Bearer ${SB_ANON}`,
-              'Content-Type':'application/json',
-              'Prefer':'return=representation'
-            },
-            body:JSON.stringify({
-              name:file.name.replace('.pdf',''),
-              size:(file.size/1024).toFixed(1)+' KB',
-              pdf_data:e.target.result
-            })
-          });
-          
-          if(r.ok){
-            uploadStatus.textContent='✓ Upload successful! Ready for next upload.';
-            uploadStatus.className='upload-status success';
-            await loadEvents();
-            setTimeout(()=>{
-              uploadStatus.textContent='';
-            },3000);
-          }else{
-            const errorText=await r.text();
-            uploadStatus.textContent=`✗ Upload failed: ${errorText}`;
-            uploadStatus.className='upload-status error';
-          }
-        }catch(err){
-          uploadStatus.textContent=`✗ Upload error: ${err.message}`;
-          uploadStatus.className='upload-status error';
-        }finally{
-          isUploading=false;
-        }
-      };
-      reader.readAsDataURL(file);
-    }else{
+    if(file.type!=='application/pdf'){
       uploadStatus.textContent='✗ Please upload PDF files only.';
       uploadStatus.className='upload-status error';
       isUploading=false;
+      break;
     }
+    /* SECURITY FIX: Enforce file-size limit before reading. */
+    if(file.size>MAX_BYTES){
+      uploadStatus.textContent=`✗ File too large (${(file.size/1024/1024).toFixed(1)} MB). Maximum is 5 MB.`;
+      uploadStatus.className='upload-status error';
+      isUploading=false;
+      break;
+    }
+    const reader=new FileReader();
+    reader.onload=async(ev)=>{
+      try{
+        const r=await fetch(`${SB_URL}/rest/v1/risinglight_events`,{
+          method:'POST',
+          headers:{
+            'apikey':SB_ANON,
+            'Authorization':`Bearer ${RL_TOKEN}`,
+            'Content-Type':'application/json',
+            'Prefer':'return=representation'
+          },
+          body:JSON.stringify({
+            name:file.name.replace('.pdf',''),
+            size:(file.size/1024).toFixed(1)+' KB',
+            pdf_data:ev.target.result
+          })
+        });
+        if(r.status===401||r.status===403){
+          clearAdminSession();
+          uploadStatus.textContent='✗ Session expired — please sign in again.';
+          uploadStatus.className='upload-status error';
+          return;
+        }
+        if(r.ok){
+          uploadStatus.textContent='✓ Upload successful! Ready for next upload.';
+          uploadStatus.className='upload-status success';
+          await loadEvents();
+          setTimeout(()=>{uploadStatus.textContent='';},3000);
+        }else{
+          const errorText=await r.text();
+          uploadStatus.textContent=`✗ Upload failed: ${errorText}`;
+          uploadStatus.className='upload-status error';
+        }
+      }catch(err){
+        uploadStatus.textContent=`✗ Upload error: ${err.message}`;
+        uploadStatus.className='upload-status error';
+      }finally{
+        isUploading=false;
+      }
+    };
+    reader.readAsDataURL(file);
   }
   fileInput.value='';
 }
@@ -640,14 +674,23 @@ function renderEvents(){
 function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 async function deleteEvent(id){
+  /* SECURITY FIX: Require a valid admin session. Previously this used
+     the anon key as Bearer — any visitor could DELETE via curl. */
+  if(!RL_TOKEN){alert('Admin session required to delete events.');return;}
   if(!confirm('Delete this event? This cannot be undone.'))return;
-  
   try{
     const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
       method:'DELETE',
-      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`}
+      headers:{
+        'apikey':SB_ANON,
+        'Authorization':`Bearer ${RL_TOKEN}`
+      }
     });
-    
+    if(r.status===401||r.status===403){
+      clearAdminSession();
+      alert('Session expired — please sign in again.');
+      return;
+    }
     if(r.ok){
       await loadEvents();
     }else{
@@ -842,43 +885,110 @@ function applyStoredTheme(){
   }
 }
 
-/* ─── ADMIN MODE ─────────────────────────────────────────────────────
-   Visit ?admin=YOUR_PASSWORD on the URL to unlock upload + delete.
-   Stored in sessionStorage so it persists for the tab session but doesn't
-   leak across browser restarts. Change ADMIN_PASS below to your secret.
-*/
-const ADMIN_PASS='riselight2026';  // ← CHANGE THIS to your own secret
+/* ─── ADMIN AUTH ──────────────────────────────────────────────────────
+   SECURITY FIX: The old approach stored the admin password as a plain
+   constant in the source code and checked it via a URL parameter or
+   browser prompt — anyone reading the source or browser history could
+   become admin instantly.
 
-function checkAdmin(){
-  const params=new URLSearchParams(location.search);
-  const queryPass=params.get('admin');
-  // If query param matches, store it for the session and clean URL
-  if(queryPass===ADMIN_PASS){
-    sessionStorage.setItem('rl_admin','1');
-    // Clean the URL so the password isn't visible / shareable accidentally
-    history.replaceState({},'',location.pathname);
+   The new approach:
+   1. Admin must sign in with a real Supabase account (same project as
+      77MediaOfficial). Their account must have role='admin' in
+      user_metadata (set by an admin via the SQL console).
+   2. The token is verified server-side on every boot so the session
+      persists across page refreshes without being trivially forgeable.
+   3. Delete and upload operations now require a valid session token —
+      the anon key is no longer used as a Bearer token for mutations.
+*/
+
+let RL_TOKEN=null; /* In-memory session token for this tab only. */
+
+async function verifySession(token){
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/user`,{
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${token}`}
+    });
+    if(!r.ok)return null;
+    const user=await r.json();
+    if(!user||!user.id)return null;
+    const role=user.user_metadata?.role||'';
+    if(role!=='admin')return null;
+    return user;
+  }catch(e){return null;}
+}
+
+function clearAdminSession(){
+  RL_TOKEN=null;
+  localStorage.removeItem('rl_token');
+  document.body.classList.remove('admin');
+}
+
+async function initAuth(){
+  /* Restore admin session from localStorage if token is still valid. */
+  const stored=localStorage.getItem('rl_token');
+  if(stored){
+    const user=await verifySession(stored);
+    if(user){
+      RL_TOKEN=stored;
+      document.body.classList.add('admin');
+      return;
+    }
+    clearAdminSession();
   }
-  if(sessionStorage.getItem('rl_admin')==='1'){
+}
+
+function showAdminLogin(){
+  document.getElementById('admin-login-modal').style.display='flex';
+  document.getElementById('adm-email').focus();
+}
+
+function closeAdminLogin(){
+  document.getElementById('admin-login-modal').style.display='none';
+  document.getElementById('admin-login-err').style.display='none';
+  document.getElementById('adm-email').value='';
+  document.getElementById('adm-pass').value='';
+}
+
+async function doAdminLogin(){
+  const btn=document.getElementById('adm-btn');
+  const errEl=document.getElementById('admin-login-err');
+  const email=document.getElementById('adm-email').value.trim();
+  const pass=document.getElementById('adm-pass').value;
+  if(!email||!pass){errEl.textContent='Email and password required';errEl.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Signing in…';errEl.style.display='none';
+  try{
+    const r=await fetch(`${SB_URL}/auth/v1/token?grant_type=password`,{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password:pass})
+    });
+    const data=await r.json();
+    if(data.error||!data.access_token){
+      errEl.textContent=data.error_description||data.error||'Login failed';
+      errEl.style.display='block';
+      return;
+    }
+    /* Verify the token and confirm role=admin server-side. */
+    const user=await verifySession(data.access_token);
+    if(!user){
+      errEl.textContent='Account does not have admin access.';
+      errEl.style.display='block';
+      return;
+    }
+    RL_TOKEN=data.access_token;
+    localStorage.setItem('rl_token',RL_TOKEN);
     document.body.classList.add('admin');
+    closeAdminLogin();
+  }catch(e){
+    errEl.textContent='Network error — please try again.';
+    errEl.style.display='block';
+  }finally{
+    btn.disabled=false;btn.textContent='Sign In';
   }
 }
 
 function exitAdmin(){
-  sessionStorage.removeItem('rl_admin');
-  document.body.classList.remove('admin');
-}
-
-/* Prompt-based admin entry (alternative to ?admin=… URL trick).
-   Opens a clean password input. Same password, same protection level. */
-function promptAdmin(){
-  const entered=prompt('Enter admin password:');
-  if(entered===null)return;  // user cancelled
-  if(entered===ADMIN_PASS){
-    sessionStorage.setItem('rl_admin','1');
-    document.body.classList.add('admin');
-  }else if(entered.trim()!==''){
-    alert('Incorrect password.');
-  }
+  clearAdminSession();
 }
 
 /* ─── GLOBE ──────────────────────────────────────────────────────────────
@@ -1039,10 +1149,13 @@ document.addEventListener('visibilitychange',()=>{
 
 /* ─── BOOT ──────────────────────────────────────────────────────────── */
 applyStoredTheme();
-checkAdmin();
-renderGlobe();
-requestAnimationFrame(animateGlobe);
-loadEvents().then(()=>animateAllCounters());
+/* SECURITY FIX: Restore admin session from server-verified token.
+   The old checkAdmin() accepted ?admin=PASSWORD in the URL. */
+initAuth().then(()=>{
+  renderGlobe();
+  requestAnimationFrame(animateGlobe);
+  loadEvents().then(()=>animateAllCounters());
+});
 </script>
 </body>
 </html>
