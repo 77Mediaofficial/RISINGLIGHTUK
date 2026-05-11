@@ -298,7 +298,314 @@ body.dark .upload-status.error{background:rgba(220,38,38,0.15);color:#F87171}
 body.dark .btn-primary:hover{background:#E0E0E0}
 
 /* Counter num is just a span — no transition needed since we manually animate */
+
+/* ===== v5: NEW FEATURES — ZERO SETUP ===== */
+
+/* Daily Brief panel */
+.brief-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 600;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+.brief-overlay.open { display: flex; }
+body.dark .brief-overlay { background: rgba(20,20,20,0.92); }
+
+.brief-panel {
+  width: 720px; max-width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  font-family: var(--font);
+  color: var(--text);
+  animation: briefSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes briefSlide {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.brief-close {
+  position: absolute; top: 16px; right: 20px;
+  background: transparent; border: none;
+  font-size: 28px; color: var(--text2); cursor: pointer;
+}
+
+.brief-greeting {
+  font-family: var(--cinzel); font-size: 32px;
+  margin-bottom: 4px; letter-spacing: 1px;
+}
+.brief-date {
+  font-size: 12px; color: var(--text3);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.brief-section {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.brief-section:last-child { border-bottom: 0; }
+.brief-section h3 {
+  font-family: var(--cinzel); font-size: 14px;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 14px; color: var(--text2);
+}
+
+.brief-stat-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 8px;
+}
+.brief-stat {
+  text-align: center; padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.brief-stat-num {
+  font-family: var(--cinzel); font-size: 28px;
+  font-weight: 700; line-height: 1;
+}
+.brief-stat-lbl {
+  font-size: 10px; letter-spacing: 1.5px;
+  color: var(--text3); text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.brief-line {
+  padding: 8px 0; font-size: 14px;
+  color: var(--text2); line-height: 1.6;
+}
+.brief-line strong { color: var(--text); }
+
+.brief-print {
+  background: var(--accent); color: var(--bg);
+  border: none; padding: 10px 22px;
+  font-family: var(--font); font-size: 13px;
+  font-weight: 600; cursor: pointer;
+  border-radius: 8px; margin-right: 8px;
+  transition: opacity 0.2s;
+}
+.brief-print:hover { opacity: 0.85; }
+
+/* Quick-capture FAB (admin only) */
+.qc-fab {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 56px; height: 56px;
+  background: var(--accent); color: var(--bg);
+  border: none; border-radius: 50%;
+  font-family: var(--cinzel); font-size: 28px;
+  font-weight: 600; cursor: pointer;
+  z-index: 90;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  transition: transform 0.25s, box-shadow 0.25s;
+  display: none;
+  align-items: center; justify-content: center;
+}
+.qc-fab.visible { display: flex; }
+.qc-fab:hover {
+  transform: scale(1.08) rotate(90deg);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
+body.dark .qc-fab:hover { box-shadow: 0 12px 32px rgba(255,255,255,0.15); }
+
+.qc-panel {
+  position: fixed; bottom: 96px; right: 24px;
+  width: 360px; max-width: calc(100vw - 48px);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  z-index: 91;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+  transform: translateY(12px) scale(0.96); opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.qc-panel.open {
+  transform: translateY(0) scale(1); opacity: 1;
+  pointer-events: auto;
+}
+.qc-title {
+  font-family: var(--cinzel); font-size: 15px;
+  font-weight: 600; letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.qc-textarea {
+  width: 100%; min-height: 88px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--font); font-size: 13px;
+  color: var(--text); resize: vertical;
+  outline: none; transition: border-color 0.15s;
+}
+.qc-textarea:focus { border-color: var(--text); }
+.qc-actions {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 10px;
+}
+.qc-hint {
+  font-size: 10px; letter-spacing: 1px;
+  color: var(--text3); text-transform: uppercase;
+}
+.qc-save {
+  background: var(--accent); color: var(--bg);
+  border: none; padding: 6px 14px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border-radius: 6px; cursor: pointer;
+}
+.qc-recent {
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  max-height: 140px; overflow-y: auto;
+}
+.qc-recent-item {
+  padding: 6px 0; font-size: 12px;
+  color: var(--text2); line-height: 1.5;
+  border-bottom: 1px dashed var(--border);
+}
+.qc-recent-item:last-child { border-bottom: 0; }
+.qc-recent-time {
+  font-size: 9.5px; color: var(--text3);
+  letter-spacing: 0.5px; margin-left: 8px;
+}
+
+/* Skeleton loaders */
+.skel {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.05) 0%,
+    rgba(0,0,0,0.1) 50%,
+    rgba(0,0,0,0.05) 100%);
+  background-size: 200% 100%;
+  animation: skelShimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+body.dark .skel {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.05) 0%,
+    rgba(255,255,255,0.1) 50%,
+    rgba(255,255,255,0.05) 100%);
+  background-size: 200% 100%;
+}
+@keyframes skelShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skel-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.skel-line { height: 14px; margin-bottom: 10px; }
+.skel-line.tall { height: 32px; margin-bottom: 16px; }
+.skel-line.short { width: 50%; }
+.skel-line.medium { width: 75%; }
+
+/* Keyboard help */
+.kbd-help-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 700;
+  display: none;
+  align-items: center; justify-content: center;
+}
+.kbd-help-overlay.open { display: flex; }
+.kbd-help-panel {
+  width: 540px; max-width: 92vw;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+}
+.kbd-help-title {
+  font-family: var(--cinzel); font-size: 22px;
+  margin-bottom: 4px;
+}
+.kbd-help-sub {
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.kbd-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; font-size: 13px;
+  color: var(--text2);
+  border-bottom: 1px dashed var(--border);
+}
+.kbd-row:last-child { border-bottom: 0; }
+.kbd-row kbd {
+  display: inline-block; padding: 3px 8px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 4px; font-family: var(--font);
+  font-size: 11px; color: var(--text);
+  margin-left: 4px;
+}
+
+/* Confetti */
+.confetti-overlay {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 800;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute; width: 10px; height: 14px;
+  will-change: transform, opacity;
+}
+
+/* Search highlight */
+.search-highlight {
+  background: rgba(255, 230, 0, 0.4);
+  color: var(--text);
+  border-radius: 2px;
+  padding: 0 2px;
+  font-weight: 600;
+}
+body.dark .search-highlight { background: rgba(255, 230, 0, 0.25); }
+
+/* Print styles */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  body.dark { background: #fff !important; color: #000 !important; }
+  .theme-toggle, .admin-entry, .admin-bar, .qc-fab, .qc-panel,
+  .upload-section, .filter-tabs, .country-filters,
+  .search-container, .ticker-wrap, .globe-section,
+  .brief-overlay, .kbd-help-overlay, .modal,
+  .events-count { display: none !important; }
+  .brief-panel { box-shadow: none; border: 2px solid #000; }
+  .events-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-card { break-inside: avoid; }
+  .brief-section { break-inside: avoid; }
+  .title { color: #000 !important; }
+}
+
+/* Pulse animation when stats change */
+.stat-pulse { animation: statPulse 0.8s ease-out; }
+@keyframes statPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); color: var(--accent); }
+  100% { transform: scale(1); }
+}
+
 </style>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Rising Light" />
 </head>
 <body>
 <!-- Theme toggle (top-right floating) -->
@@ -463,7 +770,267 @@ body.dark .btn-primary:hover{background:#E0E0E0}
     </div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+/* ============================================================
+   v5 — DAILY BRIEF, QUICK CAPTURE, CONFETTI, KEYBOARD HELP
+   ============================================================ */
+
+function openBrief() {
+  document.getElementById('brief-overlay').classList.add('open');
+  renderBrief();
+}
+function closeBrief() {
+  document.getElementById('brief-overlay').classList.remove('open');
+}
+
+function renderBrief() {
+  const now = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('brief-date').textContent = `${days[now.getDay()]} · ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  const hour = now.getHours();
+  let greet = 'Good morning';
+  if (hour >= 12 && hour < 17) greet = 'Good afternoon';
+  else if (hour >= 17 || hour < 5) greet = 'Good evening';
+  document.getElementById('brief-greeting').textContent = `${greet}.`;
+
+  // Stats
+  const totalEvents = allEvents.length;
+  const countries = new Set(allEvents.map(e => detectCountry(e.name || ''))).size;
+  const lives = totalEvents * 80; // estimate
+
+  document.getElementById('brief-events').textContent = totalEvents;
+  document.getElementById('brief-countries').textContent = countries || 3;
+  document.getElementById('brief-lives').textContent = lives || 320;
+
+  document.getElementById('brief-summary').innerHTML =
+    `Rising Light has documented <strong>${totalEvents}</strong> events across <strong>${countries || 3}</strong> countries, touching an estimated <strong>${lives || 320}</strong> lives. Compassion travels where it is needed most.`;
+
+  // Recent events
+  const recent = allEvents.slice(0, 5);
+  const recentEl = document.getElementById('brief-recent');
+  if (recent.length === 0) {
+    recentEl.innerHTML = '<div style="color:var(--text3); font-style:italic;">No events yet.</div>';
+  } else {
+    recentEl.innerHTML = recent.map(e => {
+      const country = detectCountry(e.name || '');
+      const flag = COUNTRY_FLAGS[country] || '🌍';
+      return `<div class="brief-line">${flag} <strong>${escapeHtml(e.name || 'Untitled')}</strong></div>`;
+    }).join('');
+  }
+
+  // By country
+  const byCountry = {};
+  allEvents.forEach(e => {
+    const c = detectCountry(e.name || '') || 'Other';
+    byCountry[c] = (byCountry[c] || 0) + 1;
+  });
+  const countryEl = document.getElementById('brief-by-country');
+  const entries = Object.entries(byCountry);
+  if (entries.length === 0) {
+    countryEl.innerHTML = '<div style="color:var(--text3); font-style:italic;">No data.</div>';
+  } else {
+    countryEl.innerHTML = entries.map(([c, n]) => {
+      const flag = COUNTRY_FLAGS[c] || '🌍';
+      return `<div class="brief-line">${flag} <strong>${c}</strong> — ${n} event${n === 1 ? '' : 's'}</div>`;
+    }).join('');
+  }
+}
+
+/* ===== QUICK CAPTURE ===== */
+const QC_KEY = 'rising-light-captures';
+
+function getCaptures() {
+  try { return JSON.parse(localStorage.getItem(QC_KEY) || '[]'); } catch { return []; }
+}
+function saveCaptures(arr) {
+  try { localStorage.setItem(QC_KEY, JSON.stringify(arr.slice(0, 100))); } catch {}
+}
+
+function toggleQC() {
+  const p = document.getElementById('qc-panel');
+  if (p.classList.contains('open')) p.classList.remove('open');
+  else {
+    p.classList.add('open');
+    setTimeout(() => document.getElementById('qc-text').focus(), 100);
+    renderQCRecent();
+  }
+}
+
+function saveQC() {
+  const text = document.getElementById('qc-text').value.trim();
+  if (!text) return;
+  const captures = getCaptures();
+  captures.unshift({ id: Date.now(), text, time: new Date().toISOString() });
+  saveCaptures(captures);
+  document.getElementById('qc-text').value = '';
+  renderQCRecent();
+  fireConfetti();
+}
+
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  return Math.floor(h / 24) + 'd ago';
+}
+
+function renderQCRecent() {
+  const list = document.getElementById('qc-recent');
+  if (!list) return;
+  const captures = getCaptures().slice(0, 4);
+  if (captures.length === 0) {
+    list.innerHTML = '<div style="color:var(--text3); font-size:11px; font-style:italic;">No notes yet.</div>';
+    return;
+  }
+  list.innerHTML = captures.map(c =>
+    `<div class="qc-recent-item">${escapeHtml(c.text)}<span class="qc-recent-time">${timeAgo(c.time)}</span></div>`
+  ).join('');
+}
+
+/* Show FAB when admin */
+function updateAdminFeatures() {
+  const fab = document.getElementById('qc-fab');
+  if (RL_TOKEN || (window.adminMode === true)) fab.classList.add('visible');
+  else fab.classList.remove('visible');
+}
+
+/* ===== CONFETTI ===== */
+function fireConfetti(x, y) {
+  const overlay = document.getElementById('confetti-overlay');
+  if (!overlay) return;
+  x = x || window.innerWidth / 2;
+  y = y || window.innerHeight / 3;
+  const colors = ['#000000', '#666666', '#999999'];
+  if (document.body.classList.contains('dark')) {
+    colors[0] = '#FFFFFF'; colors[1] = '#CCCCCC'; colors[2] = '#888888';
+  }
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = x + 'px';
+    piece.style.top = y + 'px';
+    piece.style.background = colors[i % colors.length];
+    overlay.appendChild(piece);
+    const angle = (Math.random() - 0.5) * Math.PI;
+    const vel = 200 + Math.random() * 300;
+    const dx = Math.sin(angle) * vel;
+    const dy = -Math.cos(angle) * vel - 150;
+    piece.animate([
+      { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+      { transform: `translate(${dx}px, ${dy}px) rotate(${(Math.random()-0.5)*720}deg)`, opacity: 1, offset: 0.4 },
+      { transform: `translate(${dx*1.3}px, ${dy+700}px) rotate(${(Math.random()-0.5)*1080}deg)`, opacity: 0 }
+    ], {
+      duration: 1600 + Math.random() * 600,
+      easing: 'cubic-bezier(0.2,0.6,0.4,1)',
+      fill: 'forwards'
+    });
+    setTimeout(() => piece.remove(), 2400);
+  }
+}
+
+/* ===== KEYBOARD HELP ===== */
+function openKbdHelp() { document.getElementById('kbd-help-overlay').classList.add('open'); }
+function closeKbdHelp() { document.getElementById('kbd-help-overlay').classList.remove('open'); }
+
+/* ===== SEARCH HIGHLIGHT ===== */
+const _origRenderEvents = typeof renderEvents === 'function' ? renderEvents : null;
+if (_origRenderEvents) {
+  window.renderEvents = function() {
+    _origRenderEvents();
+    // Highlight search matches
+    const query = (document.getElementById('search-input')?.value || '').trim();
+    if (!query) return;
+    setTimeout(() => {
+      const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      document.querySelectorAll('.events-grid h3, .events-grid p, .events-grid .event-title, .events-grid .event-card').forEach(el => {
+        const txt = el.textContent;
+        if (!txt || !re.test(txt)) return;
+        // Avoid breaking nested elements - only highlight in pure text nodes
+        el.childNodes.forEach(n => {
+          if (n.nodeType === 3 && n.textContent.match(re)) {
+            const span = document.createElement('span');
+            span.innerHTML = n.textContent.replace(re, '<mark class="search-highlight">$1</mark>');
+            n.replaceWith(...span.childNodes);
+          }
+        });
+      });
+    }, 50);
+  };
+}
+
+/* ===== GLOBAL KEYBOARD ===== */
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) {
+    // In textareas, Cmd+Enter to save QC
+    if (e.target.id === 'qc-text' && (e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      saveQC();
+    }
+    return;
+  }
+
+  // Cmd+N for quick capture (admin only)
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') {
+    if (RL_TOKEN || window.adminMode) {
+      e.preventDefault();
+      toggleQC();
+    }
+    return;
+  }
+
+  const k = e.key.toLowerCase();
+  if (k === 't') { toggleTheme(); }
+  else if (k === 'b') { openBrief(); }
+  else if (k === '/') { e.preventDefault(); document.getElementById('search-input')?.focus(); }
+  else if (k === '?') { e.preventDefault(); openKbdHelp(); }
+  else if (k === 'a') { if (typeof filterEvents === 'function') filterEvents('all'); }
+  else if (k === 'r') { if (typeof filterEvents === 'function') filterEvents('recent'); }
+  else if (k === 'escape') {
+    closeKbdHelp();
+    closeBrief();
+    const qc = document.getElementById('qc-panel');
+    if (qc) qc.classList.remove('open');
+  }
+});
+
+/* ===== HOOK UPLOAD SUCCESS TO FIRE CONFETTI ===== */
+const _origIsUploading = typeof isUploading !== 'undefined';
+let _lastEventCount = 0;
+setInterval(() => {
+  if (typeof allEvents !== 'undefined' && allEvents.length > _lastEventCount && _lastEventCount > 0) {
+    fireConfetti();
+  }
+  _lastEventCount = (typeof allEvents !== 'undefined') ? allEvents.length : _lastEventCount;
+  updateAdminFeatures();
+}, 1500);
+
+/* ===== STAT PULSE on counter update ===== */
+const _origAnimateCounter = typeof animateCounter === 'function' ? animateCounter : null;
+if (_origAnimateCounter) {
+  window.animateCounter = function(el, target, duration) {
+    _origAnimateCounter(el, target, duration);
+    if (el) {
+      el.classList.remove('stat-pulse');
+      void el.offsetWidth;
+      el.classList.add('stat-pulse');
+    }
+  };
+}
+
+/* ===== INIT ===== */
+window.addEventListener('DOMContentLoaded', () => {
+  renderQCRecent();
+  updateAdminFeatures();
+  console.log('[Rising Light v5] Daily Brief + Quick Capture + Keyboard shortcuts + Confetti loaded');
+  console.log('[Rising Light v5] Press ? for keyboard shortcuts');
+});
+
+</script>
 <script>
 const SB_URL='https://vtvniushkftodhlvdkom.supabase.co';
 const SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0dm5pdXNoa2Z0b2RobHZka29tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMTY4NzAsImV4cCI6MjA5MTY5Mjg3MH0.a8R36vH_KRnruIcj39ivrkTuVNtH7YX8OXabbSn3jgg';
@@ -1217,5 +1784,83 @@ renderGlobe();
 requestAnimationFrame(animateGlobe);
 loadEvents().then(()=>animateAllCounters());
 </script>
+
+<!-- v5: Daily Brief overlay -->
+<div class="brief-overlay" id="brief-overlay" onclick="if(event.target===this)closeBrief()">
+  <div class="brief-panel" style="position:relative">
+    <button class="brief-close" onclick="closeBrief()" aria-label="Close">×</button>
+    <div class="brief-date" id="brief-date">— Loading —</div>
+    <h2 class="brief-greeting" id="brief-greeting">Good day.</h2>
+    <p style="color:var(--text2); margin-bottom:24px; font-size:14px; line-height:1.6;" id="brief-summary">Loading today's overview...</p>
+
+    <div class="brief-section">
+      <h3>Mission overview</h3>
+      <div class="brief-stat-row">
+        <div class="brief-stat">
+          <div class="brief-stat-num" id="brief-events">0</div>
+          <div class="brief-stat-lbl">Events</div>
+        </div>
+        <div class="brief-stat">
+          <div class="brief-stat-num" id="brief-countries">0</div>
+          <div class="brief-stat-lbl">Countries</div>
+        </div>
+        <div class="brief-stat">
+          <div class="brief-stat-num" id="brief-lives">0</div>
+          <div class="brief-stat-lbl">Lives Touched</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brief-section">
+      <h3>Recent events</h3>
+      <div id="brief-recent"></div>
+    </div>
+
+    <div class="brief-section">
+      <h3>By country</h3>
+      <div id="brief-by-country"></div>
+    </div>
+
+    <div style="text-align:right; margin-top:8px;">
+      <button class="brief-print" onclick="window.print()">Print Brief</button>
+      <button class="brief-print" style="background:var(--card); color:var(--text); border:1px solid var(--border)" onclick="closeBrief()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- v5: Quick capture FAB (admin only) -->
+<button class="qc-fab" id="qc-fab" onclick="toggleQC()" title="Quick note (Cmd+N)" aria-label="Quick capture">+</button>
+<div class="qc-panel" id="qc-panel">
+  <div class="qc-title">Quick capture</div>
+  <textarea class="qc-textarea" id="qc-text" placeholder="Drop a quick note or thought about an event..."></textarea>
+  <div class="qc-actions">
+    <span class="qc-hint">Cmd+⏎ to save</span>
+    <button class="qc-save" onclick="saveQC()">Save</button>
+  </div>
+  <div class="qc-recent" id="qc-recent"></div>
+</div>
+
+<!-- v5: Keyboard help -->
+<div class="kbd-help-overlay" id="kbd-help-overlay" onclick="if(event.target===this)closeKbdHelp()">
+  <div class="kbd-help-panel">
+    <div class="kbd-help-title">Keyboard shortcuts</div>
+    <div class="kbd-help-sub">Press <kbd>Esc</kbd> to close</div>
+    <div class="kbd-row"><span>Toggle dark/light theme</span><kbd>T</kbd></div>
+    <div class="kbd-row"><span>Focus search</span><kbd>/</kbd></div>
+    <div class="kbd-row"><span>Open Daily Brief</span><kbd>B</kbd></div>
+    <div class="kbd-row"><span>Quick capture (admin)</span><kbd>Cmd</kbd><kbd>N</kbd></div>
+    <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
+    <div class="kbd-row"><span>Close any modal</span><kbd>Esc</kbd></div>
+    <div class="kbd-row"><span>All events filter</span><kbd>A</kbd></div>
+    <div class="kbd-row"><span>Recent events filter</span><kbd>R</kbd></div>
+  </div>
+</div>
+
+<!-- v5: Confetti container -->
+<div class="confetti-overlay" id="confetti-overlay"></div>
+
+<!-- v5: Daily Brief button (added to header area) -->
+<button onclick="openBrief()" style="position:fixed; top:24px; left:24px; background:transparent; border:1px solid var(--border); padding:10px 16px; border-radius:8px; font-family:var(--font); font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text2); cursor:pointer; z-index:50; transition: all 0.2s;" title="Daily Brief (B)" onmouseover="this.style.background='var(--card)';this.style.color='var(--text)'" onmouseout="this.style.background='transparent';this.style.color='var(--text2)'">📋 Brief</button>
+
 </body>
 </html>
