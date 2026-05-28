@@ -167,14 +167,15 @@ body.dark .globe-svg{
 
 /* Globe sphere base — subtle radial gradient simulates lighting */
 .globe-sphere-fill{fill:var(--card)}
-.globe-grid-line{stroke:var(--text);stroke-width:0.4;fill:none;opacity:0.06}
+.globe-grid-line{stroke:var(--text);stroke-width:0.5;fill:none;opacity:0.18}
+body.dark .globe-grid-line{opacity:0.22}
 .globe-land-dot{fill:var(--text);opacity:0.55}
 body.dark .globe-land-dot{opacity:0.75}
 .globe-rim{fill:none;stroke:var(--text);stroke-width:0.6;opacity:0.3}
 
 /* Pin styles */
 .pin-pulse{fill:var(--text);opacity:0;animation:pinPulse 2.6s ease-out infinite}
-.pin-dot{fill:var(--text);filter:drop-shadow(0 0 3px var(--text))}
+.pin-dot{fill:var(--text)}
 .pin-ring{fill:none;stroke:var(--text);stroke-width:1;opacity:0.4;animation:pinBreath 3s ease-in-out infinite}
 .pin-glow{fill:var(--text);opacity:0;animation:pinGlow 3s ease-in-out infinite}
 
@@ -644,35 +645,6 @@ body.dark .search-highlight { background: rgba(255, 230, 0, 0.25); }
 
 
 /* ═══════════════════════════════════════════════════
-   UPGRADE 1: Animated Film Grain Overlay
-   ═══════════════════════════════════════════════════ */
-#film-grain {
-  position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.022;
-  animation: grainMove 0.12s steps(1) infinite;
-  will-change: transform;
-}
-@keyframes grainMove {
-  0%   { transform: translate(0, 0); }
-  10%  { transform: translate(-2%, -3%); }
-  20%  { transform: translate(3%, 1%); }
-  30%  { transform: translate(-1%, 4%); }
-  40%  { transform: translate(2%, -2%); }
-  50%  { transform: translate(-3%, 3%); }
-  60%  { transform: translate(1%, -1%); }
-  70%  { transform: translate(-2%, 2%); }
-  80%  { transform: translate(3%, -3%); }
-  90%  { transform: translate(-1%, 1%); }
-  100% { transform: translate(2%, -2%); }
-}
-
-/* ═══════════════════════════════════════════════════
    UPGRADE 2: Staggered GSAP-style Entry Animations
    ═══════════════════════════════════════════════════ */
 @keyframes fadeRise {
@@ -805,8 +777,6 @@ body.dark .stat-card:hover {
 <meta name="apple-mobile-web-app-title" content="Rising Light" />
 </head>
 <body>
-<!-- Film Grain Canvas (Upgrade 1) -->
-<canvas id="film-grain" aria-hidden="true"></canvas>
 
 <!-- Search Spotlight Overlay (Upgrade 8) -->
 <div id="search-spotlight"></div>
@@ -2075,43 +2045,6 @@ loadEvents().then(()=>animateAllCounters());
 
 
 <script>
-/* ═══════════════════════════════════════════════════
-   UPGRADE 1: Animated Film Grain
-   ═══════════════════════════════════════════════════ */
-(function() {
-  const canvas = document.getElementById('film-grain');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let w, h, imageData;
-
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-    imageData = ctx.createImageData(w, h);
-  }
-
-  function generateGrain() {
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const v = (Math.random() * 255) | 0;
-      data[i]     = v;
-      data[i + 1] = v;
-      data[i + 2] = v;
-      data[i + 3] = 255;
-    }
-    ctx.putImageData(imageData, 0, 0);
-  }
-
-  let frame = 0;
-  function tick() {
-    if (++frame % 2 === 0) generateGrain(); // every 2 frames ≈ 30fps grain
-    requestAnimationFrame(tick);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  tick();
-})();
 
 
 
