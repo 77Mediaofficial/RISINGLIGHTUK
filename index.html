@@ -1009,11 +1009,6 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
     <div class="ticker-content"><div class="ticker-track" id="ticker-track">Loading recent activity...</div></div>
   </div>
 
-  <div class="search-container">
-    <input type="text" class="search-input" id="search-input" placeholder="Search events...">
-    <span class="search-icon">🔍</span>
-  </div>
-
   <div class="events-header">
     <div class="events-title">Events</div>
     <div class="events-count" id="event-count">0 events</div>
@@ -1329,7 +1324,6 @@ document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (k === 't') { toggleTheme(); }
   else if (k === 'b') { openBrief(); }
-  else if (k === '/') { e.preventDefault(); document.getElementById('search-input')?.focus(); }
   else if (k === '?') { e.preventDefault(); openKbdHelp(); }
   else if (k === 'a') { if (typeof filterEvents === 'function') filterEvents('all'); }
   else if (k === 'r') { if (typeof filterEvents === 'function') filterEvents('recent'); }
@@ -1588,18 +1582,14 @@ function filterEvents(filter){
   }else{renderEvents();}
 }
 
-document.getElementById('search-input').addEventListener('input',renderEvents);
-
 function renderEvents(){
   const grid=document.getElementById('events-grid');
   const count=document.getElementById('event-count');
-  const searchTerm=document.getElementById('search-input').value.toLowerCase();
 
   let filtered=allEvents.filter(e=>{
-    const matchesSearch=e.name.toLowerCase().includes(searchTerm);
     const country=detectCountry(e.name);
     const matchesCountry=currentCountry==='all'||country===currentCountry;
-    if(!matchesSearch||!matchesCountry)return false;
+    if(!matchesCountry)return false;
     if(currentFilter==='all')return true;
     const daysDiff=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
     if(currentFilter==='recent')return daysDiff<=7;
@@ -2246,7 +2236,6 @@ loadEvents().then(()=>animateAllCounters());
     <div class="kbd-help-title">Keyboard shortcuts</div>
     <div class="kbd-help-sub">Press <kbd>Esc</kbd> to close</div>
     <div class="kbd-row"><span>Toggle dark/light theme</span><kbd>T</kbd></div>
-    <div class="kbd-row"><span>Focus search</span><kbd>/</kbd></div>
     <div class="kbd-row"><span>Open Daily Brief</span><kbd>B</kbd></div>
     <div class="kbd-row"><span>Quick capture (admin)</span><kbd>Cmd</kbd><kbd>N</kbd></div>
     <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
