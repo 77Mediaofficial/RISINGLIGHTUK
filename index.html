@@ -779,6 +779,125 @@ body.dark .stat-card:hover {
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   v7 — INTERACTIVE GLOBE · IMPACT TRACKER · POLISH
+   Everything below is additive. All colors come from the existing
+   theme variables, so light/dark mode and the fonts are untouched.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* v7.1 Radar pings + v7.2 reach arcs (drawn by JS inside the globe SVG) */
+.ping-ring{fill:none;stroke:var(--text)}
+.arc-path{fill:none;stroke:var(--text);stroke-width:1;opacity:0.30;stroke-linecap:round}
+.arc-comet{fill:var(--text)}
+
+/* v7.4 Globe pin tooltip (sits inside .globe-stage, which is position:relative) */
+.globe-tip{
+  position:absolute;transform:translate(-50%,-135%);
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--text);
+  box-shadow:0 10px 30px rgba(0,0,0,0.14);
+  pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;z-index:5;
+}
+.globe-tip.show{opacity:1}
+.globe-tip .tip-count{display:block;font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.3px}
+
+/* v7.13 Light rays behind the globe — theme-aware via --glow-color */
+.globe-rays{
+  position:absolute;inset:-8%;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 0deg,
+    transparent 0deg,var(--glow-color) 14deg,transparent 32deg,
+    transparent 70deg,var(--glow-color) 86deg,transparent 104deg,
+    transparent 150deg,var(--glow-color) 165deg,transparent 184deg,
+    transparent 235deg,var(--glow-color) 252deg,transparent 270deg,
+    transparent 315deg,var(--glow-color) 332deg,transparent 350deg);
+  -webkit-mask-image:radial-gradient(circle,rgba(0,0,0,0.9) 28%,transparent 70%);
+  mask-image:radial-gradient(circle,rgba(0,0,0,0.9) 28%,transparent 70%);
+  filter:blur(10px);
+  animation:raysSpin 90s linear infinite;
+}
+@keyframes raysSpin{to{transform:rotate(360deg)}}
+
+/* v7.5 Goal thermometer + v7.6 monthly heatmap card */
+.goal-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:26px 28px;margin-bottom:60px;position:relative;overflow:hidden;
+}
+.goal-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.goal-title{font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2)}
+.goal-nums{font-family:var(--cinzel);font-size:22px;font-weight:700;letter-spacing:.5px}
+.goal-nums .goal-of{color:var(--text3);font-size:14px;font-weight:600}
+.goal-track{height:10px;border-radius:99px;background:var(--hover-bg2);overflow:hidden}
+.goal-fill{
+  height:100%;width:0;border-radius:99px;background:var(--text);
+  position:relative;transition:width 1.6s cubic-bezier(0.22,1,0.36,1);
+}
+.goal-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);
+  background-size:220% 100%;animation:skelShimmer 2.4s linear infinite;
+}
+body.dark .goal-fill::after{
+  background:linear-gradient(100deg,transparent 30%,rgba(0,0,0,0.30) 50%,transparent 70%);
+  background-size:220% 100%;
+}
+.goal-foot{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--text3);margin-top:8px;letter-spacing:.4px}
+.goal-pct{font-family:var(--mono)}
+.heat-wrap{margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}
+.heat-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.heat-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
+.heat-cell{height:26px;border-radius:6px;background:var(--text);transition:opacity .6s,transform .2s}
+.heat-cell:hover{transform:scale(1.12)}
+.heat-month{font-size:9.5px;text-align:center;color:var(--text3);margin-top:5px;letter-spacing:.5px;font-family:var(--mono)}
+
+/* v7.7 Daily Brief — by-country bars */
+.brief-cbar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13.5px}
+.brief-cbar-label{min-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brief-cbar-track{flex:1;height:6px;border-radius:99px;background:var(--hover-bg2);overflow:hidden}
+.brief-cbar-fill{height:100%;width:0;background:var(--text);border-radius:99px;transition:width .9s cubic-bezier(0.22,1,0.36,1)}
+.brief-cbar-n{font-family:var(--cinzel);font-weight:700;font-size:14px;min-width:20px;text-align:right}
+
+/* v7.8 Scroll reveal */
+.rl-sr{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(0.22,1,0.36,1),transform .8s cubic-bezier(0.22,1,0.36,1)}
+.rl-sr.rl-sr-in{opacity:1;transform:none}
+
+/* v7.10 Scroll progress + back-to-top (bottom-left; quick-capture FAB owns bottom-right) */
+.scroll-progress{position:fixed;top:0;left:0;height:2.5px;width:0;background:var(--text);z-index:3000}
+.back-top{
+  position:fixed;bottom:24px;left:24px;width:46px;height:46px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);color:var(--text);
+  font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;visibility:hidden;transform:translateY(12px);
+  transition:all .35s cubic-bezier(0.22,1,0.36,1);z-index:900;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+.back-top.show{opacity:1;visibility:visible;transform:none}
+.back-top:hover{transform:translateY(-3px)}
+body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
+
+/* v7.11 Toasts */
+.toast-wrap{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:4000;pointer-events:none}
+.toast{
+  background:var(--text);color:var(--bg);padding:11px 20px;border-radius:99px;
+  font-size:13.5px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,0.22);
+  opacity:0;transform:translateY(14px);transition:all .35s cubic-bezier(0.22,1,0.36,1);
+}
+.toast.in{opacity:1;transform:none}
+
+/* v7.12 Cursor spotlight on cards — uses the theme's --glow-color */
+.stat-card{position:relative}
+.event-card::after,.stat-card::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  opacity:0;transition:opacity .35s;
+  background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),var(--glow-color),transparent 65%);
+}
+.event-card:hover::after,.stat-card:hover::after{opacity:1}
+
+/* v7 accessibility — honor reduced-motion for the new animations */
+@media (prefers-reduced-motion:reduce){
+  .globe-rays,.goal-fill::after{animation:none}
+  .rl-sr{opacity:1;transform:none;transition:none}
+}
+
 </style>
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
@@ -828,11 +947,28 @@ body.dark .stat-card:hover {
     </div>
   </div>
 
+  <!-- v7: Impact tracker — goal thermometer + 12-month activity heatmap -->
+  <div class="goal-card" id="goal-card">
+    <div class="goal-head">
+      <div class="goal-title">2026 Goal · Lives Touched</div>
+      <div class="goal-nums"><span id="goal-now">0</span> <span class="goal-of">/ <span id="goal-target">500</span></span></div>
+    </div>
+    <div class="goal-track"><div class="goal-fill" id="goal-fill"></div></div>
+    <div class="goal-foot"><span>Every event lifts this bar</span><span class="goal-pct" id="goal-pct">0%</span></div>
+    <div class="heat-wrap">
+      <div class="heat-title">Momentum · Events per month</div>
+      <div class="heat-grid" id="heat-grid"></div>
+      <div class="heat-grid" id="heat-months"></div>
+    </div>
+  </div>
+
   <!-- Globe -->
   <div class="globe-section">
     <div class="globe-eyebrow">Our Reach</div>
     <div class="globe-title">Where Compassion Travels</div>
     <div class="globe-stage">
+      <!-- v7: ambient light rays — pure CSS, sits behind the globe SVG -->
+      <div class="globe-rays" aria-hidden="true"></div>
       <svg class="globe-svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" id="globe-svg" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="globeClip"><circle cx="200" cy="200" r="170"/></clipPath>
@@ -847,12 +983,18 @@ body.dark .stat-card:hover {
         <!-- Land dots (drawn dynamically) -->
         <g id="globe-land" clip-path="url(#globeClip)"></g>
 
+        <!-- v7: Reach arcs — intentionally unclipped so the lifted arc can
+             crest just past the rim like a flight path over the horizon -->
+        <g id="globe-arcs"></g>
+
         <!-- Pins (drawn dynamically) -->
         <g id="globe-pins" clip-path="url(#globeClip)"></g>
 
         <!-- Outer rim — drawn last so it sits on top -->
         <circle class="globe-rim" cx="200" cy="200" r="170"/>
       </svg>
+      <!-- v7: hover tooltip for globe pins -->
+      <div class="globe-tip" id="globe-tip" role="tooltip"></div>
     </div>
     <div class="globe-locations">
       <div class="globe-location">London</div>
@@ -872,13 +1014,6 @@ body.dark .stat-card:hover {
     <span class="search-icon">🔍</span>
   </div>
 
-  <!-- Country filter chips -->
-  <div class="country-filters" id="country-filters"></div>
-
-  <div class="filter-tabs">
-    <div class="filter-tab active" onclick="filterEvents('all')">All Events</div>
-    <div class="filter-tab" onclick="filterEvents('recent')">Recent</div>
-  </div>
   <div class="events-header">
     <div class="events-title">Events</div>
     <div class="events-count" id="event-count">0 events</div>
@@ -1025,10 +1160,23 @@ function renderBrief() {
   if (entries.length === 0) {
     countryEl.innerHTML = '<div style="color:var(--text3); font-style:italic;">No data.</div>';
   } else {
+    /* v7: render each country as an animated bar (longest = 100%) */
+    entries.sort((a, b) => b[1] - a[1]);
+    const maxN = Math.max(...entries.map(([, n]) => n));
     countryEl.innerHTML = entries.map(([c, n]) => {
       const flag = COUNTRY_FLAGS[c] || '🌍';
-      return `<div class="brief-line">${flag} <strong>${c}</strong> — ${n} event${n === 1 ? '' : 's'}</div>`;
+      const pct = Math.round((n / maxN) * 100);
+      return `<div class="brief-cbar-row">
+        <span class="brief-cbar-label">${flag} <strong>${c}</strong></span>
+        <div class="brief-cbar-track"><div class="brief-cbar-fill" data-w="${pct}"></div></div>
+        <span class="brief-cbar-n">${n}</span>
+      </div>`;
     }).join('');
+    // Short timeout (not rAF) so the 0-width state paints first and the fill
+    // still applies even in a backgrounded tab, where rAF callbacks pause.
+    setTimeout(() => {
+      countryEl.querySelectorAll('.brief-cbar-fill').forEach(f => f.style.width = f.dataset.w + '%');
+    }, 60);
   }
 }
 
@@ -1419,6 +1567,7 @@ async function loadEvents(){
       renderCountryFilters();
       renderTicker();
       renderEvents();
+      if(window.rlOnEventsLoaded)window.rlOnEventsLoaded(); // v7: heatmap etc.
     }
   }catch(e){
     document.getElementById('events-grid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div></div>';
@@ -1655,6 +1804,7 @@ function renderCountryFilters(){
   const list=Array.from(found);
 
   const wrap=document.getElementById('country-filters');
+  if(!wrap)return; // chip bar removed from UI — globe pin-click still filters via filterByCountry()
   wrap.innerHTML=list.map(c=>{
     const flag=c==='all'?'🌐':(COUNTRY_FLAGS[c]||'🌍');
     const label=c==='all'?'All Countries':c;
@@ -1698,6 +1848,7 @@ function shareEvent(platform,text,url){
     navigator.clipboard.writeText(fullText).then(()=>{
       // Tiny non-blocking confirmation — flash the clicked button's text
       if(btn){const orig=btn.textContent;btn.textContent='Copied ✓';setTimeout(()=>{btn.textContent=orig},1400);}
+      if(window.showToast)showToast('Link copied to clipboard 🔗'); // v7
     }).catch(()=>alert('Could not copy. URL: '+url));
   }
 }
@@ -1863,9 +2014,9 @@ const LAND=[83.46,-37.2,82.45,-49.6,81.89,-29.53,81.05,-41.93,80.29,-54.33,79.84
 /* Locations we've worked in (lat, lon, label).
    To add new locations, just push another object into this array. */
 const LOCATIONS=[
-  {lat:51.5074,lon:-0.1278,label:'London'},
-  {lat:34.0489,lon:-111.0937,label:'Arizona'},
-  {lat:15.7835,lon:-90.2308,label:'Guatemala'}
+  {lat:51.5074,lon:-0.1278,label:'London',country:'UK'},
+  {lat:34.0489,lon:-111.0937,label:'Arizona',country:'USA'},
+  {lat:15.7835,lon:-90.2308,label:'Guatemala',country:'Guatemala'}
 ];
 
 const GLOBE_R=170;       // radius in SVG units
@@ -1964,19 +2115,30 @@ function renderGlobe(){
   gridG.innerHTML=gridSvg;
 
   // Pins
+  const tNow=performance.now();
   let pinSvg='';
-  for(const loc of LOCATIONS){
+  for(let li=0;li<LOCATIONS.length;li++){
+    const loc=LOCATIONS[li];
     const p=project(loc.lat,loc.lon,globeRotation);
     const visible=p.z>0;
     const opacity=visible?Math.min(1,p.z/GLOBE_R*2):0;
     if(opacity<0.05)continue;
+
+    /* v7: radar pings — driven by wall-clock time in JS because this SVG is
+       rebuilt every frame, which would restart a CSS animation each rebuild. */
+    let pings='';
+    for(let k=0;k<2;k++){
+      const ph=((tNow/1800)+li*0.37+k*0.5)%1;
+      pings+=`<circle class="ping-ring" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(3+ph*16).toFixed(1)}" stroke-width="${(1.3*(1-ph)).toFixed(2)}" opacity="${(0.5*(1-ph)).toFixed(2)}"/>`;
+    }
 
     // Label position — offset slightly above the pin, with bg
     const labelW=loc.label.length*7+14;
     const labelX=p.x;
     const labelY=p.y-16;
 
-    pinSvg+=`<g class="pin-group" opacity="${opacity.toFixed(2)}">
+    pinSvg+=`<g class="pin-group" data-idx="${li}" opacity="${opacity.toFixed(2)}">
+      ${pings}
       <circle class="pin-glow" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5"/>
       <circle class="pin-pulse" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3"/>
       <circle class="pin-ring" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="6"/>
@@ -1986,6 +2148,10 @@ function renderGlobe(){
     </g>`;
   }
   pinsG.innerHTML=pinSvg;
+
+  /* v7: reach arcs from HQ to each location — defined in the v7 script at
+     the end of the page, so guard for the very first frames before it loads. */
+  if(typeof renderArcs==='function')renderArcs();
 }
 
 /* Animation loop. Rotates ~0.05° per frame (full revolution every ~2 mins
@@ -1993,7 +2159,9 @@ function renderGlobe(){
 let globeAnimating=true;
 let lastFrameTime=0;
 function animateGlobe(now){
-  if(globeAnimating){
+  /* v7: _rlGlobeHold pauses auto-rotation while a pin is hovered or a
+     spin-to-pin animation is driving the rotation manually. */
+  if(globeAnimating&&!window._rlGlobeHold){
     const dt=lastFrameTime?(now-lastFrameTime)/1000:0.016;
     lastFrameTime=now;
     globeRotation=(globeRotation+dt*6)%360;  // 6 deg/sec → 60s per revolution
@@ -2142,6 +2310,277 @@ loadEvents().then(()=>animateAllCounters());
 })();
 
 console.log('[Rising Light v6] Film grain, lerp cursor, spotlight search, glow pins, true-black dark mode, glassmorphic modals, staggered entry, JetBrains Mono typography, sophisticated hover states, micro-transitions — all loaded.');
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     v7 — TOASTS · SCROLL PROGRESS · BACK-TO-TOP · SKELETONS · REVEAL ·
+     SPOTLIGHT · IMPACT TRACKER · GLOBE INTERACTIVITY (arcs, spin, tips)
+     ════════════════════════════════════════════════════════════════════ -->
+<div class="scroll-progress" id="scroll-progress"></div>
+<button class="back-top" id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+<div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
+
+<script>
+/* v7 — every block below is additive. Theme + fonts come entirely from the
+   existing CSS variables; nothing above this script is altered by it. */
+
+/* ── v7.11 TOASTS ─────────────────────────────────────────────────── */
+window.showToast=function(msg){
+  const wrap=document.getElementById('toast-wrap');
+  if(!wrap)return;
+  const t=document.createElement('div');
+  t.className='toast';
+  t.textContent=msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('in'));
+  setTimeout(()=>{t.classList.remove('in');setTimeout(()=>t.remove(),380);},2600);
+};
+
+/* ── v7.10 SCROLL PROGRESS + BACK-TO-TOP ─────────────────────────── */
+(function(){
+  const bar=document.getElementById('scroll-progress');
+  const btn=document.getElementById('back-top');
+  let ticking=false;
+  function onScroll(){
+    if(ticking)return;ticking=true;
+    requestAnimationFrame(()=>{
+      const h=document.documentElement;
+      const max=h.scrollHeight-h.clientHeight;
+      bar.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+      btn.classList.toggle('show',h.scrollTop>600);
+      ticking=false;
+    });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+
+/* ── v7.9 SKELETON SHIMMER while events load ─────────────────────── */
+(function(){
+  const grid=document.getElementById('events-grid');
+  if(grid&&grid.querySelector('.loading')){
+    grid.innerHTML=Array.from({length:6},()=>`
+      <div class="skel-card">
+        <div class="skel skel-line medium" style="height:18px;margin-bottom:14px"></div>
+        <div class="skel skel-line short" style="margin-bottom:24px"></div>
+        <div style="display:flex;gap:10px">
+          <div class="skel skel-line tall" style="flex:1;margin-bottom:0"></div>
+          <div class="skel skel-line tall" style="width:70px;margin-bottom:0"></div>
+        </div>
+      </div>`).join('');
+  }
+})();
+
+/* ── v7.8 SCROLL REVEAL ──────────────────────────────────────────── */
+(function(){
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){e.target.classList.add('rl-sr-in');io.unobserve(e.target);}
+    });
+  },{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+  function attach(el,delay){
+    if(el.classList.contains('rl-sr')||el.classList.contains('rl-sr-in'))return;
+    // Never hide something already in the first viewport — no flash on load
+    if(el.getBoundingClientRect().top<window.innerHeight*0.9)return;
+    el.classList.add('rl-sr');
+    if(delay)el.style.transitionDelay=Math.min(delay,360)+'ms';
+    io.observe(el);
+  }
+  document.querySelectorAll('.stat-card,.goal-card,.globe-section,.ticker-wrap,.search-container,.country-filters,.events-header,.upload-section,.footer')
+    .forEach(el=>attach(el,0));
+  // Event cards arrive async and re-render on filter — reveal each new batch
+  const grid=document.getElementById('events-grid');
+  if(grid){
+    new MutationObserver(()=>{
+      let i=0;
+      grid.querySelectorAll('.event-card').forEach(c=>attach(c,(i++%6)*60));
+    }).observe(grid,{childList:true});
+  }
+})();
+
+/* ── v7.12 CURSOR SPOTLIGHT on cards ─────────────────────────────── */
+document.addEventListener('mousemove',e=>{
+  const card=e.target.closest&&e.target.closest('.event-card,.stat-card');
+  if(!card)return;
+  const r=card.getBoundingClientRect();
+  card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+  card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+});
+
+/* ── v7.5 GOAL THERMOMETER + v7.6 MONTHLY HEATMAP ────────────────── */
+const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goal */
+(function(){
+  const card=document.getElementById('goal-card');
+  if(!card)return;
+  const lives=+(((document.querySelectorAll('.stat-number')[2]||{}).dataset||{}).target||320);
+  document.getElementById('goal-target').textContent=RL_GOAL;
+  const pct=Math.min(100,Math.round(lives/RL_GOAL*100));
+  const io=new IntersectionObserver(es=>{
+    es.forEach(en=>{
+      if(!en.isIntersecting)return;
+      io.disconnect();
+      document.getElementById('goal-fill').style.width=pct+'%';
+      document.getElementById('goal-pct').textContent=pct+'% of goal';
+      const nowEl=document.getElementById('goal-now');
+      if(typeof animateCounter==='function')animateCounter(nowEl,lives,1600);
+      else nowEl.textContent=lives;
+    });
+  },{threshold:0.4});
+  io.observe(card);
+})();
+
+function renderHeatmap(){
+  const grid=document.getElementById('heat-grid');
+  const monthsEl=document.getElementById('heat-months');
+  if(!grid)return;
+  const evs=(typeof allEvents!=='undefined'&&allEvents)||[];
+  const nowD=new Date();
+  const buckets=[],labels=[];
+  for(let i=11;i>=0;i--){
+    const d=new Date(nowD.getFullYear(),nowD.getMonth()-i,1);
+    buckets.push({y:d.getFullYear(),m:d.getMonth(),n:0});
+    labels.push(d.toLocaleString('en',{month:'short'}).toUpperCase());
+  }
+  evs.forEach(e=>{
+    const d=new Date(e.created_at);
+    const b=buckets.find(b=>b.y===d.getFullYear()&&b.m===d.getMonth());
+    if(b)b.n++;
+  });
+  const max=Math.max(1,...buckets.map(b=>b.n));
+  grid.innerHTML=buckets.map((b,i)=>
+    `<div class="heat-cell" title="${labels[i]} ${b.y}: ${b.n} event${b.n===1?'':'s'}" style="opacity:${(0.06+0.79*(b.n/max)).toFixed(2)}"></div>`
+  ).join('');
+  monthsEl.innerHTML=labels.map(l=>`<div class="heat-month">${l}</div>`).join('');
+}
+renderHeatmap();                                  // paint the empty grid now
+window.rlOnEventsLoaded=function(){renderHeatmap();}; // re-paint once data lands
+
+/* ── v7.2 REACH ARCS from HQ (first location) to every other pin ─── */
+function _rlVec(lat,lon){
+  const la=lat*Math.PI/180,lo=lon*Math.PI/180;
+  return[Math.cos(la)*Math.sin(lo),Math.sin(la),Math.cos(la)*Math.cos(lo)];
+}
+function _rlSlerp(a,b,t){
+  let dot=a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  dot=Math.max(-1,Math.min(1,dot));
+  const om=Math.acos(dot);
+  if(om<1e-4)return a;
+  const s=Math.sin(om),k1=Math.sin((1-t)*om)/s,k2=Math.sin(t*om)/s;
+  return[a[0]*k1+b[0]*k2,a[1]*k1+b[1]*k2,a[2]*k1+b[2]*k2];
+}
+window.renderArcs=function(){
+  const g=document.getElementById('globe-arcs');
+  if(!g||typeof LOCATIONS==='undefined'||LOCATIONS.length<2)return;
+  const hq=LOCATIONS[0],tNow=performance.now(),N=44;
+  let out='';
+  for(let i=1;i<LOCATIONS.length;i++){
+    const a=_rlVec(hq.lat,hq.lon),b=_rlVec(LOCATIONS[i].lat,LOCATIONS[i].lon);
+    const pts=[];const segs=[];let seg=[];
+    for(let s=0;s<=N;s++){
+      const t=s/N,v=_rlSlerp(a,b,t);
+      const lat=Math.asin(Math.max(-1,Math.min(1,v[1])))*180/Math.PI;
+      const lon=Math.atan2(v[0],v[2])*180/Math.PI;
+      const p=project(lat,lon,globeRotation);
+      const lift=1+0.055*Math.sin(t*Math.PI); // raise the arc off the surface
+      const x=GLOBE_CX+(p.x-GLOBE_CX)*lift;
+      const y=GLOBE_CY+(p.y-GLOBE_CY)*lift;
+      const z=p.z*lift;
+      pts.push({x,y,z});
+      if(z>-6)seg.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+      else{if(seg.length>1)segs.push(seg);seg=[];}
+    }
+    if(seg.length>1)segs.push(seg);
+    for(const s2 of segs)out+=`<polyline class="arc-path" points="${s2.join(' ')}"/>`;
+    // Comet travelling along the arc, looping with a small offset per arc
+    const ph=((tNow/2600)+i*0.45)%1;
+    const ci=Math.round(ph*N),cp=pts[ci];
+    if(cp&&cp.z>0){
+      out+=`<circle class="arc-comet" cx="${cp.x.toFixed(1)}" cy="${cp.y.toFixed(1)}" r="2.2" opacity="0.9"/>`;
+      const tp=pts[Math.max(0,ci-2)];
+      if(tp&&tp.z>0)out+=`<circle class="arc-comet" cx="${tp.x.toFixed(1)}" cy="${tp.y.toFixed(1)}" r="1.3" opacity="0.4"/>`;
+    }
+  }
+  g.innerHTML=out;
+};
+
+/* ── v7.3 CLICK PIN → SPIN & FILTER + v7.4 HOVER TOOLTIP ─────────── */
+(function(){
+  const svg=document.getElementById('globe-svg');
+  const tip=document.getElementById('globe-tip');
+  if(!svg||!tip)return;
+
+  function countFor(country){
+    const evs=(typeof allEvents!=='undefined'&&allEvents)||[];
+    return evs.filter(e=>detectCountry(e.name)===country).length;
+  }
+  function release(){
+    window._rlGlobeHold=false;
+    lastFrameTime=0;            // avoid a rotation jump from the stale frame time
+    tip.classList.remove('show');
+  }
+  function showTip(idx){
+    const loc=LOCATIONS[idx];
+    if(!loc)return;
+    const rect=svg.getBoundingClientRect();
+    const p=project(loc.lat,loc.lon,globeRotation);
+    tip.style.left=(p.x*rect.width/400)+'px';
+    tip.style.top=(p.y*rect.height/400)+'px';
+    const n=countFor(loc.country);
+    const flag=(typeof COUNTRY_FLAGS!=='undefined'&&COUNTRY_FLAGS[loc.country])||'🌍';
+    tip.innerHTML=`${flag} ${loc.label}<span class="tip-count">${n} event${n===1?'':'s'} · click to explore</span>`;
+    tip.classList.add('show');
+  }
+
+  svg.addEventListener('mouseover',e=>{
+    const g=e.target.closest('.pin-group');
+    if(!g)return;
+    window._rlGlobeHold=true;   // pause rotation so the pin holds still
+    showTip(+g.dataset.idx);
+  });
+  svg.addEventListener('mouseout',e=>{
+    const g=e.target.closest('.pin-group');
+    if(!g)return;
+    if(e.relatedTarget&&e.relatedTarget.closest&&e.relatedTarget.closest('.pin-group')===g)return;
+    if(!window._rlSpinning)release();
+  });
+  svg.addEventListener('mouseleave',()=>{if(!window._rlSpinning)release();});
+
+  svg.addEventListener('click',e=>{
+    const g=e.target.closest('.pin-group');
+    if(!g||window._rlSpinning)return;
+    const loc=LOCATIONS[+g.dataset.idx];
+    if(!loc)return;
+    spinTo(loc);
+  });
+
+  function spinTo(loc){
+    tip.classList.remove('show');
+    window._rlGlobeHold=true;
+    window._rlSpinning=true;
+    const from=globeRotation;
+    const delta=((loc.lon-from)%360+540)%360-180; // shortest way round
+    const dur=950,t0=performance.now();
+    function step(now){
+      const k=Math.min(1,(now-t0)/dur);
+      const ease=1-Math.pow(1-k,3);
+      globeRotation=(from+delta*ease+360)%360;
+      renderGlobe();
+      if(k<1){requestAnimationFrame(step);return;}
+      window._rlSpinning=false;
+      if(typeof filterByCountry==='function'){
+        filterByCountry(loc.country);
+        const flag=(typeof COUNTRY_FLAGS!=='undefined'&&COUNTRY_FLAGS[loc.country])||'';
+        const n=countFor(loc.country);
+        showToast(`Showing ${loc.country} ${flag} — ${n} event${n===1?'':'s'}`);
+      }
+      // Let the visitor take it in, then resume the slow rotation
+      setTimeout(()=>{window._rlGlobeHold=false;lastFrameTime=0;},2200);
+    }
+    requestAnimationFrame(step);
+  }
+})();
+
+console.log('[Rising Light v7] Interactive globe (arcs · pings · spin-to-filter · tooltips) + impact tracker (goal bar · heatmap · country bars) + polish (reveal · skeletons · toasts · spotlight · progress · back-to-top · rays) loaded');
 </script>
 
 </body>
