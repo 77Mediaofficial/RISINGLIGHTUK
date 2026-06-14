@@ -106,6 +106,8 @@ body.dark .title-logo{filter:none}
 .btn-primary:hover{background:#333}
 .btn-delete{background:transparent;color:#DC2626;border:1px solid var(--border);padding:10px 16px}
 .btn-delete:hover{background:#FEF2F2;border-color:#DC2626}
+.btn-replace{background:transparent;color:var(--text);border:1px solid var(--border);padding:10px 16px}
+.btn-replace:hover{background:var(--hover-bg2);border-color:var(--accent)}
 .upload-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:60px}
 .upload-header{text-align:center;margin-bottom:24px}
 .upload-header h2{font-family:var(--cinzel);font-size:24px;font-weight:600;margin-bottom:8px}
@@ -311,6 +313,8 @@ body.dark .ticker-wrap{
 body.admin .admin-section{display:block}
 body.admin .btn-delete{display:inline-flex}
 .btn-delete{display:none}
+body.admin .btn-replace{display:inline-flex}
+.btn-replace{display:none}
 
 .admin-bar{
   position:fixed;bottom:20px;left:20px;z-index:50;
@@ -963,16 +967,16 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
 .cal-detail-day{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.5px;margin-right:2px}
 .cal-detail-ev{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .25s cubic-bezier(0.22,1,0.36,1);font-family:var(--font)}
 .cal-detail-ev:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
-/* Admin-only scheduler — revealed by the body.admin class on sign-in */
-.cal-sched{display:none;margin-top:24px;padding-top:18px;border-top:1px solid var(--border)}
-body.admin .cal-sched{display:block}
-.cal-sched-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.cal-sched-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
-.cal-sched-row:last-child{border-bottom:none}
-.cal-sched-name{flex:1;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cal-sched-date{border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:7px 10px;font-family:var(--mono);font-size:12.5px;cursor:pointer;color-scheme:light}
-body.dark .cal-sched-date{color-scheme:dark}
-.cal-sched-date:focus{outline:none;border-color:var(--text)}
+/* Admin-only Manage Events panel — its own .admin-section card, shown on sign-in */
+.manage-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:60px}
+.manage-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.manage-row:last-child{border-bottom:none}
+.manage-name{flex:1;min-width:170px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:9px 12px;font-size:14px;font-family:var(--font)}
+.manage-name:focus{outline:none;border-color:var(--text)}
+.manage-date{border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12.5px;cursor:pointer;color-scheme:light}
+body.dark .manage-date{color-scheme:dark}
+.manage-date:focus{outline:none;border-color:var(--text)}
+.manage-empty{font-size:14px;color:var(--text3);padding:8px 0}
 .cal-empty{font-size:12.5px;color:var(--text3);padding:6px 0}
 @media(max-width:768px){.cal-card{padding:22px 18px}.cal-cell{font-size:12px}}
 
@@ -1052,10 +1056,6 @@ body.dark .cal-sched-date{color-scheme:dark}
     </div>
     <div class="cal-grid" id="cal-grid"></div>
     <div class="cal-detail" id="cal-detail"></div>
-    <div class="cal-sched" id="cal-sched">
-      <div class="cal-sched-title">Schedule · set a date for each event</div>
-      <div id="cal-sched-list"></div>
-    </div>
   </div>
 
   <!-- Globe -->
@@ -1124,6 +1124,13 @@ body.dark .cal-sched-date{color-scheme:dark}
       <input type="file" id="file-input" accept=".pdf" multiple>
     </div>
     <div class="upload-status" id="upload-status"></div>
+  </div>
+  <div class="manage-section admin-section">
+    <div class="upload-header">
+      <h2>Manage Events</h2>
+      <p>Rename, set a date, replace the PDF, or remove any event</p>
+    </div>
+    <div id="manage-list"></div>
   </div>
   <div class="footer">
     <div class="footer-org">Rising Light UK</div>
@@ -1711,7 +1718,6 @@ function renderEvents(){
       <div class="event-name">${escapeHtml(e.name)}</div>
       <div class="event-actions">
         <button class="btn btn-primary" onclick="viewEvent(${e.id})">View Details</button>
-        <button class="btn btn-delete" onclick="deleteEvent(${e.id})">Delete</button>
       </div>
       <div class="event-share">
         <button class="share-btn" onclick="shareEvent('twitter','${shareText}','${shareUrl}')" title="Share on Twitter">𝕏</button>
@@ -1764,6 +1770,73 @@ async function deleteEvent(id){
     alert('Delete error: '+err.message);
   }
 }
+
+/* ===== REPLACE PDF (admin) — swap the file, keep the same event row =====
+   PATCHes the existing row so id / name / event_date / created_at all survive:
+   the calendar date you set and the card's position don't change, only the PDF.
+   Mirrors the upload (storage POST) + delete (storage cleanup) patterns. */
+let replaceTargetId=null;
+const replaceInput=document.createElement('input');
+replaceInput.type='file';replaceInput.accept='.pdf';replaceInput.style.display='none';
+document.body.appendChild(replaceInput);
+
+function replacePdf(id){
+  if(!RL_TOKEN){alert('Admin sign-in required to replace PDFs.');return;}
+  replaceTargetId=id;
+  replaceInput.value='';
+  replaceInput.click();
+}
+
+replaceInput.addEventListener('change',async()=>{
+  const file=replaceInput.files&&replaceInput.files[0];
+  const id=replaceTargetId;
+  if(!file||id==null)return;
+  if(!RL_TOKEN){alert('Admin sign-in required to replace PDFs.');return;}
+  if(file.type!=='application/pdf'){alert('Please choose a PDF file.');replaceInput.value='';return;}
+  const MAX_BYTES=10*1024*1024; /* 10 MB — same cap as upload */
+  if(file.size>MAX_BYTES){alert(`File too large (${(file.size/1024/1024).toFixed(1)} MB). Maximum is 10 MB.`);replaceInput.value='';return;}
+
+  const ev=allEvents.find(e=>e.id===id);
+  const oldUrl=ev?ev.pdf_url:null;
+
+  try{
+    /* Step 1: upload the new binary to a fresh storage path */
+    const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const storagePath=`${Date.now()}-${safeName}`;
+    const storageR=await fetch(`${SB_URL}/storage/v1/object/event-pdfs/${storagePath}`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${RL_TOKEN}`,'Content-Type':'application/pdf','x-upsert':'false'},
+      body:file
+    });
+    if(storageR.status===401||storageR.status===403){clearAdminSession();alert('Session expired — please sign in again.');return;}
+    if(!storageR.ok){const t=await storageR.text().catch(()=>'');throw new Error(`Storage upload failed (${storageR.status}): ${t}`);}
+
+    const publicUrl=`${SB_URL}/storage/v1/object/public/event-pdfs/${storagePath}`;
+
+    /* Step 2: PATCH the existing row — only pdf_url + size change */
+    const dbR=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${RL_TOKEN}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({pdf_url:publicUrl,size:(file.size/1024).toFixed(1)+' KB'})
+    });
+    if(dbR.status===401||dbR.status===403){clearAdminSession();alert('Session expired — please sign in again.');return;}
+    if(!dbR.ok){const t=await dbR.text().catch(()=>'');throw new Error(`DB update failed (${dbR.status}): ${t}`);}
+
+    /* Step 3: best-effort delete the old storage file (mirror deleteEvent) */
+    if(oldUrl){
+      const m=oldUrl.match(/\/event-pdfs\/(.+)$/);
+      if(m){fetch(`${SB_URL}/storage/v1/object/event-pdfs/${m[1]}`,{method:'DELETE',headers:{'Authorization':`Bearer ${RL_TOKEN}`}}).catch(()=>{});}
+    }
+
+    if(window.showToast)window.showToast('PDF replaced ✓');
+    await loadEvents();
+  }catch(err){
+    alert('Replace error: '+err.message);
+  }finally{
+    replaceTargetId=null;
+    replaceInput.value='';
+  }
+});
 
 async function viewEvent(id){
   const e=allEvents.find(ev=>ev.id===id);
@@ -2579,20 +2652,22 @@ function renderCalendar(){
   const det=document.getElementById('cal-detail');
   if(det)det.innerHTML='';
 }
-function renderSchedule(){
-  const list=document.getElementById('cal-sched-list');
+function renderManage(){
+  const list=document.getElementById('manage-list');
   if(!list)return;
   const evs=(((typeof allEvents!=='undefined'&&allEvents)||[]).slice())
     .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
-  if(!evs.length){list.innerHTML='<div class="cal-empty">No events yet.</div>';return;}
+  if(!evs.length){list.innerHTML='<div class="manage-empty">No events yet — upload one above.</div>';return;}
   list.innerHTML=evs.map(e=>`
-    <div class="cal-sched-row">
-      <span class="cal-sched-name">${escapeHtml(e.name)}</span>
-      <input type="date" class="cal-sched-date" value="${e.event_date?String(e.event_date).slice(0,10):''}" onchange="setEventDate(${e.id},this.value)">
+    <div class="manage-row">
+      <input type="text" class="manage-name" value="${escapeHtml(e.name)}" onchange="setEventName(${e.id},this.value)" aria-label="Event name">
+      <input type="date" class="manage-date" value="${e.event_date?String(e.event_date).slice(0,10):''}" onchange="setEventDate(${e.id},this.value)" aria-label="Event date">
+      <button class="btn btn-replace" onclick="replacePdf(${e.id})">Replace</button>
+      <button class="btn btn-delete" onclick="deleteEvent(${e.id})">Delete</button>
     </div>`).join('');
 }
 async function setEventDate(id,val){
-  if(!RL_TOKEN){alert('Admin sign-in required to set a date.');renderSchedule();return;}
+  if(!RL_TOKEN){alert('Admin sign-in required to set a date.');renderManage();return;}
   try{
     const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
       method:'PATCH',
@@ -2603,13 +2678,32 @@ async function setEventDate(id,val){
     if(!r.ok){const t=await r.text().catch(()=>'');throw new Error(`Save failed (${r.status}): ${t}`);}
     const ev=((typeof allEvents!=='undefined'&&allEvents)||[]).find(x=>x.id===id);
     if(ev)ev.event_date=val||null;
-    renderCalendar();renderSchedule();
+    renderCalendar();renderManage();
     if(window.showToast)window.showToast(val?'Date set':'Date cleared');
   }catch(err){console.error('setEventDate',err);alert('Could not save date. '+err.message);}
 }
+async function setEventName(id,val){
+  if(!RL_TOKEN){alert('Admin sign-in required to rename events.');renderManage();return;}
+  const name=(val||'').trim();
+  if(!name){alert('Name cannot be empty.');renderManage();return;}
+  const ev=((typeof allEvents!=='undefined'&&allEvents)||[]).find(x=>x.id===id);
+  if(ev&&ev.name===name)return; /* unchanged — skip the write */
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${RL_TOKEN}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name:name})
+    });
+    if(r.status===401||r.status===403){if(typeof clearAdminSession==='function')clearAdminSession();alert('Session expired — please sign in again.');return;}
+    if(!r.ok){const t=await r.text().catch(()=>'');throw new Error(`Rename failed (${r.status}): ${t}`);}
+    if(window.showToast)window.showToast('Name updated ✓');
+    /* name feeds country detection, ticker, cards & calendar — reload all */
+    await loadEvents();
+  }catch(err){console.error('setEventName',err);alert('Could not rename. '+err.message);}
+}
 (function(){
   const prev=window.rlOnEventsLoaded;
-  window.rlOnEventsLoaded=function(){if(prev)prev();renderCalendar();renderSchedule();};
+  window.rlOnEventsLoaded=function(){if(prev)prev();renderCalendar();renderManage();};
   const stepMonth=delta=>{calView=calView||{y:new Date().getFullYear(),m:new Date().getMonth()};
     let mm=calView.m+delta,yy=calView.y;
     if(mm<0){mm=11;yy--;}else if(mm>11){mm=0;yy++;}
@@ -2624,7 +2718,7 @@ async function setEventDate(id,val){
     det.innerHTML=`<span class="cal-detail-day">${k}</span>`+
       evs.map(ev=>`<button class="cal-detail-ev" onclick="viewEvent(${ev.id})">${escapeHtml(ev.name)}</button>`).join('');
   });
-  renderCalendar();renderSchedule();
+  renderCalendar();renderManage();
 })();
 
 /* ── v7.2 REACH ARCS from HQ (first location) to every other pin ─── */
