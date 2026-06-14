@@ -920,6 +920,11 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
   background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),var(--glow-color),transparent 65%);
 }
 .event-card:hover::after,.stat-card:hover::after{opacity:1}
+/* Cards own a permanent stacking context so the z-index:-1 dot layer always
+   sits above the card background. Without this, dots only showed when a hover
+   transform created a context — and scroll-revealed cards (.rl-sr-in) keep
+   transform:none on hover, so their dots never appeared. */
+.event-card,.stat-card{isolation:isolate}
 /* Card spotlight dots — revealed only under the cursor, behind the text */
 .event-card::before,.stat-card::before{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
