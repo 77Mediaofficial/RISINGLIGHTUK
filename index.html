@@ -943,6 +943,39 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
   .title-logo,.subtitle .w,.overview{animation:none}
 }
 
+/* ── Events Calendar (Momentum) — set a date per PDF, see it land here ── */
+.cal-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 28px;margin-bottom:60px;position:relative;isolation:isolate}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.cal-title{font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2)}
+.cal-nav{display:flex;align-items:center;gap:10px}
+.cal-month{font-family:var(--cinzel);font-size:16px;font-weight:700;letter-spacing:.5px;min-width:158px;text-align:center}
+.cal-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(0.22,1,0.36,1)}
+.cal-btn:hover{background:var(--hover-bg);border-color:var(--text2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;max-width:480px;margin:0 auto}
+.cal-dow{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);text-align:center;padding-bottom:4px;font-family:var(--mono)}
+.cal-cell{aspect-ratio:1;border-radius:8px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text2);font-family:var(--mono);transition:all .25s cubic-bezier(0.22,1,0.36,1)}
+.cal-cell.cal-pad{opacity:0}
+.cal-cell.cal-today{border-color:var(--border);color:var(--text);font-weight:700}
+.cal-cell.cal-has{cursor:pointer;background:var(--text);color:var(--bg);font-weight:700}
+.cal-cell.cal-has:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.16)}
+.cal-detail{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:center}
+.cal-detail:empty{display:none}
+.cal-detail-day{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.5px;margin-right:2px}
+.cal-detail-ev{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .25s cubic-bezier(0.22,1,0.36,1);font-family:var(--font)}
+.cal-detail-ev:hover{background:var(--text);color:var(--bg);border-color:var(--text)}
+/* Admin-only scheduler — revealed by the body.admin class on sign-in */
+.cal-sched{display:none;margin-top:24px;padding-top:18px;border-top:1px solid var(--border)}
+body.admin .cal-sched{display:block}
+.cal-sched-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.cal-sched-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.cal-sched-row:last-child{border-bottom:none}
+.cal-sched-name{flex:1;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-sched-date{border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);padding:7px 10px;font-family:var(--mono);font-size:12.5px;cursor:pointer;color-scheme:light}
+body.dark .cal-sched-date{color-scheme:dark}
+.cal-sched-date:focus{outline:none;border-color:var(--text)}
+.cal-empty{font-size:12.5px;color:var(--text3);padding:6px 0}
+@media(max-width:768px){.cal-card{padding:22px 18px}.cal-cell{font-size:12px}}
+
 </style>
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
@@ -1004,6 +1037,24 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
       <div class="heat-title">Momentum · Events per month</div>
       <div class="heat-grid" id="heat-grid"></div>
       <div class="heat-grid" id="heat-months"></div>
+    </div>
+  </div>
+
+  <!-- Events calendar — dates set per PDF event sync here -->
+  <div class="cal-card" id="cal-card">
+    <div class="cal-head">
+      <div class="cal-title">Calendar</div>
+      <div class="cal-nav">
+        <button class="cal-btn" id="cal-prev" type="button" aria-label="Previous month">&lsaquo;</button>
+        <div class="cal-month" id="cal-month"></div>
+        <button class="cal-btn" id="cal-next" type="button" aria-label="Next month">&rsaquo;</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-detail" id="cal-detail"></div>
+    <div class="cal-sched" id="cal-sched">
+      <div class="cal-sched-title">Schedule · set a date for each event</div>
+      <div id="cal-sched-list"></div>
     </div>
   </div>
 
@@ -2488,6 +2539,93 @@ function renderHeatmap(){
 }
 renderHeatmap();                                  // paint the empty grid now
 window.rlOnEventsLoaded=function(){renderHeatmap();}; // re-paint once data lands
+
+/* ── EVENTS CALENDAR (Momentum) ──────────────────────────────────────
+   Admin sets a date per PDF event (PATCH event_date — needs RL_TOKEN);
+   dated events render on an in-app month calendar. Reads the same
+   allEvents array, so setting a date syncs to the calendar instantly. */
+let calView=null;
+function _rlEventsByDate(){
+  const map={};
+  ((typeof allEvents!=='undefined'&&allEvents)||[]).forEach(e=>{
+    if(e&&e.event_date){const k=String(e.event_date).slice(0,10);(map[k]=map[k]||[]).push(e);}
+  });
+  return map;
+}
+function renderCalendar(){
+  const grid=document.getElementById('cal-grid');
+  if(!grid)return;
+  const now=new Date();
+  if(!calView)calView={y:now.getFullYear(),m:now.getMonth()};
+  const y=calView.y,m=calView.m,pad=n=>String(n).padStart(2,'0');
+  const monthEl=document.getElementById('cal-month');
+  if(monthEl)monthEl.textContent=new Date(y,m,1).toLocaleString('en',{month:'long',year:'numeric'});
+  const map=_rlEventsByDate();
+  const dows=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const lead=(new Date(y,m,1).getDay()+6)%7;       // Monday-first
+  const dim=new Date(y,m+1,0).getDate();
+  const todayK=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  let html=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<lead;i++)html+='<div class="cal-cell cal-pad"></div>';
+  for(let d=1;d<=dim;d++){
+    const k=`${y}-${pad(m+1)}-${pad(d)}`;
+    const has=map[k]&&map[k].length;
+    let cls='cal-cell';
+    if(k===todayK)cls+=' cal-today';
+    if(has)cls+=' cal-has';
+    html+=`<div class="${cls}"${has?` data-k="${k}"`:''}>${d}</div>`;
+  }
+  grid.innerHTML=html;
+  const det=document.getElementById('cal-detail');
+  if(det)det.innerHTML='';
+}
+function renderSchedule(){
+  const list=document.getElementById('cal-sched-list');
+  if(!list)return;
+  const evs=(((typeof allEvents!=='undefined'&&allEvents)||[]).slice())
+    .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+  if(!evs.length){list.innerHTML='<div class="cal-empty">No events yet.</div>';return;}
+  list.innerHTML=evs.map(e=>`
+    <div class="cal-sched-row">
+      <span class="cal-sched-name">${escapeHtml(e.name)}</span>
+      <input type="date" class="cal-sched-date" value="${e.event_date?String(e.event_date).slice(0,10):''}" onchange="setEventDate(${e.id},this.value)">
+    </div>`).join('');
+}
+async function setEventDate(id,val){
+  if(!RL_TOKEN){alert('Admin sign-in required to set a date.');renderSchedule();return;}
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':SB_ANON,'Authorization':`Bearer ${RL_TOKEN}`,'Content-Type':'application/json','Prefer':'return=representation'},
+      body:JSON.stringify({event_date:val||null})
+    });
+    if(r.status===401||r.status===403){if(typeof clearAdminSession==='function')clearAdminSession();alert('Session expired — please sign in again.');return;}
+    if(!r.ok){const t=await r.text().catch(()=>'');throw new Error(`Save failed (${r.status}): ${t}`);}
+    const ev=((typeof allEvents!=='undefined'&&allEvents)||[]).find(x=>x.id===id);
+    if(ev)ev.event_date=val||null;
+    renderCalendar();renderSchedule();
+    if(window.showToast)window.showToast(val?'Date set':'Date cleared');
+  }catch(err){console.error('setEventDate',err);alert('Could not save date. '+err.message);}
+}
+(function(){
+  const prev=window.rlOnEventsLoaded;
+  window.rlOnEventsLoaded=function(){if(prev)prev();renderCalendar();renderSchedule();};
+  const stepMonth=delta=>{calView=calView||{y:new Date().getFullYear(),m:new Date().getMonth()};
+    let mm=calView.m+delta,yy=calView.y;
+    if(mm<0){mm=11;yy--;}else if(mm>11){mm=0;yy++;}
+    calView={y:yy,m:mm};renderCalendar();};
+  const p=document.getElementById('cal-prev'),n=document.getElementById('cal-next'),g=document.getElementById('cal-grid');
+  if(p)p.onclick=()=>stepMonth(-1);
+  if(n)n.onclick=()=>stepMonth(1);
+  if(g)g.addEventListener('click',e=>{
+    const cell=e.target.closest('.cal-has');if(!cell)return;
+    const k=cell.getAttribute('data-k'),evs=_rlEventsByDate()[k]||[];
+    const det=document.getElementById('cal-detail');if(!det)return;
+    det.innerHTML=`<span class="cal-detail-day">${k}</span>`+
+      evs.map(ev=>`<button class="cal-detail-ev" onclick="viewEvent(${ev.id})">${escapeHtml(ev.name)}</button>`).join('');
+  });
+  renderCalendar();renderSchedule();
+})();
 
 /* ── v7.2 REACH ARCS from HQ (first location) to every other pin ─── */
 function _rlVec(lat,lon){
