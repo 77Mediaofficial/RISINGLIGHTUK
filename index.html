@@ -962,6 +962,18 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
 .cal-cell.cal-today{border-color:var(--border);color:var(--text);font-weight:700}
 .cal-cell.cal-has{cursor:pointer;background:var(--text);color:var(--bg);font-weight:700}
 .cal-cell.cal-has:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.16)}
+/* Momentum — 18-month overview; a month block lights up when it holds events */
+.mom-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.mom-block{position:relative;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text2);padding:14px 10px;min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;transition:all .3s cubic-bezier(0.22,1,0.36,1)}
+.mom-m{font-family:var(--cinzel);font-size:15px;font-weight:700;letter-spacing:.5px;line-height:1}
+.mom-y{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px}
+.mom-block.cal-current{border-color:var(--text2)}
+.mom-block.cal-current .mom-m{color:var(--text)}
+.mom-block.cal-has{cursor:pointer;background:var(--text);border-color:var(--text);color:var(--bg);box-shadow:0 10px 30px rgba(0,0,0,0.18)}
+.mom-block.cal-has .mom-y{color:rgba(255,255,255,0.6)}
+body.dark .mom-block.cal-has .mom-y{color:rgba(0,0,0,0.55)}
+.mom-block.cal-has:hover{transform:translateY(-3px);box-shadow:0 16px 42px rgba(0,0,0,0.26)}
+.mom-n{position:absolute;top:7px;right:8px;font-family:var(--mono);font-size:10px;font-weight:700;background:var(--bg);color:var(--text);border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .cal-detail{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:center}
 .cal-detail:empty{display:none}
 .cal-detail-day{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.5px;margin-right:2px}
@@ -978,7 +990,8 @@ body.dark .manage-date{color-scheme:dark}
 .manage-date:focus{outline:none;border-color:var(--text)}
 .manage-empty{font-size:14px;color:var(--text3);padding:8px 0}
 .cal-empty{font-size:12.5px;color:var(--text3);padding:6px 0}
-@media(max-width:768px){.cal-card{padding:22px 18px}.cal-cell{font-size:12px}}
+@media(max-width:768px){.cal-card{padding:22px 18px}.cal-cell{font-size:12px}.mom-grid{grid-template-columns:repeat(4,1fr);gap:8px}.mom-block{min-height:64px;padding:10px 6px}.mom-m{font-size:13px}}
+@media(max-width:430px){.mom-grid{grid-template-columns:repeat(3,1fr)}}
 
 </style>
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
@@ -1039,8 +1052,8 @@ body.dark .manage-date{color-scheme:dark}
     <div class="goal-foot"><span>Every event lifts this bar</span><span class="goal-pct" id="goal-pct">0%</span></div>
     <div class="heat-wrap">
       <div class="heat-title">Momentum · Events per month</div>
-      <div class="heat-grid" id="heat-grid"></div>
-      <div class="heat-grid" id="heat-months"></div>
+      <div class="mom-grid" id="mom-grid"></div>
+      <div class="cal-detail" id="mom-detail"></div>
     </div>
   </div>
 
@@ -2587,31 +2600,56 @@ const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goa
   io.observe(card);
 })();
 
-function renderHeatmap(){
-  const grid=document.getElementById('heat-grid');
-  const monthsEl=document.getElementById('heat-months');
-  if(!grid)return;
-  const evs=(typeof allEvents!=='undefined'&&allEvents)||[];
-  const nowD=new Date();
-  const buckets=[],labels=[];
-  for(let i=11;i>=0;i--){
-    const d=new Date(nowD.getFullYear(),nowD.getMonth()-i,1);
-    buckets.push({y:d.getFullYear(),m:d.getMonth(),n:0});
-    labels.push(d.toLocaleString('en',{month:'short'}).toUpperCase());
-  }
-  evs.forEach(e=>{
-    const d=new Date(e.created_at);
-    const b=buckets.find(b=>b.y===d.getFullYear()&&b.m===d.getMonth());
-    if(b)b.n++;
+const MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* Group events by the month ("yyyy-mm") of their event_date, each list sorted by day. */
+function _rlEventsByMonth(){
+  const map={};
+  ((typeof allEvents!=='undefined'&&allEvents)||[]).forEach(e=>{
+    if(e&&e.event_date){const k=String(e.event_date).slice(0,7);(map[k]=map[k]||[]).push(e);}
   });
-  const max=Math.max(1,...buckets.map(b=>b.n));
-  grid.innerHTML=buckets.map((b,i)=>
-    `<div class="heat-cell" title="${labels[i]} ${b.y}: ${b.n} event${b.n===1?'':'s'}" style="opacity:${(0.06+0.79*(b.n/max)).toFixed(2)}"></div>`
-  ).join('');
-  monthsEl.innerHTML=labels.map(l=>`<div class="heat-month">${l}</div>`).join('');
+  Object.values(map).forEach(a=>a.sort((x,y)=>String(x.event_date).localeCompare(String(y.event_date))));
+  return map;
 }
-renderHeatmap();                                  // paint the empty grid now
-window.rlOnEventsLoaded=function(){renderHeatmap();}; // re-paint once data lands
+/* Momentum — the next 18 months as blocks; a month lights up if it holds dated events. */
+function renderMomentum(){
+  const grid=document.getElementById('mom-grid');
+  if(!grid)return;
+  const now=new Date(),pad=n=>String(n).padStart(2,'0');
+  const startY=now.getFullYear(),startM=now.getMonth();
+  const curK=`${startY}-${pad(startM+1)}`;
+  const map=_rlEventsByMonth();
+  let html='';
+  for(let i=0;i<18;i++){
+    const d=new Date(startY,startM+i,1),y=d.getFullYear(),m=d.getMonth();
+    const k=`${y}-${pad(m+1)}`,evs=map[k]||[],has=evs.length;
+    let cls='mom-block';
+    if(k===curK)cls+=' cal-current';
+    if(has)cls+=' cal-has';
+    html+=`<div class="${cls}"${has?` data-k="${k}"`:''}>`+
+      (has?`<span class="mom-n">${evs.length}</span>`:'')+
+      `<span class="mom-m">${MONTHS_SHORT[m]}</span><span class="mom-y">${y}</span></div>`;
+  }
+  grid.innerHTML=html;
+  const det=document.getElementById('mom-detail');
+  if(det)det.innerHTML='';
+}
+(function(){
+  const g=document.getElementById('mom-grid');
+  if(g)g.addEventListener('click',e=>{
+    const block=e.target.closest('.cal-has');if(!block)return;
+    const k=block.getAttribute('data-k'),evs=_rlEventsByMonth()[k]||[];
+    const det=document.getElementById('mom-detail');if(!det)return;
+    const parts=k.split('-'),label=`${MONTHS_SHORT[parseInt(parts[1],10)-1]} ${parts[0]}`;
+    det.innerHTML=`<span class="cal-detail-day">${label}</span>`+
+      evs.map(ev=>{
+        const day=ev.event_date?String(ev.event_date).slice(8,10):'';
+        return `<button class="cal-detail-ev" onclick="viewEvent(${ev.id})">${day?day+' · ':''}${escapeHtml(ev.name)}</button>`;
+      }).join('');
+    det.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+})();
+renderMomentum();                                  // paint now
+window.rlOnEventsLoaded=function(){renderMomentum();}; // re-paint once data lands
 
 /* ── EVENTS CALENDAR (Momentum) ──────────────────────────────────────
    Admin sets a date per PDF event (PATCH event_date — needs RL_TOKEN);
@@ -2678,7 +2716,7 @@ async function setEventDate(id,val){
     if(!r.ok){const t=await r.text().catch(()=>'');throw new Error(`Save failed (${r.status}): ${t}`);}
     const ev=((typeof allEvents!=='undefined'&&allEvents)||[]).find(x=>x.id===id);
     if(ev)ev.event_date=val||null;
-    renderCalendar();renderManage();
+    renderCalendar();renderMomentum();renderManage();
     if(window.showToast)window.showToast(val?'Date set':'Date cleared');
   }catch(err){console.error('setEventDate',err);alert('Could not save date. '+err.message);}
 }
