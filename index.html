@@ -1205,7 +1205,7 @@ body.dark .manage-date{color-scheme:dark}
     </div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xJE8YWIUHMn+oCQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 /* ============================================================
    v5 — DAILY BRIEF, QUICK CAPTURE, CONFETTI, KEYBOARD HELP
@@ -1400,17 +1400,32 @@ function installSearchHighlight() {
     const query = (document.getElementById('search-input')?.value || '').trim();
     if (!query) return;
     setTimeout(() => {
-      const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      // SECURITY: highlight by building real DOM nodes (textContent), never by
+      // assigning text to innerHTML — event names can contain HTML characters
+      // and would otherwise be re-parsed and executed (stored DOM-XSS). Using a
+      // fresh regex per text node also avoids the shared-lastIndex bug that a
+      // reused /g regex causes across .test()/.exec() calls.
+      const pattern = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       document.querySelectorAll('.events-grid h3, .events-grid p, .events-grid .event-title, .events-grid .event-card').forEach(el => {
-        const txt = el.textContent;
-        if (!txt || !re.test(txt)) return;
-        // Avoid breaking nested elements - only highlight in pure text nodes
         el.childNodes.forEach(n => {
-          if (n.nodeType === 3 && n.textContent.match(re)) {
-            const span = document.createElement('span');
-            span.innerHTML = n.textContent.replace(re, '<mark class="search-highlight">$1</mark>');
-            n.replaceWith(...span.childNodes);
+          if (n.nodeType !== 3) return; // text nodes only — leave nested elements alone
+          const text = n.textContent;
+          const re = new RegExp(pattern, 'gi');
+          if (!re.test(text)) return;
+          re.lastIndex = 0;
+          const frag = document.createDocumentFragment();
+          let last = 0, m;
+          while ((m = re.exec(text)) !== null) {
+            if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+            const mark = document.createElement('mark');
+            mark.className = 'search-highlight';
+            mark.textContent = m[0]; // textContent — auto-escaped, no HTML parsing
+            frag.appendChild(mark);
+            last = m.index + m[0].length;
+            if (m[0].length === 0) re.lastIndex++; // guard against zero-width matches
           }
+          if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+          n.replaceWith(frag);
         });
       });
     }, 50);
