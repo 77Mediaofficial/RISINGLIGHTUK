@@ -1452,6 +1452,10 @@ document.addEventListener('keydown', e => {
     return;
   }
 
+  // Ignore browser/OS combos (Ctrl+R reload, Cmd+T new tab, etc.) so the
+  // single-key shortcuts below don't hijack them. Cmd/Ctrl+N is handled above.
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+
   const k = e.key.toLowerCase();
   if (k === 't') { toggleTheme(); }
   else if (k === 'b') { openBrief(); }
@@ -1467,7 +1471,6 @@ document.addEventListener('keydown', e => {
 });
 
 /* ===== HOOK UPLOAD SUCCESS TO FIRE CONFETTI ===== */
-const _origIsUploading = typeof isUploading !== 'undefined';
 let _lastEventCount = 0;
 setInterval(() => {
   if (typeof allEvents !== 'undefined' && allEvents.length > _lastEventCount && _lastEventCount > 0) {
@@ -1680,22 +1683,44 @@ async function handleFiles(e){
 }
 
 async function loadEvents(){
+  const grid=document.getElementById('events-grid');
+  const fail=msg=>{if(grid)grid.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div><div style="font-size:14px;margin-top:8px;color:var(--text3)">${msg}</div></div>`;};
+
+  /* Network layer: a thrown fetch is a connection problem; a non-OK status is a
+     server problem. The OLD code only handled r.ok and the catch — a 4xx/5xx
+     left the skeleton loaders spinning forever with no message. */
+  let r;
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/risinglight_events?order=created_at.desc`,{
+    r=await fetch(`${SB_URL}/rest/v1/risinglight_events?order=created_at.desc`,{
       headers:{'apikey':SB_ANON,'Authorization':`Bearer ${SB_ANON}`}
     });
-    if(r.ok){
-      allEvents=await r.json();
-      const totalEl=document.getElementById('total-events');
-      totalEl.dataset.target=allEvents.length;
-      totalEl.textContent=allEvents.length;
-      renderCountryFilters();
-      renderTicker();
-      renderEvents();
-      if(window.rlOnEventsLoaded)window.rlOnEventsLoaded(); // v7: heatmap etc.
-    }
   }catch(e){
-    document.getElementById('events-grid').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div></div>';
+    fail('Check your connection and try again.');
+    return;
+  }
+  if(!r.ok){
+    fail(`Server returned ${r.status}. Please try again later.`);
+    return;
+  }
+  try{
+    allEvents=await r.json();
+  }catch(e){
+    fail('The response could not be read.');
+    return;
+  }
+
+  /* Rendering is isolated from the network try/catch so a rendering exception
+     can't masquerade as a "failed to load" message — it surfaces in the console
+     instead, and loadEvents still resolves so boot-time counters animate. */
+  try{
+    const totalEl=document.getElementById('total-events');
+    if(totalEl){totalEl.dataset.target=allEvents.length;totalEl.textContent=allEvents.length;}
+    renderCountryFilters();
+    renderTicker();
+    renderEvents();
+    if(window.rlOnEventsLoaded)window.rlOnEventsLoaded(); // v7: heatmap etc.
+  }catch(e){
+    console.error('[Rising Light] post-load render failed:',e);
   }
 }
 
@@ -2009,6 +2034,7 @@ function filterByCountry(country){
 /* ─── TICKER ──────────────────────────────────────────────────────────── */
 function renderTicker(){
   const track=document.getElementById('ticker-track');
+  if(!track)return;
   if(!allEvents.length){track.textContent='No events yet — check back soon';return;}
   const items=allEvents.slice(0,8).map(e=>{
     const days=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
@@ -2344,15 +2370,20 @@ function renderGlobe(){
 /* Animation loop. Rotates ~0.05° per frame (full revolution every ~2 mins
    at 60fps). Slow enough to feel meditative rather than dizzying. */
 let globeAnimating=true;
+let _rlGlobeOnScreen=true;   // perf: only auto-rotate while the globe is in view
 let lastFrameTime=0;
 function animateGlobe(now){
   /* v7: _rlGlobeHold pauses auto-rotation while a pin is hovered or a
-     spin-to-pin animation is driving the rotation manually. */
-  if(globeAnimating&&!window._rlGlobeHold){
+     spin-to-pin animation is driving the rotation manually.
+     PERF: also skip the per-frame SVG rebuild while the globe is scrolled
+     off-screen — renderGlobe() rebuilds hundreds of nodes every frame. */
+  if(globeAnimating&&_rlGlobeOnScreen&&!window._rlGlobeHold){
     const dt=lastFrameTime?(now-lastFrameTime)/1000:0.016;
     lastFrameTime=now;
     globeRotation=(globeRotation+dt*6)%360;  // 6 deg/sec → 60s per revolution
     renderGlobe();
+  }else{
+    lastFrameTime=0;  // reset so rotation doesn't jump when it resumes
   }
   requestAnimationFrame(animateGlobe);
 }
@@ -2362,6 +2393,18 @@ document.addEventListener('visibilitychange',()=>{
   globeAnimating=!document.hidden;
   lastFrameTime=0;
 });
+
+/* PERF: pause the globe's per-frame redraw when it scrolls out of view.
+   Defaults to on-screen, so if IntersectionObserver is unavailable the globe
+   simply keeps animating exactly as before — purely additive. */
+(function(){
+  const stage=document.querySelector('.globe-stage');
+  if(!stage||!('IntersectionObserver'in window))return;
+  new IntersectionObserver(es=>{
+    _rlGlobeOnScreen=es[0].isIntersecting;
+    if(_rlGlobeOnScreen)lastFrameTime=0;
+  },{threshold:0}).observe(stage);
+})();
 
 
 /* ─── BOOT ──────────────────────────────────────────────────────────── */
