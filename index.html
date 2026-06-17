@@ -1145,6 +1145,57 @@ body.dark .manage-date{color-scheme:dark}
     </div>
     <div id="manage-list"></div>
   </div>
+  <!-- Get Involved: Volunteer + Contact Us (email via mailto) -->
+  <style>
+  .give-section{max-width:900px;margin:0 auto 80px;padding:0 4px}
+  .give-head{text-align:center;margin-bottom:34px}
+  .give-title{font-family:var(--cinzel);font-size:28px;font-weight:600;letter-spacing:2px}
+  .give-sub{font-size:14px;color:var(--text2);margin-top:10px}
+  .give-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .give-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:12px}
+  .give-card-title{font-family:var(--cinzel);font-size:18px;font-weight:700;letter-spacing:.5px;margin:0 0 4px}
+  .give-field{display:flex;flex-direction:column;gap:6px}
+  .give-field>span{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
+  .give-field input,.give-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:var(--font);background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;resize:vertical}
+  .give-field input:focus,.give-field textarea:focus{border-color:var(--text)}
+  .give-btn{margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-family:var(--font);transition:transform .2s,opacity .2s;-webkit-tap-highlight-color:transparent}
+  .give-btn:hover{transform:translateY(-2px);opacity:.92}
+  </style>
+  <section class="give-section" id="get-involved">
+    <div class="give-head">
+      <div class="give-title">Get Involved</div>
+      <p class="give-sub">Volunteer with us or send a message. We'd love to hear from you.</p>
+    </div>
+    <div class="give-grid">
+      <form class="give-card" onsubmit="return rlGiveSubmit(event,'volunteer')">
+        <h3 class="give-card-title">Volunteer / Partner</h3>
+        <label class="give-field"><span>Name</span><input type="text" name="name" required placeholder="Your name" autocomplete="name"></label>
+        <label class="give-field"><span>Email</span><input type="email" name="email" required placeholder="you@example.com" autocomplete="email"></label>
+        <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" placeholder="e.g. events, fundraising, skills"></label>
+        <button class="give-btn" type="submit">Send</button>
+      </form>
+      <form class="give-card" onsubmit="return rlGiveSubmit(event,'contact')">
+        <h3 class="give-card-title">Contact Us</h3>
+        <label class="give-field"><span>Name</span><input type="text" name="name" required placeholder="Your name" autocomplete="name"></label>
+        <label class="give-field"><span>Email</span><input type="email" name="email" required placeholder="you@example.com" autocomplete="email"></label>
+        <label class="give-field"><span>Message</span><textarea name="message" rows="3" required placeholder="How can we help?"></textarea></label>
+        <button class="give-btn" type="submit">Send</button>
+      </form>
+    </div>
+  </section>
+  <script>
+  function rlGiveSubmit(e,kind){
+    e.preventDefault();
+    var f=e.target, to='svn-77mediaofficial@outlook.com';
+    function v(n){var el=f.elements[n];return el?String(el.value||'').trim():'';}
+    var subj,body;
+    if(kind==='volunteer'){ subj='Volunteer / partner enquiry'; body='Name: '+v('name')+'\nEmail: '+v('email')+'\nHow I would like to help: '+v('interest'); }
+    else { subj='Website enquiry'; body='Name: '+v('name')+'\nEmail: '+v('email')+'\n\nMessage:\n'+v('message'); }
+    window.location.href='mailto:'+to+'?subject='+encodeURIComponent('[Rising Light] '+subj)+'&body='+encodeURIComponent(body);
+    if(window.showToast){ try{ showToast('Opening your email app...'); }catch(_){ } }
+    return false;
+  }
+  </script>
   <div class="footer">
     <div class="footer-org">Rising Light UK</div>
     <div class="footer-location">London, United Kingdom</div>
