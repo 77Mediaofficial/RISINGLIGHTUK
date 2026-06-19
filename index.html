@@ -1161,6 +1161,54 @@ body.dark .manage-date{color-scheme:dark}
   .give-field input:focus,.give-field textarea:focus{border-color:var(--text)}
   .give-btn{margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-family:var(--font);transition:transform .2s,opacity .2s;-webkit-tap-highlight-color:transparent}
   .give-btn:hover{transform:translateY(-2px);opacity:.92}
+
+  /* ── Mobile scale-down: smaller UI + visuals = more breathing room on iOS ──
+     Sits after the main stylesheet, so these win on equal specificity.
+     Trims the hero, stats, globe and cards a notch and widens side gutters,
+     leaving more empty space around everything on a phone screen. */
+  @media(max-width:768px){
+    .container{padding:32px 20px}                 /* airier side gutters, shorter top */
+    .title-logo{max-width:min(132px,46vw)}        /* smaller hero mark */
+    .subtitle{font-size:12px;letter-spacing:3px}
+    .overview{font-size:12.5px;line-height:1.7;margin-top:18px;padding:0 6px}
+    .overview p{margin-bottom:14px}
+
+    .stats-section{gap:12px;margin-bottom:46px;max-width:400px}
+    .stat-card{padding:20px}
+    .stat-number{font-size:30px}
+    .stat-label{font-size:11px;letter-spacing:2px}
+
+    .events-title,.give-title{font-size:22px}
+    .upload-header h2{font-size:20px}
+
+    .events-grid{gap:16px;margin-bottom:52px}
+    .event-card{padding:20px}
+    .event-name{font-size:16px}
+    .event-meta{font-size:13px}
+
+    .globe-section{margin-bottom:34px;padding:14px 10px 4px}
+    .globe-eyebrow{font-size:10px;letter-spacing:4px}
+    .globe-title{font-size:16px;margin-bottom:18px}
+    .globe-stage{width:min(300px,76vw)}
+
+    .give-section{margin-bottom:52px}
+    .give-head{margin-bottom:26px}
+    .give-grid{gap:16px}
+    .give-card{padding:20px}
+
+    .upload-section{padding:22px;margin-bottom:44px}
+    .footer{margin-top:52px;padding:30px 20px 26px}
+  }
+  @media(max-width:480px){
+    .container{padding:26px 18px}
+    .title-logo{max-width:min(120px,44vw)}
+    .subtitle{letter-spacing:2px}
+    .stat-card{padding:18px}
+    .stat-number{font-size:28px}
+    .event-card,.give-card{padding:18px}
+    .globe-stage{width:min(244px,72vw)}
+    .globe-title{font-size:15px}
+  }
   </style>
   <section class="give-section" id="get-involved">
     <div class="give-head">
