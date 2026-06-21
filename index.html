@@ -10,13 +10,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  /* Warm "Cinematic Editorial Noir" palette — matched to 77mediaofficial.net:
-     bone paper #FAF9F6 + warm ink #15140F + warm neutral greys (was pure B/W). */
-  --bg:#FAF9F6;--card:#F3F2EC;--text:#15140F;--text2:#6B685E;--text3:#9A9589;
-  --border:#E6E4DE;--accent:#15140F;--font:'Inter',system-ui,sans-serif;
+  /* 77 Media "Cinematic Editorial Noir" design-system palette (exact swatches).
+     Paper/ink + warm neutral greys; surfaces step paper -> ink-soft -> surface. */
+  --bg:#FAF9F6;--card:#ECECE9;--text:#15140F;--text-dim:#3A382F;--text2:#6B685E;--text3:#837F70;
+  --border:rgba(21,20,15,0.14);--accent:#15140F;--accent-hover:#2E2B25;--font:'Inter',system-ui,sans-serif;
   --cinzel:'Cinzel',serif;
   --mono:'JetBrains Mono',monospace;
-  --hover-bg:#F2F1EB;--hover-bg2:#ECEBE4;--upload-bg:#F5F4EF;
+  --hover-bg:#E6E5E1;--hover-bg2:#E6E5E1;--upload-bg:#ECECE9;
   --glow-color:rgba(21,20,15,0.05);
   --dot-color:rgba(21,20,15,0.15);--hero-grid:rgba(21,20,15,0.055);
   --pdf-viewer-bg:#525659;
@@ -24,14 +24,23 @@
 body.dark{
   /* Warm noir — same bone/ink anchors inverted, so dark mode is the same brand
      (warm near-black, not a cold pure #000). */
-  --bg:#100F0B;--card:#17150F;--text:#FAF9F6;--text2:#A8A496;--text3:#6F6C61;
-  --border:#2A2820;--accent:#FAF9F6;
+  --bg:#100F0B;--card:#17150F;--text:#FAF9F6;--text-dim:#D8D4C8;--text2:#A8A496;--text3:#837F70;
+  --border:#2A2820;--accent:#FAF9F6;--accent-hover:#E6E5E1;
   --hover-bg:#1D1B14;--hover-bg2:#252319;--upload-bg:#14120D;
   --pdf-viewer-bg:#14120D;
   --glow-color:rgba(250,249,246,0.08);
   --dot-color:rgba(250,249,246,0.19);--hero-grid:rgba(250,249,246,0.06);
 }
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;transition:background 0.4s cubic-bezier(0.22,1,0.36,1),color 0.4s cubic-bezier(0.22,1,0.36,1)}
+/* Scrollbar — 77 Media palette (scroll #D2D1CC / hover #C3C2BC) */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#D2D1CC;border-radius:999px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#C3C2BC}
+body.dark ::-webkit-scrollbar-thumb{background:#2E2B25}
+body.dark ::-webkit-scrollbar-thumb:hover{background:#3A382F}
+html{scrollbar-width:thin;scrollbar-color:#D2D1CC var(--bg)}
+body.dark{scrollbar-color:#2E2B25 #100F0B}
 .container{max-width:1200px;margin:0 auto;padding:60px 20px}
 .header{text-align:center;margin-bottom:80px;position:relative;isolation:isolate}
 /* Hero backdrop — a faint grid that fades out toward the edges */
@@ -80,7 +89,7 @@ body.dark .title-logo{filter:none}
 @media(max-width:768px){
   .overview{font-size:13px;line-height:1.75;letter-spacing:0.3px;margin-top:22px}
 }
-.subtitle{font-family:var(--cinzel);font-size:18px;font-weight:400;letter-spacing:6px;color:var(--text2);text-transform:uppercase}
+.subtitle{font-family:var(--cinzel);font-size:18px;font-weight:400;letter-spacing:6px;color:var(--text-dim);text-transform:uppercase}
 .stats-section{display:flex;flex-direction:column;gap:16px;max-width:480px;margin:0 auto 60px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:all 0.4s cubic-bezier(0.22,1,0.36,1)}
 .stat-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.08)}
@@ -107,7 +116,7 @@ body.dark .title-logo{filter:none}
 .event-actions{display:flex;gap:8px;margin-top:20px}
 .btn{padding:12px 24px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);font-family:var(--font)}
 .btn-primary{background:var(--text);color:var(--bg);flex:1}
-.btn-primary:hover{background:#333}
+.btn-primary:hover{background:var(--accent-hover)}
 .btn-delete{background:transparent;color:#DC2626;border:1px solid var(--border);padding:10px 16px}
 .btn-delete:hover{background:#FEF2F2;border-color:#DC2626}
 .btn-replace{background:transparent;color:var(--text);border:1px solid var(--border);padding:10px 16px}
@@ -132,7 +141,7 @@ body.dark .title-logo{filter:none}
 .modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .modal-title{font-size:20px;font-weight:700}
 .modal-close{background:var(--card);border:none;width:36px;height:36px;border-radius:8px;font-size:20px;cursor:pointer;color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center}
-.modal-close:hover{background:#E0E0E0}
+.modal-close:hover{background:var(--hover-bg)}
 .modal-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
 .pdf-container{width:100%;height:100%;overflow:hidden;background:var(--pdf-viewer-bg)}
 /* Horizontal slider: one slide per page, only the active page in view */
@@ -349,7 +358,7 @@ body.dark .upload-zone{background:var(--upload-bg)}
 body.dark .upload-status{background:var(--card);color:var(--text2)}
 body.dark .upload-status.success{background:rgba(21,128,61,0.15);color:#4ADE80}
 body.dark .upload-status.error{background:rgba(220,38,38,0.15);color:#F87171}
-body.dark .btn-primary:hover{background:#E0E0E0}
+body.dark .btn-primary:hover{background:var(--accent-hover)}
 
 /* Counter num is just a span — no transition needed since we manually animate */
 
@@ -1164,7 +1173,7 @@ body.dark .manage-date{color-scheme:dark}
   .give-field input,.give-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:var(--font);background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;resize:vertical}
   .give-field input:focus,.give-field textarea:focus{border-color:var(--text)}
   .give-btn{margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-family:var(--font);transition:transform .2s,opacity .2s;-webkit-tap-highlight-color:transparent}
-  .give-btn:hover{transform:translateY(-2px);opacity:.92}
+  .give-btn:hover{transform:translateY(-2px);background:var(--accent-hover)}
 
   /* ── Mobile scale-down: smaller UI + visuals = more breathing room on iOS ──
      Sits after the main stylesheet, so these win on equal specificity.
