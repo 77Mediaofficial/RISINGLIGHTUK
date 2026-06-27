@@ -3162,7 +3162,7 @@ console.log('[Rising Light v7] Interactive globe (arcs · pings · spin-to-filte
 .rl-ig-title{font-family:var(--cinzel);font-size:28px;font-weight:600;letter-spacing:2px;color:var(--text)}
 .rl-ig-sub{font-size:14px;color:var(--text2);margin-top:10px}
 .rl-ig-sub a{color:var(--text);font-weight:600;text-decoration:none;border-bottom:1px solid var(--border)}
-.rl-ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+.rl-ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .rl-ig-card{position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--border);display:block;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:transform .25s cubic-bezier(.22,1,.36,1)}
 .rl-ig-card:hover{transform:translateY(-3px)}
 .rl-ig-card img{width:100%;height:100%;object-fit:cover;display:block;background:var(--card);transition:transform .5s cubic-bezier(.22,1,.36,1)}
@@ -3173,7 +3173,7 @@ console.log('[Rising Light v7] Interactive globe (arcs · pings · spin-to-filte
 .rl-ig-badge{position:absolute;top:9px;right:9px;width:21px;height:21px;color:#FAF9F6;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));opacity:.9;pointer-events:none}
 .rl-ig-skel{aspect-ratio:3/4;border-radius:14px;border:1px solid var(--border);background:linear-gradient(100deg,var(--card) 28%,var(--hover-bg) 50%,var(--card) 72%);background-size:200% 100%;animation:rl-ig-shim 1.3s linear infinite}
 @keyframes rl-ig-shim{to{background-position:-200% 0}}
-@media(max-width:600px){.rl-ig-grid{grid-template-columns:repeat(2,1fr);gap:10px}.rl-ig-title{font-size:22px}.rl-ig{padding-bottom:0}}
+@media(max-width:600px){.rl-ig-grid{grid-template-columns:repeat(3,1fr);gap:10px}.rl-ig-title{font-size:22px}.rl-ig{padding-bottom:0}}
 @media(prefers-reduced-motion:reduce){.rl-ig-card,.rl-ig-card img,.rl-ig-skel{transition:none;animation:none}}
 </style>
 <section class="rl-ig" id="rl-instagram" aria-labelledby="rl-ig-title" hidden>
@@ -3202,7 +3202,7 @@ console.log('[Rising Light v7] Interactive globe (arcs · pings · spin-to-filte
   ];
   var RL_IG_FEED = '';                 /* optional Behold feed URL (paid plan) */
   var HANDLE = 'risinglightuk';
-  var COUNT = 8;
+  var COUNT = 3;
 
   var section = document.getElementById('rl-instagram');
   var grid = document.getElementById('rl-ig-grid');
