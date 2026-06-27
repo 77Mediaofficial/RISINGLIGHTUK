@@ -980,9 +980,10 @@ body.dark .back-top{box-shadow:0 8px 24px rgba(0,0,0,0.5)}
 
 /* v7 accessibility — honor reduced-motion for the new animations */
 @media (prefers-reduced-motion:reduce){
-  .globe-rays,.goal-fill::after{animation:none}
+  .globe-rays,.goal-fill::after,.pin-pulse,.pin-ring,.pin-glow,.ticker-track,.ticker-label::before,.skel{animation:none!important}
   .rl-sr{opacity:1;transform:none;transition:none}
   .title-logo,.subtitle .w,.overview{animation:none}
+  *{scroll-behavior:auto!important}
 }
 
 /* ── Events Calendar (Momentum) — set a date per PDF, see it land here ── */
@@ -2572,16 +2573,23 @@ function renderGlobe(){
 let globeAnimating=true;
 let _rlGlobeOnScreen=true;   // perf: only auto-rotate while the globe is in view
 let lastFrameTime=0;
+/* PERF/a11y: never auto-rotate under prefers-reduced-motion; on touch devices
+   throttle the redraw to ~30fps — renderGlobe() rebuilds the whole SVG each
+   frame, so halving the rate roughly halves the globe's CPU cost on mobile. */
+const _rlReduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
+const _rlGlobeMinFrameMs = (window.matchMedia && matchMedia('(pointer:coarse)').matches) ? 33 : 0;
 function animateGlobe(now){
   /* v7: _rlGlobeHold pauses auto-rotation while a pin is hovered or a
      spin-to-pin animation is driving the rotation manually.
      PERF: also skip the per-frame SVG rebuild while the globe is scrolled
      off-screen — renderGlobe() rebuilds hundreds of nodes every frame. */
-  if(globeAnimating&&_rlGlobeOnScreen&&!window._rlGlobeHold){
-    const dt=lastFrameTime?(now-lastFrameTime)/1000:0.016;
-    lastFrameTime=now;
-    globeRotation=(globeRotation+dt*6)%360;  // 6 deg/sec → 60s per revolution
-    renderGlobe();
+  if(globeAnimating&&_rlGlobeOnScreen&&!_rlReduceMotion&&!window._rlGlobeHold){
+    if(!lastFrameTime||now-lastFrameTime>=_rlGlobeMinFrameMs){
+      const dt=lastFrameTime?(now-lastFrameTime)/1000:0.016;
+      lastFrameTime=now;
+      globeRotation=(globeRotation+dt*6)%360;  // 6 deg/sec → 60s per revolution
+      renderGlobe();
+    }
   }else{
     lastFrameTime=0;  // reset so rotation doesn't jump when it resumes
   }
@@ -2828,13 +2836,23 @@ window.showToast=function(msg){
 })();
 
 /* ── v7.12 CURSOR SPOTLIGHT on cards ─────────────────────────────── */
-document.addEventListener('mousemove',e=>{
-  const card=e.target.closest&&e.target.closest('.event-card,.stat-card');
-  if(!card)return;
-  const r=card.getBoundingClientRect();
-  card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
-  card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
-});
+/* Desktop only (no listener on touch) + rAF-throttled, so it does at most one
+   layout read + style write per frame instead of one per mousemove event. */
+if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
+  let _rlSpotRaf=0,_rlSpotCard=null,_rlSpotX=0,_rlSpotY=0;
+  document.addEventListener('mousemove',e=>{
+    const card=e.target.closest&&e.target.closest('.event-card,.stat-card');
+    if(!card)return;
+    _rlSpotCard=card;_rlSpotX=e.clientX;_rlSpotY=e.clientY;
+    if(_rlSpotRaf)return;
+    _rlSpotRaf=requestAnimationFrame(()=>{
+      _rlSpotRaf=0;
+      const r=_rlSpotCard.getBoundingClientRect();
+      _rlSpotCard.style.setProperty('--mx',((_rlSpotX-r.left)/r.width*100)+'%');
+      _rlSpotCard.style.setProperty('--my',((_rlSpotY-r.top)/r.height*100)+'%');
+    });
+  },{passive:true});
+}
 
 /* ── v7.5 GOAL THERMOMETER + v7.6 MONTHLY HEATMAP ────────────────── */
 const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goal */
