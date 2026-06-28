@@ -1186,7 +1186,12 @@ body.dark .manage-date{color-scheme:dark}
   </div>
   <!-- Get Involved: Volunteer + Contact Us (email via mailto) -->
   <style>
-  html,body{overflow-x:hidden;max-width:100%} /* mobile: clip full-bleed decorative layers (globe rays, overlays) so the page never scrolls sideways */
+  /* Clip sideways overflow WITHOUT making the document a scroll container:
+     overflow-x:hidden turns html/body into a scroller, which on iOS fails to
+     repaint isolated/overflow cards (calendar, goal) during momentum scroll —
+     content visibly clips. overflow-x:clip avoids that; hidden is the fallback. */
+  html,body{overflow-x:hidden;overflow-x:clip;max-width:100%}
+  html{-webkit-text-size-adjust:100%}
   .give-section{max-width:900px;margin:0 auto 80px;padding:0 4px}
   .give-head{text-align:center;margin-bottom:34px}
   .give-title{font-family:var(--cinzel);font-size:28px;font-weight:600;letter-spacing:2px}
