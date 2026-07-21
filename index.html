@@ -1166,6 +1166,11 @@ body.dark .manage-date{color-scheme:dark}
 .manage-date:focus{outline:none;border-color:var(--text)}
 .manage-empty{font-size:14px;color:var(--text3);padding:8px 0}
 /* Impact-numbers editor (admin) — reuses the manage-row/manage-name furniture */
+.admin-only{display:none}
+body.admin .admin-only{display:inline-flex}
+/* "Edit numbers" button sits under the chapter title, centred with it */
+.stat-edit-btn{margin-top:16px;align-items:center;justify-content:center;font-size:12px;
+  letter-spacing:.06em;text-transform:uppercase;padding:8px 16px}
 .stat-edit-lbl{flex:0 0 140px;font-size:13.5px;color:var(--text2);font-family:var(--font)}
 .stat-edit-hint{font-size:12.5px;color:var(--text2);flex-basis:100%;margin-top:14px;line-height:1.55}
 .stat-edit-hint code{font-family:var(--mono);font-size:11.5px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
@@ -1261,6 +1266,8 @@ body.dark .manage-date{color-scheme:dark}
     <div class="sect-head">
       <span class="sect-eyebrow">CH. 01 — Impact</span>
       <div class="sect-title">The Story in Numbers</div>
+      <!-- Admin-only: opens the Impact Numbers editor right where the numbers are -->
+      <button class="btn stat-edit-btn admin-only" type="button" onclick="openImpactModal()">Edit numbers</button>
     </div>
     <div class="stats-section">
       <div class="stat-card">
@@ -1398,32 +1405,6 @@ body.dark .manage-date{color-scheme:dark}
       <p>Rename, set a date, replace the PDF, or remove any event</p>
     </div>
     <div id="manage-list"></div>
-  </div>
-  <!-- Admin-only Impact Numbers editor. Blank field = calculate it automatically
-       from the events table; a typed number pins that stat site-wide. -->
-  <div class="manage-section admin-section">
-    <div class="upload-header">
-      <h2>Impact Numbers</h2>
-      <p>Preview a number here, then paste the generated code into <code>index.html</code> and push to publish. Leave a field blank to let it calculate itself.</p>
-    </div>
-    <div class="manage-row">
-      <label class="stat-edit-lbl" for="rl-stat-countries">Countries</label>
-      <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-countries" placeholder="Auto">
-    </div>
-    <div class="manage-row">
-      <label class="stat-edit-lbl" for="rl-stat-events">Total Events</label>
-      <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-events" placeholder="Auto">
-    </div>
-    <div class="manage-row">
-      <label class="stat-edit-lbl" for="rl-stat-lives">Lives Touched</label>
-      <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-lives" placeholder="Auto">
-    </div>
-    <div class="manage-row stat-edit-actions">
-      <button class="btn" id="rl-stats-revert" type="button" onclick="rlRevertStats()">Revert</button>
-      <button class="btn" id="rl-stats-clear" type="button" onclick="rlClearStats()">Clear all</button>
-      <button class="btn" id="rl-stats-save" type="button" onclick="rlApplyAndCopy()">Preview &amp; copy code</button>
-    </div>
-    <div class="stat-edit-hint" id="rl-stats-hint"></div>
   </div>
   <!-- Get Involved: Volunteer + Contact Us (email via mailto) -->
   <style>
@@ -1617,6 +1598,41 @@ body.dark .manage-date{color-scheme:dark}
   </footer>
 </div>
 <!-- Admin login modal — replaces the old prompt() + hardcoded password -->
+<!-- Impact Numbers editor — opened by the "Edit numbers" button on CH.01.
+     Blank field = that stat calculates itself from the events list. -->
+<div class="modal" id="impact-modal">
+  <div class="modal-content" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title" style="font-family:var(--cinzel)">Impact Numbers</div>
+      <button class="modal-close" onclick="closeImpactModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:26px 28px 28px">
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:22px">
+        Change a number and press <strong>Apply</strong> to see it on the page. Leave a field
+        blank to let it work itself out from your events.
+      </p>
+      <div class="manage-row">
+        <label class="stat-edit-lbl" for="rl-stat-countries">Countries</label>
+        <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-countries" placeholder="Auto">
+      </div>
+      <div class="manage-row">
+        <label class="stat-edit-lbl" for="rl-stat-events">Total Events</label>
+        <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-events" placeholder="Auto">
+      </div>
+      <div class="manage-row">
+        <label class="stat-edit-lbl" for="rl-stat-lives">Lives Touched</label>
+        <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-lives" placeholder="Auto">
+      </div>
+      <div class="manage-row stat-edit-actions">
+        <button class="btn" id="rl-stats-revert" type="button" onclick="rlRevertStats()">Revert</button>
+        <button class="btn" id="rl-stats-clear" type="button" onclick="rlClearStats()">Clear all</button>
+        <button class="btn" id="rl-stats-save" type="button" onclick="rlApplyAndCopy()">Apply</button>
+      </div>
+      <div class="stat-edit-hint" id="rl-stats-hint"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="admin-login-modal">
   <div class="modal-content" style="max-width:400px">
     <div class="modal-header">
@@ -3295,6 +3311,29 @@ function rlClearStats(){
   });
   rlApplyAndCopy();
 }
+/* ── Impact Numbers modal ─────────────────────────────────────────── */
+function openImpactModal(){
+  rlFillStatsForm();
+  const hint=document.getElementById('rl-stats-hint');
+  if(hint)hint.innerHTML='';
+  const m=document.getElementById('impact-modal');
+  if(!m)return;
+  m.classList.add('active');
+  setTimeout(()=>{const f=document.getElementById('rl-stat-countries');if(f)f.focus();},80);
+}
+function closeImpactModal(){
+  const m=document.getElementById('impact-modal');
+  if(m)m.classList.remove('active');
+}
+/* Backdrop click + Escape, same as the other modals on the page. */
+(function(){
+  const m=document.getElementById('impact-modal');
+  if(!m)return;
+  m.addEventListener('click',e=>{if(e.target===m)closeImpactModal();});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&m.classList.contains('active'))closeImpactModal();
+  });
+})();
 /* Restore the page to the numbers that are actually published in this file. */
 function rlRevertStats(){
   rlStatsOverride={...RL_IMPACT};
