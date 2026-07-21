@@ -143,9 +143,12 @@ body.dark .title-logo{filter:none}
 }
 .overview p:last-child{font-size:15px;line-height:1.7;color:var(--text2)}
 @media(max-width:768px){
-  .overview{margin-top:26px;padding:0 6px}
+  /* Lede reads CENTRAL on a phone. Full-width left-align looked edge-stuck under
+     the centred headline, so centre it — and retire the floated drop cap here,
+     since a left-float fights centred text. Desktop keeps its editorial column. */
+  .overview{margin-top:22px;padding:0 12px;text-align:center}
   .overview p:first-child{font-size:16px}
-  .overview p:first-child::first-letter{font-size:46px;padding:7px 10px 0 0}
+  .overview p:first-child::first-letter{float:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit;padding:0;color:inherit}
   .overview p:last-child{font-size:14px}
 }
 /* Impact ledger — three numbers on the paper, separated by hairlines.
@@ -427,6 +430,10 @@ body::after{
   opacity:.038;mix-blend-mode:multiply;
 }
 body.dark::after{opacity:.05;mix-blend-mode:screen}
+/* Smoothness: the grain is a FIXED, full-viewport, blended layer — on touch it
+   forces a full-screen recomposite on every scroll frame (jank) for a texture
+   that's imperceptible at phone DPI. Drop it on touch; desktop keeps the grain. */
+@media (hover:none){body::after{display:none}}
 
 /* ── INK-STAMP SELECTION — paper/ink invert, flips with the theme ── */
 ::selection{background:var(--text);color:var(--bg)}
@@ -514,6 +521,20 @@ body.admin .admin-bar{display:inline-flex}
 }
 .admin-entry:hover{opacity:1;border-color:var(--text2);color:var(--text2)}
 body.admin .admin-entry{display:none}
+/* Breathing room on phones: the floating Daily-Brief pill collides with the
+   sticky wordmark up top, and the chapter-bar owns the bottom — there's no clean
+   float for it on a phone. So on phones it TUCKS into the masthead as a compact
+   icon beside the theme toggle — decluttered, but still one tap from the Daily
+   Brief (a touch phone has no 'B' key). Desktop keeps the labelled pill. */
+@media(max-width:768px){
+  .brief-fab{
+    top:8px!important;left:auto!important;right:64px!important;bottom:auto!important;
+    width:36px;height:36px;padding:0!important;border-radius:50%!important;
+    display:inline-flex!important;align-items:center;justify-content:center;
+    font-size:15px!important;line-height:1;z-index:210!important;
+  }
+  .brief-fab .brief-label{display:none}
+}
 
 /* Dark mode tweaks for fixed elements */
 body.dark .modal{background:rgba(0,0,0,0.82)}
@@ -1144,6 +1165,14 @@ body.dark .mom-block.cal-has .mom-y{color:rgba(0,0,0,0.55)}
 body.dark .manage-date{color-scheme:dark}
 .manage-date:focus{outline:none;border-color:var(--text)}
 .manage-empty{font-size:14px;color:var(--text3);padding:8px 0}
+/* Impact-numbers editor (admin) — reuses the manage-row/manage-name furniture */
+.stat-edit-lbl{flex:0 0 140px;font-size:13.5px;color:var(--text2);font-family:var(--font)}
+.stat-edit-hint{font-size:12.5px;color:var(--text2);flex-basis:100%;margin-top:14px;line-height:1.55}
+.stat-edit-hint code{font-family:var(--mono);font-size:11.5px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+.stat-edit-code{font-family:var(--mono);font-size:12px;line-height:1.6;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:14px 16px;margin-top:10px;overflow-x:auto;white-space:pre;user-select:all;color:var(--text)}
+.manage-row.stat-edit-actions{justify-content:flex-end;gap:10px;border-bottom:none;padding-top:18px}
+@media(max-width:560px){.stat-edit-lbl{flex-basis:100%}}
 .cal-empty{font-size:12.5px;color:var(--text3);padding:6px 0}
 @media(max-width:768px){.cal-card{padding:22px 18px}.cal-cell{font-size:12px}.mom-grid{grid-template-columns:repeat(4,1fr);gap:8px}.mom-block{min-height:64px;padding:10px 6px}.mom-m{font-size:13px}}
 @media(max-width:430px){.mom-grid{grid-template-columns:repeat(3,1fr)}}
@@ -1370,6 +1399,32 @@ body.dark .manage-date{color-scheme:dark}
     </div>
     <div id="manage-list"></div>
   </div>
+  <!-- Admin-only Impact Numbers editor. Blank field = calculate it automatically
+       from the events table; a typed number pins that stat site-wide. -->
+  <div class="manage-section admin-section">
+    <div class="upload-header">
+      <h2>Impact Numbers</h2>
+      <p>Preview a number here, then paste the generated code into <code>index.html</code> and push to publish. Leave a field blank to let it calculate itself.</p>
+    </div>
+    <div class="manage-row">
+      <label class="stat-edit-lbl" for="rl-stat-countries">Countries</label>
+      <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-countries" placeholder="Auto">
+    </div>
+    <div class="manage-row">
+      <label class="stat-edit-lbl" for="rl-stat-events">Total Events</label>
+      <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-events" placeholder="Auto">
+    </div>
+    <div class="manage-row">
+      <label class="stat-edit-lbl" for="rl-stat-lives">Lives Touched</label>
+      <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-lives" placeholder="Auto">
+    </div>
+    <div class="manage-row stat-edit-actions">
+      <button class="btn" id="rl-stats-revert" type="button" onclick="rlRevertStats()">Revert</button>
+      <button class="btn" id="rl-stats-clear" type="button" onclick="rlClearStats()">Clear all</button>
+      <button class="btn" id="rl-stats-save" type="button" onclick="rlApplyAndCopy()">Preview &amp; copy code</button>
+    </div>
+    <div class="stat-edit-hint" id="rl-stats-hint"></div>
+  </div>
   <!-- Get Involved: Volunteer + Contact Us (email via mailto) -->
   <style>
   /* Clip sideways overflow WITHOUT making the document a scroll container:
@@ -1397,22 +1452,17 @@ body.dark .manage-date{color-scheme:dark}
     :root{--gap-major:64px;--gap-minor:20px}      /* tighter chapter rhythm on phones */
     .container{padding:24px 20px 32px}            /* airier side gutters, shorter top */
 
-    /* Full-height cinematic opening frame */
-    .header{
-      min-height:calc(100vh - 150px);min-height:calc(100svh - 150px);
-      display:flex;flex-direction:column;justify-content:center;margin-bottom:56px;
-    }
+    /* Hero flows from the TOP on a phone — the same top-down load as desktop.
+       (Was a forced 100svh centre-frame + a scroll cue desktop never had, which
+       is what made mobile "load differently"; both are gone now.) */
+    .header{margin-bottom:52px}
     .header::before{background-size:34px 34px}    /* keep the grid's density at phone scale */
     .title-logo{max-width:78px;margin-bottom:22px}
     .hero-kicker{font-size:9px;letter-spacing:2px;margin-bottom:16px}
     /* Fluid scale with real slack: the longest LINE ("Has No Borders") clears
        the box on every phone (320–480), even before Cinzel-700 swaps in. */
     .hero-h1{font-size:clamp(26px,7.5vw,38px);letter-spacing:0}
-    .hero-cue{
-      display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:40px;
-      color:var(--text3);font-family:var(--mono);font-size:9.5px;letter-spacing:3px;text-transform:uppercase;
-    }
-    .hero-cue::before{content:'';width:1px;height:32px;background:var(--border)}
+    .hero-cue{display:none}   /* desktop has no scroll cue — match it exactly */
 
     .stat-card{padding:14px 8px 10px}
     .stat-number{font-size:26px}
@@ -1650,17 +1700,24 @@ function renderBrief() {
   else if (hour >= 17 || hour < 5) greet = 'Good evening';
   document.getElementById('brief-greeting').textContent = `${greet}.`;
 
-  // Stats
-  const totalEvents = allEvents.length;
-  const countries = new Set(allEvents.map(e => detectCountry(e.name || ''))).size;
-  const lives = totalEvents * 80; // estimate
+  // Stats — read the SAME resolved numbers the headline Impact section publishes
+  // (auto, or an admin-pinned value). The brief used to derive its own figures
+  // (lives = events × 80), which contradicted the published numbers.
+  const eff = (typeof rlEffectiveStats === 'function')
+    ? rlEffectiveStats()
+    : { countries: new Set(allEvents.map(e => detectCountry(e.name || ''))).size || 3,
+        total_events: allEvents.length,
+        lives_touched: 320 };
+  const totalEvents = eff.total_events;
+  const countries = eff.countries;
+  const lives = eff.lives_touched;
 
   document.getElementById('brief-events').textContent = totalEvents;
-  document.getElementById('brief-countries').textContent = countries || 3;
-  document.getElementById('brief-lives').textContent = lives || 320;
+  document.getElementById('brief-countries').textContent = countries;
+  document.getElementById('brief-lives').textContent = lives;
 
   document.getElementById('brief-summary').innerHTML =
-    `Rising Light has documented <strong>${totalEvents}</strong> events across <strong>${countries || 3}</strong> countries, touching an estimated <strong>${lives || 320}</strong> lives. Compassion travels where it is needed most.`;
+    `Rising Light has documented <strong>${totalEvents}</strong> events across <strong>${countries}</strong> countries, touching an estimated <strong>${lives}</strong> lives. Compassion travels where it is needed most.`;
 
   // Recent events
   const recent = allEvents.slice(0, 5);
@@ -2128,8 +2185,10 @@ async function loadEvents(){
      can't masquerade as a "failed to load" message — it surfaces in the console
      instead, and loadEvents still resolves so boot-time counters animate. */
   try{
-    const totalEl=document.getElementById('total-events');
-    if(totalEl){totalEl.dataset.target=allEvents.length;totalEl.textContent=allEvents.length;}
+    /* Impact numbers recalculate from the events just loaded — unless an admin
+       has pinned a value, which rlApplyStats honours. */
+    if(typeof rlApplyStats==='function')rlApplyStats();
+    if(typeof rlFillStatsForm==='function')rlFillStatsForm();
     renderCountryFilters();
     renderTicker();
     renderEvents();
@@ -2921,7 +2980,7 @@ loadEvents().then(()=>animateAllCounters());
 <div class="confetti-overlay" id="confetti-overlay"></div>
 
 <!-- v5: Daily Brief button (added to header area) -->
-<button onclick="openBrief()" style="position:fixed; top:24px; left:24px; background:transparent; border:1px solid var(--border); padding:10px 16px; border-radius:8px; font-family:var(--font); font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text2); cursor:pointer; z-index:50; transition: all 0.2s;" title="Daily Brief (B)" onmouseover="this.style.background='var(--card)';this.style.color='var(--text)'" onmouseout="this.style.background='transparent';this.style.color='var(--text2)'">📋 Brief</button>
+<button class="brief-fab" onclick="openBrief()" style="position:fixed; top:24px; left:24px; background:transparent; border:1px solid var(--border); padding:10px 16px; border-radius:8px; font-family:var(--font); font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text2); cursor:pointer; z-index:50; transition: all 0.2s;" title="Daily Brief (B)" aria-label="Open Daily Brief" onmouseover="this.style.background='var(--card)';this.style.color='var(--text)'" onmouseout="this.style.background='transparent';this.style.color='var(--text2)'">📋<span class="brief-label"> Brief</span></button>
 
 
 <script>
@@ -3099,27 +3158,189 @@ if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
   },{passive:true});
 }
 
+/* ══ PUBLISHED IMPACT NUMBERS ═════════════════════════════════════════
+   ★ THIS BLOCK IS THE SOURCE OF TRUTH FOR THE THREE HEADLINE STATS. ★
+   There is no database — the site is a static file published from git, so
+   these values ARE the published figures.
+
+   To change what the public sees:
+     1. edit the numbers below (or use the Impact Numbers panel in admin
+        mode, which previews them and writes this exact block out for you),
+     2. commit and push. GitHub Pages redeploys and everyone sees the change.
+
+   null = let that number calculate itself from the events list.          */
+const RL_IMPACT={
+  countries:null,      /* null → count the distinct countries in the events */
+  total_events:null,   /* null → count the events                          */
+  lives_touched:320    /* no automatic source — publish the figure here    */
+};
+
+const RL_LIVES_FALLBACK=320;  /* used only if lives_touched is left null */
+const RL_COUNTRIES_FALLBACK=3;/* shown before events load / none detected */
+
+/* Working copy the admin panel previews into. Changing this only affects the
+   browser you're sitting at — nothing is published until RL_IMPACT above is
+   edited and pushed. */
+let rlStatsOverride={...RL_IMPACT};
+
+/* What each stat would be with nothing pinned. */
+function rlAutoStats(){
+  const evs=(typeof allEvents!=='undefined'&&allEvents)||[];
+  const countries=new Set(evs.map(e=>detectCountry(e.name||''))).size;
+  return{
+    countries:countries||RL_COUNTRIES_FALLBACK,
+    total_events:evs.length,
+    lives_touched:RL_LIVES_FALLBACK
+  };
+}
+/* THE source of truth for the three published numbers: a pinned value if there
+   is one, otherwise the auto value. Anything on the site that displays these
+   stats must read them from here, so nothing can contradict the headline.
+   (Note `??` — a pinned 0 is a real value and is respected.) */
+function rlEffectiveStats(){
+  const auto=rlAutoStats();
+  return{
+    countries:rlStatsOverride.countries??auto.countries,
+    total_events:rlStatsOverride.total_events??auto.total_events,
+    lives_touched:rlStatsOverride.lives_touched??auto.lives_touched
+  };
+}
+/* Resolve auto vs pinned and write the result into the three stat cards.
+   Sets data-target too, so the count-up animation lands on the right number. */
+function rlApplyStats(){
+  const eff=rlEffectiveStats();
+  const cards=document.querySelectorAll('.stats-section .stat-number');
+  const set=(el,v)=>{if(!el)return;el.dataset.target=v;el.textContent=v;};
+  set(cards[0],eff.countries);
+  set(cards[1],eff.total_events);
+  set(cards[2],eff.lives_touched);
+  if(window.rlRefreshGoal)window.rlRefreshGoal(); /* keep the goal bar in step */
+  return eff;
+}
+/* Mirror current state into the admin form; placeholders show the auto value
+   so it's obvious what "blank" will fall back to. */
+function rlFillStatsForm(){
+  const ids=['rl-stat-countries','rl-stat-events','rl-stat-lives'];
+  /* Never overwrite a field the admin is actively typing into (loadEvents can
+     re-run mid-edit after an upload or delete). */
+  const act=document.activeElement;
+  if(act&&ids.indexOf(act.id)!==-1)return;
+  const auto=rlAutoStats();
+  const put=(id,val,autoVal)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.value=(val==null?'':val);
+    el.placeholder='Auto — '+autoVal;
+  };
+  put('rl-stat-countries',rlStatsOverride.countries,auto.countries);
+  put('rl-stat-events',rlStatsOverride.total_events,auto.total_events);
+  put('rl-stat-lives',rlStatsOverride.lives_touched,auto.lives_touched);
+}
+/* Render the RL_IMPACT block for the values currently in the form. This is what
+   gets pasted back into index.html — it IS the publish step. */
+function rlImpactSnippet(v){
+  const f=x=>(x===null?'null':x);
+  return 'const RL_IMPACT={\n'+
+         '  countries:'+f(v.countries)+',\n'+
+         '  total_events:'+f(v.total_events)+',\n'+
+         '  lives_touched:'+f(v.lives_touched)+'\n'+
+         '};';
+}
+/* Preview the typed numbers on the page AND emit the code to publish them.
+   Nothing here reaches the internet — there is no backend to save to. */
+async function rlApplyAndCopy(){
+  /* Blank = let it calculate itself. Anything else must be a whole number ≥ 0. */
+  const read=id=>{
+    const raw=(document.getElementById(id).value||'').trim();
+    if(raw==='')return null;
+    const n=Number(raw);
+    if(!isFinite(n)||n<0||Math.floor(n)!==n)throw new Error('Use a whole number of 0 or more, or leave the field blank to calculate it automatically.');
+    return n;
+  };
+  let next;
+  try{
+    next={
+      countries:read('rl-stat-countries'),
+      total_events:read('rl-stat-events'),
+      lives_touched:read('rl-stat-lives')
+    };
+  }catch(err){alert(err.message);return;}
+
+  rlStatsOverride=next;
+  rlApplyStats();
+
+  const code=rlImpactSnippet(next);
+  const hint=document.getElementById('rl-stats-hint');
+  const changed=JSON.stringify(next)!==JSON.stringify(RL_IMPACT);
+  if(hint){
+    hint.innerHTML=
+      (changed
+        ? '<strong>Previewing — not published yet.</strong> Replace the <code>RL_IMPACT</code> block near the bottom of <code>index.html</code> with this, then commit &amp; push:'
+        : '<strong>These are already the published numbers.</strong> Nothing to push.')+
+      '<pre class="stat-edit-code">'+escapeHtml(code)+'</pre>';
+  }
+  if(!changed)return;
+  try{
+    await navigator.clipboard.writeText(code);
+    if(window.showToast)showToast('Code copied — paste into index.html, then push');
+  }catch(_){
+    /* Clipboard needs a secure context; the code is on screen either way. */
+    if(window.showToast)showToast('Preview applied — copy the code shown below');
+  }
+}
+/* Blank every field → all three stats go back to calculating themselves. */
+function rlClearStats(){
+  ['rl-stat-countries','rl-stat-events','rl-stat-lives'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  rlApplyAndCopy();
+}
+/* Restore the page to the numbers that are actually published in this file. */
+function rlRevertStats(){
+  rlStatsOverride={...RL_IMPACT};
+  rlApplyStats();
+  rlFillStatsForm();
+  const hint=document.getElementById('rl-stats-hint');
+  if(hint)hint.innerHTML='';
+  if(window.showToast)showToast('Reverted to the published numbers');
+}
+
 /* ── v7.5 GOAL THERMOMETER + v7.6 MONTHLY HEATMAP ────────────────── */
 const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goal */
 (function(){
   const card=document.getElementById('goal-card');
   if(!card)return;
-  const lives=+(((document.querySelectorAll('.stat-number')[2]||{}).dataset||{}).target||320);
   document.getElementById('goal-target').textContent=RL_GOAL;
-  const pct=Math.min(100,Math.round(lives/RL_GOAL*100));
+  let painted=false;
+  /* Read "lives" at paint time rather than parse time, so a pinned number that
+     arrives with the async stats fetch is reflected in the bar. */
+  function paint(animate){
+    const lives=+(((document.querySelectorAll('.stats-section .stat-number')[2]||{}).dataset||{}).target||RL_LIVES_FALLBACK);
+    const pct=Math.min(100,Math.round(lives/RL_GOAL*100));
+    document.getElementById('goal-fill').style.width=pct+'%';
+    document.getElementById('goal-pct').textContent=pct+'% of goal';
+    const nowEl=document.getElementById('goal-now');
+    if(animate&&typeof animateCounter==='function')animateCounter(nowEl,lives,1600);
+    else nowEl.textContent=lives;
+  }
   const io=new IntersectionObserver(es=>{
     es.forEach(en=>{
       if(!en.isIntersecting)return;
       io.disconnect();
-      document.getElementById('goal-fill').style.width=pct+'%';
-      document.getElementById('goal-pct').textContent=pct+'% of goal';
-      const nowEl=document.getElementById('goal-now');
-      if(typeof animateCounter==='function')animateCounter(nowEl,lives,1600);
-      else nowEl.textContent=lives;
+      painted=true;
+      paint(true);
     });
   },{threshold:0.4});
   io.observe(card);
+  /* Re-paint (no count-up) when the numbers change under it. */
+  window.rlRefreshGoal=function(){if(painted)paint(false);};
 })();
+
+/* Publish the numbers from RL_IMPACT. Must run AFTER the definitions above —
+   the boot block earlier in the page is a separate <script>, so calling it
+   there would throw before this block has parsed. */
+rlApplyStats();
+rlFillStatsForm();
 
 const MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 /* Group events by the month ("yyyy-mm") of their event_date, each list sorted by day. */
