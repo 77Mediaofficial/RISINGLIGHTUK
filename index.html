@@ -3186,9 +3186,9 @@ if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
 
    null = let that number calculate itself from the events list.          */
 const RL_IMPACT={
-  countries:null,      /* null → count the distinct countries in the events */
-  total_events:null,   /* null → count the events                          */
-  lives_touched:320    /* no automatic source — publish the figure here    */
+  countries:4,         /* pinned — set back to null to count from the events */
+  total_events:4,      /* pinned — set back to null to count the events      */
+  lives_touched:320    /* no automatic source — publish the figure here      */
 };
 
 const RL_LIVES_FALLBACK=320;  /* used only if lives_touched is left null */
