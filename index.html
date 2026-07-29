@@ -37,7 +37,7 @@
 :root{
   /* 77 Media "Cinematic Editorial Noir" design-system palette (exact swatches).
      Paper/ink + warm neutral greys; surfaces step paper -> ink-soft -> surface. */
-  --bg:#FAF9F6;--card:#ECECE9;--text:#15140F;--text-dim:#3A382F;--text2:#6B685E;--text3:#706C5E; /* text3 darkened #837F70→#706C5E: 4.6:1 AA on paper */
+  --bg:#FFFFFF;--card:#ECECE9;--text:#15140F;--text-dim:#3A382F;--text2:#6B685E;--text3:#706C5E; /* text3 darkened #837F70→#706C5E: 4.6:1 AA on paper */
   --border:rgba(21,20,15,0.14);--accent:#15140F;--accent-hover:#2E2B25;--font:'Inter',system-ui,sans-serif;
   --cinzel:'Cinzel',serif;
   --mono:'JetBrains Mono',monospace;
@@ -58,7 +58,7 @@
 body.dark{
   /* Warm noir — same bone/ink anchors inverted, so dark mode is the same brand
      (warm near-black, not a cold pure #000). */
-  --bg:#100F0B;--card:#17150F;--text:#FAF9F6;--text-dim:#D8D4C8;--text2:#A8A496;--text3:#837F70;
+  --bg:#000000;--card:#17150F;--text:#FAF9F6;--text-dim:#D8D4C8;--text2:#A8A496;--text3:#837F70;
   --border:#2A2820;--accent:#FAF9F6;--accent-hover:#E6E5E1;
   --accent-2:#C9A96A;
   --edge-light:rgba(250,249,246,0.055);
@@ -79,7 +79,7 @@ body.dark ::-webkit-scrollbar-thumb:hover{background:#3A382F}
    on body.dark alone makes html/body schemes disagree, which stops Chromium
    propagating the body background to the canvas (page ground goes white). */
 html{scrollbar-width:thin;scrollbar-color:#D2D1CC var(--bg);color-scheme:light}
-body.dark{scrollbar-color:#2E2B25 #100F0B}
+body.dark{scrollbar-color:#2E2B25 #000000}
 .container{max-width:1200px;margin:0 auto;padding:60px 20px}
 .header{text-align:center;margin-bottom:var(--gap-major);position:relative;isolation:isolate}
 /* Hero backdrop — a faint grid that fades out toward the edges */
