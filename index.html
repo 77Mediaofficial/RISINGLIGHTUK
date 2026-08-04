@@ -422,18 +422,7 @@ body.dark .chapter-bar{background:rgba(23,21,15,0.88);box-shadow:0 10px 30px rgb
   .toast-wrap{bottom:calc(74px + env(safe-area-inset-bottom,0px))} /* clear the bar */
 }
 
-/* ── FILM GRAIN — static paper-grain overlay (one composited layer, no frames) ── */
-body::after{
-  content:'';position:fixed;inset:0;z-index:2200;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:160px 160px;
-  opacity:.038;mix-blend-mode:multiply;
-}
-body.dark::after{opacity:.05;mix-blend-mode:screen}
-/* Smoothness: the grain is a FIXED, full-viewport, blended layer — on touch it
-   forces a full-screen recomposite on every scroll frame (jank) for a texture
-   that's imperceptible at phone DPI. Drop it on touch; desktop keeps the grain. */
-@media (hover:none){body::after{display:none}}
+/* Film grain retired 2026-08-04 — pure-mono standard is FLAT #fff/#000, no texture. */
 
 /* ── INK-STAMP SELECTION — paper/ink invert, flips with the theme ── */
 ::selection{background:var(--text);color:var(--bg)}
@@ -1183,10 +1172,10 @@ body.admin .admin-only{display:inline-flex}
 @media(max-width:430px){.mom-grid{grid-template-columns:repeat(3,1fr)}}
 
 </style>
-<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZBRjlGNiIsInRoZW1lX2NvbG9yIjoiI0ZBRjlGNiIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiI0ZGRkZGRiIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <!-- Single theme-color meta, driven by the in-page toggle (not the OS scheme)
      so the browser chrome always matches what's actually on screen -->
-<meta name="theme-color" content="#FAF9F6" />
+<meta name="theme-color" content="#FFFFFF" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Rising Light" />
@@ -1200,7 +1189,7 @@ body.admin .admin-only{display:inline-flex}
         clean top-down fade, guaranteed to reveal via a hard timeout. -->
 <script>try{
   var _b=document.body;
-  if(localStorage.getItem('rl_theme')==='dark'){_b.classList.add('dark');document.documentElement.style.colorScheme='dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#100F0B');}
+  if(localStorage.getItem('rl_theme')==='dark'){_b.classList.add('dark');document.documentElement.style.colorScheme='dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#000000');}
   if('scrollRestoration' in history){history.scrollRestoration='manual';}
   _b.classList.add('hero-armed');
   var _shown=false,_reveal=function(){if(_shown)return;_shown=true;_b.classList.add('hero-in');};
@@ -1423,6 +1412,9 @@ body.admin .admin-only{display:inline-flex}
   .give-field input,.give-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:var(--font);background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;resize:vertical}
   .give-field input:focus,.give-field textarea:focus{border-color:var(--text)}
   .give-btn{margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-family:var(--font);transition:transform .2s,opacity .2s;-webkit-tap-highlight-color:transparent}
+  .give-btn:disabled{opacity:.55;cursor:default}
+  /* spam honeypot — invisible to people, tempting to bots */
+  .give-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
   .give-btn:hover{transform:translateY(-2px);background:var(--accent-hover)}
 
   /* ── Mobile scale-down: smaller UI + visuals = more breathing room on iOS ──
@@ -1558,30 +1550,63 @@ body.admin .admin-only{display:inline-flex}
     <div class="give-grid">
       <form class="give-card" onsubmit="return rlGiveSubmit(event,'volunteer')">
         <h3 class="give-card-title">Volunteer / Partner</h3>
-        <label class="give-field"><span>Name</span><input type="text" name="name" required placeholder="Your name" autocomplete="name"></label>
-        <label class="give-field"><span>Email</span><input type="email" name="email" required placeholder="you@example.com" autocomplete="email"></label>
-        <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" placeholder="e.g. events, fundraising, skills"></label>
+        <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
+        <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
+        <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" maxlength="500" placeholder="e.g. events, fundraising, skills"></label>
+        <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="give-btn" type="submit">Send</button>
       </form>
       <form class="give-card" onsubmit="return rlGiveSubmit(event,'contact')">
         <h3 class="give-card-title">Contact Us</h3>
-        <label class="give-field"><span>Name</span><input type="text" name="name" required placeholder="Your name" autocomplete="name"></label>
-        <label class="give-field"><span>Email</span><input type="email" name="email" required placeholder="you@example.com" autocomplete="email"></label>
-        <label class="give-field"><span>Message</span><textarea name="message" rows="3" required placeholder="How can we help?"></textarea></label>
+        <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
+        <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
+        <label class="give-field"><span>Message</span><textarea name="message" rows="3" required maxlength="4000" placeholder="How can we help?"></textarea></label>
+        <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="give-btn" type="submit">Send</button>
       </form>
     </div>
   </section>
   <script>
+  /* Submissions save to the risinglight_enquiries table (works on every phone,
+     no mail app needed). If that save fails for ANY reason — table not yet
+     provisioned, offline, RLS — we fall back to the original mailto: flow so
+     the form can never dead-end. Hidden "website" field is a spam honeypot. */
   function rlGiveSubmit(e,kind){
     e.preventDefault();
     var f=e.target, to='svn-77mediaofficial@outlook.com';
     function v(n){var el=f.elements[n];return el?String(el.value||'').trim():'';}
-    var subj,body;
-    if(kind==='volunteer'){ subj='Volunteer / partner enquiry'; body='Name: '+v('name')+'\nEmail: '+v('email')+'\nHow I would like to help: '+v('interest'); }
-    else { subj='Website enquiry'; body='Name: '+v('name')+'\nEmail: '+v('email')+'\n\nMessage:\n'+v('message'); }
-    window.location.href='mailto:'+to+'?subject='+encodeURIComponent('[Rising Light] '+subj)+'&body='+encodeURIComponent(body);
-    if(window.showToast){ try{ showToast('Opening your email app...'); }catch(_){ } }
+    if(v('website')){ f.reset(); if(window.showToast)showToast('Thank you — message sent ✓'); return false; }
+
+    var btn=f.querySelector('.give-btn'), label=btn?btn.textContent:'';
+    function mailtoFallback(){
+      var subj,body;
+      if(kind==='volunteer'){ subj='Volunteer / partner enquiry'; body='Name: '+v('name')+'\nEmail: '+v('email')+'\nHow I would like to help: '+v('interest'); }
+      else { subj='Website enquiry'; body='Name: '+v('name')+'\nEmail: '+v('email')+'\n\nMessage:\n'+v('message'); }
+      window.location.href='mailto:'+to+'?subject='+encodeURIComponent('[Rising Light] '+subj)+'&body='+encodeURIComponent(body);
+      if(window.showToast){ try{ showToast('Opening your email app...'); }catch(_){ } }
+    }
+    if(typeof SB_URL==='undefined'||typeof SB_ANON==='undefined'){ mailtoFallback(); return false; }
+
+    if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+    fetch(SB_URL+'/rest/v1/risinglight_enquiries',{
+      method:'POST',
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+SB_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        kind:kind,
+        name:v('name'),
+        email:v('email'),
+        interest:kind==='volunteer'?(v('interest')||null):null,
+        message:kind==='contact'?v('message'):null
+      })
+    }).then(function(r){
+      if(!r.ok)throw 0;
+      f.reset();
+      if(window.showToast)showToast(kind==='volunteer'?'Thank you — we’ll be in touch ✓':'Message sent — thank you ✓');
+    }).catch(function(){
+      mailtoFallback();
+    }).finally(function(){
+      if(btn){ btn.disabled=false; btn.textContent=label||'Send'; }
+    });
     return false;
   }
   </script>
@@ -2590,7 +2615,7 @@ function animateAllCounters(){
    is kept in sync by driving the single theme-color meta from JS. */
 function _rlSyncThemeMeta(isDark){
   const mt=document.querySelector('meta[name="theme-color"]');
-  if(mt)mt.setAttribute('content',isDark?'#100F0B':'#FAF9F6');
+  if(mt)mt.setAttribute('content',isDark?'#000000':'#FFFFFF');
   // Root-level color-scheme keeps native scrollbars/pickers/autofill in step
   // (must live on <html>, matching body — see the comment in the stylesheet).
   document.documentElement.style.colorScheme=isDark?'dark':'light';
@@ -3765,24 +3790,27 @@ body.dark .rl-ig-card:hover img,body.dark .rl-ig-card:focus-visible img{filter:b
   }
   function show(html){ if(!html){section.hidden=true;return;} grid.innerHTML=html; section.hidden=false; }
 
-  /* 1) Curated posts (primary, served from the repo) */
-  if(RL_IG_POSTS&&RL_IG_POSTS.length){
-    var html=''; RL_IG_POSTS.slice(0,COUNT).forEach(function(p,i){ if(p&&p.img) html+=card(p.img,p.link,p.caption,p.alt,'FR.'+('0'+(i+1)).slice(-2)); });
-    return show(html);
+  function showCurated(){
+    if(RL_IG_POSTS&&RL_IG_POSTS.length){
+      var html=''; RL_IG_POSTS.slice(0,COUNT).forEach(function(p,i){ if(p&&p.img) html+=card(p.img,p.link,p.caption,p.alt,'FR.'+('0'+(i+1)).slice(-2)); });
+      show(html);
+    } else { section.hidden=true; }
   }
-  /* 2) Behold live feed (optional — only if RL_IG_FEED is set) */
+  /* 1) Behold LIVE feed — preferred whenever a feed URL is configured, so the
+        strip tracks @risinglightuk automatically. Any failure (offline, feed
+        deleted, CORS) falls back to the curated stills — never a blank strip. */
   if(RL_IG_FEED){
     var skel=''; for(var i=0;i<COUNT;i++)skel+='<div class="rl-ig-skel" aria-hidden="true"></div>';
     grid.innerHTML=skel; section.hidden=false;
     var pickImg=function(p){var s=p.sizes;if(s){var z=s.medium||s.small||s.large||s.full;if(z&&z.mediaUrl)return z.mediaUrl;}return p.thumbnailUrl||p.mediaUrl||'';};
     var capOf=function(p){if(p.prunedCaption)return p.prunedCaption;if(typeof p.caption==='string')return p.caption;if(p.caption&&p.caption.text)return p.caption.text;return '';};
     fetch(RL_IG_FEED,{mode:'cors'}).then(function(r){if(!r.ok)throw 0;return r.json();})
-      .then(function(d){var posts=Array.isArray(d)?d:(d.posts||d.data||[]),h='';posts.slice(0,COUNT).forEach(function(p,i){var u=pickImg(p);if(u)h+=card(u,p.permalink,capOf(p),p.altText,'FR.'+('0'+(i+1)).slice(-2));});show(h);})
-      .catch(function(){section.hidden=true;});
+      .then(function(d){var posts=Array.isArray(d)?d:(d.posts||d.data||[]),h='';posts.slice(0,COUNT).forEach(function(p,i){var u=pickImg(p);if(u)h+=card(u,p.permalink,capOf(p),p.altText,'FR.'+('0'+(i+1)).slice(-2));});if(h)show(h);else showCurated();})
+      .catch(showCurated);
     return;
   }
-  /* 3) nothing configured -> stay hidden (page unchanged) */
-  section.hidden=true;
+  /* 2) Curated posts from the repo (no feed configured) */
+  showCurated();
 })();
 </script>
 
