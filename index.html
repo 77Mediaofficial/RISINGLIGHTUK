@@ -835,7 +835,22 @@ body.dark .search-highlight { background: rgba(201, 169, 106, 0.28); }
 /* Print styles */
 @media print {
   body { background: #fff !important; color: #000 !important; }
-  body.dark { background: #fff !important; color: #000 !important; }
+  /* Paper is always white, so a visitor who printed from dark mode must get the
+     LIGHT palette back. Resetting body's own background/color is not enough —
+     every element painted with var(--text*) keeps resolving against the dark
+     values below, which prints bone-white ink on white paper. Re-declare the
+     full set body.dark overrides so the whole page prints as ink-on-paper. */
+  body.dark {
+    background: #fff !important; color: #000 !important;
+    --bg:#FFFFFF;--card:#ECECE9;--text:#15140F;--text-dim:#3A382F;--text2:#6B685E;--text3:#706C5E;
+    --border:rgba(21,20,15,0.14);--accent:#15140F;--accent-hover:#2E2B25;
+    --accent-2:#8C6A2F;
+    --edge-light:transparent;
+    --hover-bg:#E6E5E1;--hover-bg2:#E6E5E1;--upload-bg:#ECECE9;
+    --pdf-viewer-bg:#525659;
+    --glow-color:rgba(21,20,15,0.05);
+    --dot-color:rgba(21,20,15,0.15);--hero-grid:rgba(21,20,15,0.055);
+  }
   .theme-toggle, .admin-entry, .admin-bar, .qc-fab, .qc-panel,
   .upload-section, .filter-tabs, .country-filters,
   .search-container, .ticker-wrap, .globe-section,
@@ -848,6 +863,11 @@ body.dark .search-highlight { background: rgba(201, 169, 106, 0.28); }
   .stat-card { break-inside: avoid; }
   .brief-section { break-inside: avoid; }
   .title { color: #000 !important; }
+  /* The crest art is white-on-transparent: light mode inverts it to black, and
+     dark mode drops the invert so it stays white. Paper is always white, so
+     re-assert the invert here — otherwise printing from dark mode renders the
+     logo white-on-white and it vanishes. */
+  .title-logo { filter: invert(1) !important; }
 }
 
 /* Pulse animation when stats change */
