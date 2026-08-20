@@ -160,6 +160,34 @@ body.dark .title-logo{filter:none}
 .stat-number{font-family:var(--cinzel);font-size:46px;font-weight:700;margin-bottom:8px;letter-spacing:1px}
 .stat-label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:2.5px;font-weight:600}
 
+/* ── MILESTONE BADGES — expedition-patch roundels, hairline mono ── */
+.badge-head{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:4px;
+  text-transform:uppercase;color:var(--text3);text-align:center;margin:44px 0 22px;
+}
+.badge-wall{
+  list-style:none;margin:0 auto;padding:0 20px;max-width:860px;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:26px 30px;
+}
+.badge{width:108px;text-align:center}
+.badge-medal{display:block;width:82px;height:82px;margin:0 auto 10px;color:var(--text)}
+.badge-medal circle,.badge-medal path,.badge-medal line{stroke:currentColor;fill:none}
+.badge-name{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.8px;
+  text-transform:uppercase;color:var(--text);line-height:1.5;
+}
+.badge-sub{
+  font-family:var(--mono);font-size:8.5px;font-weight:500;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--text3);margin-top:2px;line-height:1.5;
+}
+/* not-yet-earned: dashed ring, dimmed — the ring dash is set in the SVG */
+.badge.pending{opacity:.48}
+@media(max-width:480px){
+  .badge{width:92px}
+  .badge-medal{width:70px;height:70px}
+  .badge-wall{gap:20px 18px}
+}
+
 /* ── CHAPTER SYSTEM — one film-credit header pattern for every section ── */
 .chapter{margin-bottom:var(--gap-major)}
 .sect-head{text-align:center;margin-bottom:38px}
@@ -1233,6 +1261,11 @@ body.admin .admin-only{display:inline-flex}
         <div class="stat-label">Lives Touched</div>
       </div>
     </div>
+    <!-- Milestone badges — expedition-patch roundels for what's been completed.
+         Rendered by renderBadges() from the RL_BADGES list near the bottom of
+         this file; a badge with done:false shows as a dashed "in progress" ring. -->
+    <h3 class="badge-head" id="badge-head">Milestones</h3>
+    <ul class="badge-wall" id="badge-wall" aria-labelledby="badge-head"></ul>
   </section>
 
   <!-- CH. 02 — Momentum: goal thermometer + events calendar, two-up on desktop -->
@@ -3116,6 +3149,53 @@ const RL_COUNTRIES_FALLBACK=3;/* shown before events load / none detected */
    browser you're sitting at — nothing is published until RL_IMPACT above is
    edited and pushed. */
 let rlStatsOverride={...RL_IMPACT};
+
+/* ══ MILESTONE BADGES ═════════════════════════════════════════════════
+   ★ Like RL_IMPACT above, this list IS the published record. ★
+   To award a new badge (or flip one from in-progress to earned):
+   edit this array, commit, push. done:false renders as a dashed
+   "in progress" ring at reduced opacity.
+   glyph: flame · drop · book · pin · rings · peak                     */
+const RL_BADGES=[
+  {id:'first',  glyph:'flame', name:'First Mission',  sub:'The work begins',      done:true},
+  {id:'water',  glyph:'drop',  name:'Water Aid',      sub:'Waterloo, London',     done:true},
+  {id:'school', glyph:'book',  name:'School Aid',     sub:'Learning supported',   done:true},
+  {id:'ghana',  glyph:'pin',   name:'Ghana Aid',      sub:'First international',  done:true},
+  {id:'ally',   glyph:'rings', name:'Alliance',       sub:'Charlie&rsquo;s Promise',   done:true},
+  {id:'snowdon',glyph:'peak',  name:'Yr Wyddfa',      sub:'Snowdon · July 2026',  done:false}
+];
+/* Tiny wireframe glyphs, drawn to a 24×24 box (stroke-only, inherits color). */
+const RL_BADGE_GLYPHS={
+  flame:'<path d="M12 3c3 4 5.6 6.2 5.6 9.6a5.6 5.6 0 0 1-11.2 0c0-1.9.9-3.6 2.6-5.4.1 1.7.8 2.7 1.9 3.2C10.6 8.2 11.2 5.4 12 3z"/>',
+  drop:'<path d="M12 3.4c3.6 4.9 5.4 7.3 5.4 10a5.4 5.4 0 0 1-10.8 0c0-2.7 1.8-5.1 5.4-10z"/>',
+  book:'<path d="M4.6 6.4c2.7-1.3 4.7-1.3 7.4.2 2.7-1.5 4.7-1.5 7.4-.2v12.2c-2.7-1.3-4.7-1.3-7.4.2-2.7-1.5-4.7-1.5-7.4-.2z"/><line x1="12" y1="6.6" x2="12" y2="18.8"/>',
+  pin:'<path d="M12 20.6s-5.6-6-5.6-10.2a5.6 5.6 0 1 1 11.2 0c0 4.2-5.6 10.2-5.6 10.2z"/><circle cx="12" cy="10.2" r="2"/>',
+  rings:'<circle cx="9.6" cy="12" r="4.6"/><circle cx="14.4" cy="12" r="4.6"/>',
+  peak:'<path d="M3.4 18.6h17.2l-5.2-9.4-2.5 3.4-3-5.6z"/>'
+};
+function renderBadges(){
+  const wall=document.getElementById('badge-wall');
+  if(!wall||typeof RL_BADGES==='undefined')return;
+  wall.innerHTML=RL_BADGES.map(function(b){
+    const g=RL_BADGE_GLYPHS[b.glyph]||'';
+    const dash=b.done?'':' stroke-dasharray="4 4"';
+    return '<li class="badge'+(b.done?'':' pending')+'" aria-label="'+b.name+(b.done?' — completed':' — in progress')+'">'
+      +'<svg class="badge-medal" viewBox="0 0 82 82" aria-hidden="true">'
+      +'<circle cx="41" cy="41" r="39" stroke-width="1.2"'+dash+'/>'
+      +'<circle cx="41" cy="41" r="32" stroke-width="0.7" opacity="0.6"/>'
+      /* compass ticks between the rings, N/E/S/W */
+      +'<line x1="41" y1="2.6" x2="41" y2="8.4" stroke-width="1"/>'
+      +'<line x1="41" y1="73.6" x2="41" y2="79.4" stroke-width="1"/>'
+      +'<line x1="2.6" y1="41" x2="8.4" y2="41" stroke-width="1"/>'
+      +'<line x1="73.6" y1="41" x2="79.4" y2="41" stroke-width="1"/>'
+      +'<g transform="translate(23,23) scale(1.5)" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round">'+g+'</g>'
+      +'</svg>'
+      +'<div class="badge-name">'+b.name+'</div>'
+      +(b.sub?'<div class="badge-sub">'+b.sub+'</div>':'')
+      +'</li>';
+  }).join('');
+}
+renderBadges();
 
 /* What each stat would be with nothing pinned. */
 function rlAutoStats(){
