@@ -363,6 +363,33 @@ body.dark .title-logo{filter:none}
   .map-node-co{font-size:8px}
 }
 
+/* ── MAP MOTION ── quiet ambient life + a one-time entrance.
+   Ambient: the dashed arcs flow, the node rings breathe — two tiny paths and
+   three pseudo-elements, nothing like the old globe's full-SVG rebuilds. */
+.map-arc{animation:mapArcFlow 1.6s linear infinite}
+@keyframes mapArcFlow{to{stroke-dashoffset:-20}}
+.map-node-mark::after{animation:mapBreath 3.4s ease-in-out infinite}
+@keyframes mapBreath{0%,100%{opacity:.4}50%{opacity:.9}}
+.map-node:hover .map-node-mark::after,
+.map-node:focus-visible .map-node-mark::after,
+.map-node[aria-expanded="true"] .map-node-mark::after{animation:none}
+/* Entrance: JS adds .map-pre at render, .map-in when scrolled into view —
+   dots fade up, then arcs+compass, then the three nodes pop in west→east. */
+.map-pre .map-dots{opacity:0;transition:opacity 1s ease .1s}
+.map-pre .map-overlay{opacity:0;transition:opacity .8s ease .6s}
+.map-pre .map-node{opacity:0;transform:translate(-50%,-50%) scale(.55);
+  transition:opacity .5s cubic-bezier(0.22,1,0.36,1),transform .5s cubic-bezier(0.22,1,0.36,1)}
+.map-pre .map-node[data-idx="1"]{transition-delay:.75s}   /* Arizona   */
+.map-pre .map-node[data-idx="2"]{transition-delay:.9s}    /* Guatemala */
+.map-pre .map-node[data-idx="0"]{transition-delay:1.05s}  /* London    */
+.map-pre.map-in .map-dots,.map-pre.map-in .map-overlay{opacity:1}
+.map-pre.map-in .map-node{opacity:1;transform:translate(-50%,-50%) scale(1)}
+@media(prefers-reduced-motion:reduce){
+  .map-arc,.map-node-mark::after{animation:none}
+  .map-pre .map-dots,.map-pre .map-overlay,.map-pre .map-node{
+    opacity:1;transform:translate(-50%,-50%);transition:none}
+}
+
 /* ── MASTHEAD — sticky editorial nav: wordmark, section links, theme toggle ── */
 .masthead{
   position:sticky;top:0;z-index:200;
@@ -1193,9 +1220,9 @@ body.admin .admin-only{display:inline-flex}
   <div class="masthead-in">
     <a class="mast-brand" href="#" aria-label="Rising Light UK — back to top">Rising Light</a>
     <nav class="mast-nav" aria-label="Sections">
+      <a href="#reach">Reach</a>
       <a href="#impact">Impact</a>
       <a href="#momentum">Momentum</a>
-      <a href="#reach">Reach</a>
       <a href="#events">Events</a>
       <a href="#faq">FAQ</a>
       <a href="#get-involved">Get Involved</a>
@@ -1209,8 +1236,8 @@ body.admin .admin-only{display:inline-flex}
 
 <!-- Mobile chapter bar — fixed bottom pill nav with scroll-spy -->
 <nav class="chapter-bar" id="chapter-bar" aria-label="Page sections">
-  <a href="#impact" data-spy="impact">Impact</a>
   <a href="#reach" data-spy="reach">Reach</a>
+  <a href="#impact" data-spy="impact">Impact</a>
   <a href="#events" data-spy="events">Events</a>
   <a href="#faq" data-spy="faq">FAQ</a>
   <a href="#get-involved" data-spy="get-involved">Join</a>
@@ -1236,10 +1263,27 @@ body.admin .admin-only{display:inline-flex}
     </div>
     <div class="hero-cue" aria-hidden="true">Our Work</div>
   </div>
-  <!-- CH. 01 — Impact ledger: three numbers on hairlines -->
+  <!-- CH. 01 — Reach map. Static blueprint dot-map built from the same LAND
+       lat/lon data the old globe used: canvas draws the land dots once, the
+       SVG overlay carries the dashed reach arcs + compass, and the location
+       nodes are real buttons that open a small info card. No animation loop. -->
+  <div class="map-section" id="reach">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 01 — Our Reach</span>
+      <div class="sect-title">Where Compassion Travels</div>
+    </div>
+    <div class="map-stage" id="map-stage">
+      <canvas class="map-dots" id="map-dots" aria-hidden="true"></canvas>
+      <svg class="map-overlay" id="map-overlay" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+      <!-- node buttons + the shared card are injected by renderMap() -->
+      <div class="map-card" id="map-card" role="region" aria-live="polite" hidden></div>
+    </div>
+  </div>
+
+    <!-- CH. 02 — Impact ledger: three numbers on hairlines -->
   <section class="chapter" id="impact" aria-label="Impact in numbers">
     <div class="sect-head">
-      <span class="sect-eyebrow">CH. 01 — Impact</span>
+      <span class="sect-eyebrow">CH. 02 — Impact</span>
       <div class="sect-title">The Story in Numbers</div>
       <!-- Admin-only: opens the Impact Numbers editor right where the numbers are -->
       <button class="btn stat-edit-btn admin-only" type="button" onclick="openImpactModal()">Edit numbers</button>
@@ -1268,10 +1312,10 @@ body.admin .admin-only{display:inline-flex}
     <ul class="badge-wall" id="badge-wall" aria-labelledby="badge-head"></ul>
   </section>
 
-  <!-- CH. 02 — Momentum: goal thermometer + events calendar, two-up on desktop -->
+  <!-- CH. 03 — Momentum: goal thermometer + events calendar, two-up on desktop -->
   <section class="chapter" id="momentum" aria-label="Goal and calendar">
     <div class="sect-head">
-      <span class="sect-eyebrow">CH. 02 — Momentum</span>
+      <span class="sect-eyebrow">CH. 03 — Momentum</span>
       <div class="sect-title">The Work in Motion</div>
     </div>
     <div class="ledger-grid">
@@ -1306,24 +1350,7 @@ body.admin .admin-only{display:inline-flex}
     </div>
   </section>
 
-  <!-- CH. 03 — Reach map. Static blueprint dot-map built from the same LAND
-       lat/lon data the old globe used: canvas draws the land dots once, the
-       SVG overlay carries the dashed reach arcs + compass, and the location
-       nodes are real buttons that open a small info card. No animation loop. -->
-  <div class="map-section" id="reach">
-    <div class="sect-head">
-      <span class="sect-eyebrow">CH. 03 — Our Reach</span>
-      <div class="sect-title">Where Compassion Travels</div>
-    </div>
-    <div class="map-stage" id="map-stage">
-      <canvas class="map-dots" id="map-dots" aria-hidden="true"></canvas>
-      <svg class="map-overlay" id="map-overlay" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
-      <!-- node buttons + the shared card are injected by renderMap() -->
-      <div class="map-card" id="map-card" role="region" aria-live="polite" hidden></div>
-    </div>
-  </div>
-
-  <!-- CH. 04 — Events: chapter head, then the live ticker bound to its chapter -->
+<!-- CH. 04 — Events: chapter head, then the live ticker bound to its chapter -->
   <div class="events-header" id="events">
     <div class="sect-head">
       <span class="sect-eyebrow">CH. 04 — On the Ground</span>
@@ -2854,6 +2881,13 @@ function _mapSeeEvents(i){
 (function(){
   const stage=document.getElementById('map-stage');
   if(!stage)return;
+  /* one-time entrance choreography — dots, then arcs, then nodes (CSS-driven) */
+  if('IntersectionObserver' in window && !(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)){
+    stage.classList.add('map-pre');
+    new IntersectionObserver(function(es,io){
+      if(es[0].isIntersecting){stage.classList.add('map-in');io.disconnect();}
+    },{threshold:0.3}).observe(stage);
+  }
   stage.addEventListener('click',function(e){
     const btn=e.target.closest('.map-node');
     if(btn){
@@ -3158,11 +3192,10 @@ let rlStatsOverride={...RL_IMPACT};
    glyph: flame · drop · book · pin · rings · peak                     */
 const RL_BADGES=[
   {id:'first',  glyph:'flame', name:'First Mission',  sub:'The work begins',      done:true},
-  {id:'water',  glyph:'drop',  name:'Water Aid',      sub:'Waterloo, London',     done:true},
   {id:'school', glyph:'book',  name:'School Aid',     sub:'Learning supported',   done:true},
   {id:'ghana',  glyph:'pin',   name:'Ghana Aid',      sub:'First international',  done:true},
   {id:'ally',   glyph:'rings', name:'Alliance',       sub:'Charlie&rsquo;s Promise',   done:true},
-  {id:'snowdon',glyph:'peak',  name:'Yr Wyddfa',      sub:'Snowdon · July 2026',  done:false}
+  {id:'snowdon',glyph:'peak',  name:'Yr Wyddfa',      sub:'Snowdon · Summited',   done:true}
 ];
 /* Tiny wireframe glyphs, drawn to a 24×24 box (stroke-only, inherits color). */
 const RL_BADGE_GLYPHS={
