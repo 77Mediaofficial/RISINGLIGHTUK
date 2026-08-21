@@ -362,6 +362,20 @@ body.dark .title-logo{filter:none}
   .map-node-tag{font-size:9.5px;letter-spacing:1.2px}
   .map-node-co{font-size:8px}
 }
+@media(max-width:640px){
+  /* full-world view on a phone puts Arizona and Guatemala ~25px apart —
+     smaller hit areas keep them individually tappable */
+  .map-node{padding:7px}
+  /* three text chips don't fit a 130px-tall world — markers only; the tap
+     card carries the name + coordinates, the legend below says how */
+  .map-node-tag{display:none}
+  .map-section .map-legend{display:block}
+}
+.map-legend{
+  display:none;margin-top:14px;text-align:center;
+  font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);
+}
 
 /* ── MAP MOTION ── quiet ambient life + a one-time entrance.
    Ambient: the dashed arcs flow, the node rings breathe — two tiny paths and
@@ -1278,6 +1292,8 @@ body.admin .admin-only{display:inline-flex}
       <!-- node buttons + the shared card are injected by renderMap() -->
       <div class="map-card" id="map-card" role="region" aria-live="polite" hidden></div>
     </div>
+    <!-- phones hide the per-marker text chips — this line says how to get them -->
+    <div class="map-legend">Tap a marker — London · Arizona · Guatemala</div>
   </div>
 
     <!-- CH. 02 — Impact ledger: three numbers on hairlines -->
@@ -2758,12 +2774,12 @@ const MAP_INFO=[
   {co:'34.0489° N · 111.0937° W',tag:'tag-up', body:'Our United States arm — community support projects in Arizona.'},
   {co:'15.7835° N · 90.2308° W', tag:'',       body:'International projects — help for families and animals in Guatemala.'}
 ];
-/* Two crops: full world on wide screens; an Atlantic window on phones so the
-   three nodes stay far enough apart to tap. */
+/* One view everywhere: the FULL world (Antarctica cropped). An earlier build
+   cropped phones to an Atlantic window for tap spacing, but half the planet
+   missing read as a broken map — full world wins; node hit areas shrink on
+   small screens instead. */
 function _mapView(){
-  return (window.innerWidth<640)
-    ? {lon0:-140,lon1:40, lat0:-8, lat1:72}
-    : {lon0:-180,lon1:180,lat0:-56,lat1:84}; /* Antarctica cropped */
+  return {lon0:-180,lon1:180,lat0:-56,lat1:84};
 }
 function _mapXY(lat,lon,V,W,H){
   return {x:(lon-V.lon0)/(V.lon1-V.lon0)*W, y:(V.lat1-lat)/(V.lat1-V.lat0)*H};
@@ -2807,7 +2823,9 @@ function renderMap(){
     const mx=(hq.x+p.x)/2, my=Math.min(hq.y,p.y)-Math.hypot(p.x-hq.x,p.y-hq.y)*0.16;
     s+='<path class="map-arc" d="M'+hq.x.toFixed(1)+' '+hq.y.toFixed(1)+' Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+p.x.toFixed(1)+' '+p.y.toFixed(1)+'"/>';
   }
-  const cx=52,cy=H-50,cr=20; /* bottom-left = open Pacific in both crops */
+  /* compass scales with the canvas so it never clips on short phone maps */
+  const cr=Math.max(11,Math.min(20,H*0.12));
+  const cx=cr+30, cy=H-cr-28;
   s+='<g class="map-compass" opacity="0.75">'
    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" stroke-width="1"/>'
    +'<circle cx="'+cx+'" cy="'+cy+'" r="'+(cr*0.55)+'" stroke-width="0.8"/>'
