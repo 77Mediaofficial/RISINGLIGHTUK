@@ -44,7 +44,7 @@
   /* Candle-gold secondary accent — the palette's single point of chroma.
      Used ONLY for moments of state/life: open FAQ, active chip, live dot,
      goal fill, search highlight. Warms (not inverts) in dark mode. */
-  --accent-2:#8C6A2F;
+  --accent-2:#1F6E7E; /* Glaslyn petrol (was candle gold) — the one colour accent */
   /* Edge-light: invisible in light mode; a hairline of light catching the top
      edge of raised surfaces in dark mode (noir elevation, not black shadows). */
   --edge-light:transparent;
@@ -61,7 +61,7 @@ body.dark{
      (warm near-black, not a cold pure #000). */
   --bg:#000000;--card:#17150F;--text:#FAF9F6;--text-dim:#D8D4C8;--text2:#A8A496;--text3:#837F70;
   --border:#2A2820;--accent:#FAF9F6;--accent-hover:#E6E5E1;
-  --accent-2:#C9A96A;
+  --accent-2:#7FC2CE; /* petrol, glacial-pale on pure black */
   --edge-light:rgba(250,249,246,0.055);
   --hover-bg:#1D1B14;--hover-bg2:#252319;--upload-bg:#14120D;
   --band:#17150F;
@@ -927,13 +927,13 @@ body.dark .kbd-help-panel {
 
 /* Search highlight — candle-gold wash (the raw yellow highlighter is retired) */
 .search-highlight {
-  background: rgba(140, 106, 47, 0.22);
+  background: rgba(31,110,126,0.16);
   color: var(--text);
   border-radius: 2px;
   padding: 0 2px;
   font-weight: 600;
 }
-body.dark .search-highlight { background: rgba(201, 169, 106, 0.28); }
+body.dark .search-highlight { background: rgba(127,194,206,0.28); }
 
 /* Print styles */
 @media print {
@@ -3290,7 +3290,7 @@ function renderBadges(){
   wall.innerHTML=RL_BADGES.map(function(b){
     const g=RL_BADGE_GLYPHS[b.glyph]||'';
     const dash=b.done?'':' stroke-dasharray="4 4"';
-    return '<li class="badge'+(b.done?'':' pending')+'" aria-label="'+b.name+(b.done?' — completed':' — in progress')+'">'
+    return '<li class="badge badge-'+b.id+(b.done?'':' pending')+'" aria-label="'+b.name+(b.done?' — completed':' — in progress')+'">'
       +'<svg class="badge-medal" viewBox="0 0 82 82" aria-hidden="true">'
       +'<circle cx="41" cy="41" r="39" stroke-width="1.2"'+dash+'/>'
       +'<circle cx="41" cy="41" r="32" stroke-width="0.7" opacity="0.6"/>'
@@ -3713,6 +3713,49 @@ body.dark .rl-ig-card:hover img,body.dark .rl-ig-card:focus-visible img{filter:b
   .rl-ig-ov{opacity:1;background:linear-gradient(to top,rgba(21,20,15,.72),rgba(21,20,15,0) 55%)}
 }
 @media(prefers-reduced-motion:reduce){.rl-ig-card,.rl-ig-card img,.rl-ig-skel{transition:none;animation:none}}
+
+/* ── GLASLYN PETROL — the single colour accent (owner-chosen from 12 candidates,
+      previewed on the live site first). Scarce by design: it marks only the
+      LIVE moments — progress, the reach routes, the current chapter, the open
+      question, the summited badge. Everything else stays pure mono. */
+.goal-fill{background:var(--accent-2)}
+.map-arc{stroke:var(--accent-2);opacity:.55}
+.map-node-mark::before{background:var(--accent-2)}
+.map-node-mark::after{border-color:var(--accent-2)}
+.badge-snowdon .badge-medal{color:var(--accent-2)}
+.ch-rail a.active{color:var(--accent-2)}
+.ch-rail a.active::after{background:var(--accent-2);border-color:var(--accent-2)}
+.chapter-bar a.active{background:var(--accent-2);color:#FFFFFF}
+body.dark .chapter-bar a.active{color:#15140F}
+.filter-tab.active{background:var(--accent-2);border-color:var(--accent-2);color:#FFFFFF}
+body.dark .filter-tab.active{color:#15140F}
+.faq-item[open] .faq-q{color:var(--accent-2)}
+.overview p:last-child::before{background:var(--accent-2);opacity:.85}
+
+/* tier 2 — the theme threads SITEWIDE (owner request): every chapter head,
+   links, primary buttons, calendar-lit dates, the progress bar, selection. */
+.scroll-progress{background:var(--accent-2)}
+.sect-eyebrow{color:var(--accent-2)}
+.sect-head::before{border-color:var(--accent-2);opacity:.75}
+.footer::before{border-color:var(--accent-2)}
+.stat-ix{color:var(--accent-2)}
+.goal-pct{color:var(--accent-2)}
+.mast-nav a:hover{color:var(--accent-2)}
+.faq-a a{color:var(--accent-2)}
+.credits-row dd a{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+.credits-row dd a:hover{color:var(--text);border-color:var(--text2)}
+.map-card-link:hover{border-color:var(--accent-2);color:var(--accent-2);background:transparent}
+.cal-cell.cal-has{background:var(--accent-2);color:#FFFFFF}
+body.dark .cal-cell.cal-has{color:#15140F}
+.mom-block.cal-has{background:var(--accent-2);border-color:var(--accent-2);color:#FFFFFF}
+body.dark .mom-block.cal-has{color:#15140F}
+.give-btn{background:var(--accent-2);color:#FFFFFF}
+body.dark .give-btn{color:#15140F}
+.give-btn:hover{background:#1A5D6B}
+body.dark .give-btn:hover{background:#93CDD8}
+::selection{background:var(--accent-2);color:#FFFFFF}
+body.dark ::selection{color:#15140F}
+.cal-cell.cal-today{border-color:var(--accent-2);color:var(--accent-2)}
 </style>
 <script>
 (function(){
