@@ -59,13 +59,15 @@
 body.dark{
   /* Warm noir — same bone/ink anchors inverted, so dark mode is the same brand
      (warm near-black, not a cold pure #000). */
-  --bg:#000000;--card:#17150F;--text:#FAF9F6;--text-dim:#D8D4C8;--text2:#A8A496;--text3:#837F70;
-  --border:#2A2820;--accent:#FAF9F6;--accent-hover:#E6E5E1;
+  /* Surfaces are NEUTRAL grey (same character as light mode's #ECECE9, at the
+     same lightness as before) — ink stays warm bone. Owner call 23 Aug. */
+  --bg:#000000;--card:#151514;--text:#FAF9F6;--text-dim:#D8D4C8;--text2:#A8A496;--text3:#837F70;
+  --border:#282827;--accent:#FAF9F6;--accent-hover:#E6E5E1;
   --accent-2:#7FC2CE; /* petrol, glacial-pale on pure black */
   --edge-light:rgba(250,249,246,0.055);
-  --hover-bg:#1D1B14;--hover-bg2:#252319;--upload-bg:#14120D;
-  --band:#17150F;
-  --pdf-viewer-bg:#14120D;
+  --hover-bg:#1B1B1A;--hover-bg2:#232322;--upload-bg:#121211;
+  --band:#151514;
+  --pdf-viewer-bg:#121211;
   --glow-color:rgba(250,249,246,0.08);
   --dot-color:rgba(250,249,246,0.19);--hero-grid:rgba(250,249,246,0.06);
 }
@@ -75,13 +77,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:#D2D1CC;border-radius:999px;border:2px solid var(--bg)}
 ::-webkit-scrollbar-thumb:hover{background:#C3C2BC}
-body.dark ::-webkit-scrollbar-thumb{background:#2E2B25}
-body.dark ::-webkit-scrollbar-thumb:hover{background:#3A382F}
+body.dark ::-webkit-scrollbar-thumb{background:#2B2B2A}
+body.dark ::-webkit-scrollbar-thumb:hover{background:#383837}
 /* color-scheme lives on the ROOT and is driven by the theme JS — declaring it
    on body.dark alone makes html/body schemes disagree, which stops Chromium
    propagating the body background to the canvas (page ground goes white). */
 html{scrollbar-width:thin;scrollbar-color:#D2D1CC var(--bg);color-scheme:light}
-body.dark{scrollbar-color:#2E2B25 #000000}
+body.dark{scrollbar-color:#2B2B2A #000000}
 .container{max-width:1200px;margin:0 auto;padding:60px 20px}
 
 /* ── CHAPTER BANDS — every other chapter sits on a full-bleed surface band,
@@ -539,7 +541,7 @@ body.dark .chapter-bar{background:rgba(23,21,15,0.88);box-shadow:0 10px 30px rgb
   overflow:hidden;position:relative;
 }
 body.dark .ticker-wrap{
-  background:linear-gradient(135deg,#15130D 0%,#1D1B14 40%,#15130D 70%,#19170F 100%);
+  background:linear-gradient(135deg,var(--upload-bg) 0%,var(--hover-bg) 40%,var(--upload-bg) 70%,var(--card) 100%);
 }
 .ticker-content,.ticker-label{position:relative;z-index:2}
 .ticker-label{
