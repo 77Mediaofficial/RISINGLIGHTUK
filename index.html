@@ -271,6 +271,11 @@ body.dark .title-logo{filter:none}
 .events-header{margin-bottom:var(--gap-minor)}
 .events-header .sect-head{margin-bottom:0}
 .events-count{display:inline-block;margin-top:14px;font-size:12.5px;color:var(--text2);background:var(--card);padding:7px 15px;border-radius:20px;font-weight:600;border:1px solid var(--border);font-family:var(--mono)}
+/* Reset control for the map's country filter — the chip bar that used to
+   hold "All Countries" is gone, so without this a filtered list is a trap. */
+.filter-clear{display:none;margin:12px auto 0;padding:9px 18px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--accent-2);background:transparent;border:1px solid var(--accent-2);border-radius:20px;cursor:pointer;transition:background .25s,color .25s}
+.filter-clear.on{display:block;width:max-content}
+.filter-clear:hover{background:var(--accent-2);color:var(--bg)}
 .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;margin-bottom:80px;transition:opacity 0.25s ease,transform 0.25s cubic-bezier(0.22,1,0.36,1)}
 .event-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);position:relative}
 .event-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 60px rgba(0,0,0,0.14),0 8px 20px rgba(0,0,0,0.08);border-color:rgba(128,128,128,0.4)}
@@ -930,15 +935,15 @@ body.dark .kbd-help-panel {
   will-change: transform, opacity;
 }
 
-/* Search highlight — candle-gold wash (the raw yellow highlighter is retired) */
+/* Search highlight — alpine-green wash (the raw yellow highlighter is retired) */
 .search-highlight {
-  background: rgba(31,110,126,0.16);
+  background: rgba(44,115,67,0.16);
   color: var(--text);
   border-radius: 2px;
   padding: 0 2px;
   font-weight: 600;
 }
-body.dark .search-highlight { background: rgba(127,194,206,0.28); }
+body.dark .search-highlight { background: rgba(133,207,160,0.28); }
 
 /* Print styles */
 @media print {
@@ -949,7 +954,7 @@ body.dark .search-highlight { background: rgba(127,194,206,0.28); }
   .search-container, .ticker-wrap, .map-section,
   .brief-overlay, .kbd-help-overlay, .modal,
   .masthead, .chapter-bar, .hero-cue, .rl-ig, .scroll-progress, .back-top,
-  .events-count { display: none !important; }
+  .events-count, .filter-clear { display: none !important; }
   body::after { display: none !important; } /* no grain on paper-paper */
   .brief-panel { box-shadow: none; border: 2px solid #000; }
   .events-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -1438,6 +1443,7 @@ body.admin .admin-only{display:inline-flex}
       <span class="sect-eyebrow">CH. 04 — On the Ground</span>
       <div class="sect-title">Events</div>
       <div class="events-count" id="event-count">0 events</div>
+      <button type="button" class="filter-clear" id="filter-clear" onclick="filterByCountry('all')">Show all events ×</button>
     </div>
   </div>
 
@@ -2344,6 +2350,13 @@ function renderEvents(){
 
   count.textContent=filtered.length+' event'+(filtered.length!==1?'s':'');
 
+  /* country-filter reset — visible only while a filter is active */
+  const clr=document.getElementById('filter-clear');
+  if(clr){
+    clr.classList.toggle('on',currentCountry!=='all');
+    if(currentCountry!=='all')clr.textContent='Showing '+currentCountry+' — show all events ×';
+  }
+
   if(filtered.length===0){
     grid.innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No events found</div><div style="font-size:14px;margin-top:8px;color:var(--text3)">Check back soon for upcoming events</div></div>';
     return;
@@ -2960,6 +2973,10 @@ function _mapSeeEvents(i){
   if(loc&&typeof filterByCountry==='function'){
     filterByCountry(loc.country);
     if(window.showToast)showToast('Showing '+loc.country+' events');
+  }else if(typeof filterByCountry==='function'&&currentCountry!=='all'){
+    /* the generic "See our events" always shows the full list */
+    filterByCountry('all');
+    if(window.showToast)showToast('Showing all events');
   }
   const target=document.getElementById('events')||document.getElementById('events-grid');
   if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
