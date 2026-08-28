@@ -34,19 +34,15 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* Display face — Molot by Jovanny Lemonad (libre licence, DaFont), self-hosted:
-   11.9KB OTF in the repo root, single weight. font-synthesis-weight:none on
-   body stops the browser faux-bolding the 600/700 display rules. */
-@font-face{font-family:'Molot';src:url('molot.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   /* 77 Media "Cinematic Editorial Noir" design-system palette (exact swatches).
      Paper/ink + warm neutral greys; surfaces step paper -> ink-soft -> surface. */
   --bg:#FFFFFF;--card:#ECECE9;--text:#15140F;--text-dim:#3A382F;--text2:#6B685E;--text3:#706C5E; /* text3 darkened #837F70→#706C5E: 4.6:1 AA on paper */
   --border:rgba(21,20,15,0.14);--accent:#15140F;--accent-hover:#2E2B25;--font:'Inter',system-ui,sans-serif;
-  --cinzel:'Molot',sans-serif; /* display face — Molot (libre, self-hosted molot.otf), single weight */
+  --cinzel:'Cinzel',serif;
   --mono:'JetBrains Mono',monospace;
   /* Candle-gold secondary accent — the palette's single point of chroma.
      Used ONLY for moments of state/life: open FAQ, active chip, live dot,
@@ -78,7 +74,7 @@ body.dark{
   --glow-color:rgba(250,249,246,0.08);
   --dot-color:rgba(250,249,246,0.19);--hero-grid:rgba(250,249,246,0.06);
 }
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;font-synthesis-weight:none;transition:background-color 0.4s cubic-bezier(0.22,1,0.36,1),color 0.4s cubic-bezier(0.22,1,0.36,1)}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;transition:background-color 0.4s cubic-bezier(0.22,1,0.36,1),color 0.4s cubic-bezier(0.22,1,0.36,1)}
 /* Scrollbar — 77 Media palette (scroll #D2D1CC / hover #C3C2BC) */
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:var(--bg)}
@@ -337,7 +333,7 @@ body.dark .title-logo{filter:none}
 .pdf-controls button:disabled{background:#ccc;cursor:not-allowed}
 .pdf-page-info{font-size:14px;font-weight:600}
 /* End-credits footer — the page ends like a film, not just stops.
-   Top hairline broken by a diamond, Molot masthead, role–name credit rows,
+   Top hairline broken by a diamond, Cinzel masthead, role–name credit rows,
    mono catalogue line to close. */
 .footer{border-top:1px solid var(--border);padding:46px 20px 34px;margin-top:var(--gap-major);text-align:center;position:relative}
 .footer::before{
@@ -986,9 +982,9 @@ body.dark .search-highlight { background: rgba(133,207,160,0.28); }
    Hero entrance — clean top-down fade, HELD until the display font is ready
    ═══════════════════════════════════════════════════
    `body.hero-armed` (set pre-paint) hides the hero from the first frame; the
-   boot script adds `body.hero-in` once Molot has actually loaded (or after a
+   boot script adds `body.hero-in` once Cinzel has actually loaded (or after a
    short hard-timeout, so it can never hang hidden). Result: the headline never
-   flickers from a fallback serif into Molot mid-animation, and the old
+   flickers from a fallback serif into Cinzel mid-animation, and the old
    per-word stagger is replaced by ONE smooth fade per element, in order.
    Everything below the fold is handled by the .rl-sr scroll observer. */
 .header { animation: none; }
@@ -1279,7 +1275,7 @@ body.admin .admin-only{display:inline-flex}
      1. apply stored theme  → returning dark visitors get no light flash
      2. scrollRestoration=manual + scroll-to-top → the page ALWAYS opens at the top
      3. arm the hero (hidden) and reveal it only once the display font is ready,
-        so the big Molot headline never flickers from a fallback serif — one
+        so the big Cinzel headline never flickers from a fallback serif — one
         clean top-down fade, guaranteed to reveal via a hard timeout. -->
 <script>try{
   var _b=document.body;
@@ -1550,7 +1546,7 @@ body.admin .admin-only{display:inline-flex}
     .header::before{background-size:34px 34px}    /* keep the grid's density at phone scale */
     .title-logo{max-width:78px;margin-bottom:22px}
     /* Fluid scale with real slack: the longest LINE ("Has No Borders") clears
-       the box on every phone (320–480), even before Molot swaps in. */
+       the box on every phone (320–480), even before Cinzel-700 swaps in. */
     .hero-h1{font-size:clamp(26px,7.5vw,38px);letter-spacing:0}
     .hero-cue{display:none}   /* desktop has no scroll cue — match it exactly */
 
