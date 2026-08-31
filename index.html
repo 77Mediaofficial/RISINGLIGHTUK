@@ -1693,10 +1693,14 @@ body.admin .admin-only{display:inline-flex}
   <style>
   /* ── CH.05 Quiet Battles ─────────────────────────────────────────────────
      Scoped to .qb so nothing here can leak into the aid chapters. The crisis
-     panel inverts by swapping the two theme tokens (bg on text) — it stays
-     correct in light AND dark with no second palette to maintain. No accent
-     colour inside the panel on purpose: neither green passes contrast on both
-     inverted grounds, and the panel needs no help standing out. */
+     panel is the site's standard card surface (--card / --border / 16px, the
+     same as .event-card) so it reads as part of the site rather than a slab
+     dropped into it. No accent colour inside it on purpose — the numbers do
+     the work, and green on grey buys nothing.
+     ⚠️ The one contrast trap: the global light --text3 (#706C5E) is tuned for
+     PAPER, and drops under AA on the grey card. The small uppercase hours line
+     therefore uses a local --qb-muted, darkened the same way .ch-band darkens
+     text3. Do not "simplify" it back to var(--text3). */
   .qb .qb-lede{
     max-width:660px;margin:0 auto;padding:0 4px;text-align:center;
     font-size:clamp(16px,1.7vw,18px);line-height:1.75;color:var(--text-dim);
@@ -1718,22 +1722,28 @@ body.admin .admin-only{display:inline-flex}
     max-width:660px;margin:26px auto 0;padding:0 4px;text-align:center;
     font-size:14.5px;line-height:1.7;color:var(--text2);
   }
-  /* the inverted panel — paper and ink simply trade places */
+  /* the crisis panel — the site's own card surface */
   .qb .qb-crisis{
+    --qb-muted:#5F5C4C;
     max-width:660px;margin:38px auto 0;
-    background:var(--text);color:var(--bg);
-    border-radius:10px;padding:26px 26px 22px;
+    background:var(--card);color:var(--text);
+    border:1px solid var(--border);
+    border-radius:16px;padding:26px 26px 22px;
   }
+  /* dark uses the --text2 bone rather than --text3: at 10.5px uppercase the
+     text3 value measured 4.55:1, which clears AA by almost nothing. Crisis
+     text gets headroom. */
+  body.dark .qb .qb-crisis{--qb-muted:#A8A496}
   .qb .qb-crisis-head{
     font-family:var(--mono);font-size:11px;font-weight:700;
     letter-spacing:2.4px;text-transform:uppercase;
-    opacity:.66;margin:0 0 4px;
+    color:var(--qb-muted);margin:0 0 4px;
   }
   .qb .qb-lines{list-style:none;margin:0;padding:0}
   .qb .qb-line{
     display:grid;grid-template-columns:1fr auto;align-items:baseline;
     gap:2px 18px;padding:14px 0;
-    border-top:1px solid rgba(128,128,128,.34);
+    border-top:1px solid var(--border);
   }
   .qb .qb-who{font-size:15px;font-weight:600;line-height:1.35}
   .qb .qb-num{
@@ -1746,12 +1756,12 @@ body.admin .admin-only{display:inline-flex}
   .qb .qb-when{
     grid-column:1/-1;
     font-family:var(--mono);font-size:10.5px;font-weight:500;
-    letter-spacing:1.1px;text-transform:uppercase;opacity:.66;line-height:1.5;
+    letter-spacing:1.1px;text-transform:uppercase;color:var(--qb-muted);line-height:1.5;
   }
   .qb .qb-crisis-foot{
     margin:18px 0 0;padding-top:16px;
-    border-top:1px solid rgba(128,128,128,.34);
-    font-size:14px;line-height:1.65;opacity:.78;
+    border-top:1px solid var(--border);
+    font-size:14px;line-height:1.65;color:var(--qb-muted);
   }
   .qb .qb-outro{
     max-width:660px;margin:30px auto 0;padding:0 4px;text-align:center;
@@ -1760,14 +1770,14 @@ body.admin .admin-only{display:inline-flex}
   .qb .qb-outro a{color:var(--accent-2);text-decoration:underline;text-underline-offset:3px}
   @media(max-width:600px){
     .qb .qb-scope{grid-template-columns:1fr;gap:22px}
-    .qb .qb-crisis{padding:22px 18px 18px;border-radius:8px}
+    .qb .qb-crisis{padding:22px 18px 18px;border-radius:12px}
     .qb .qb-line{grid-template-columns:1fr;gap:3px;padding:13px 0}
     .qb .qb-num{text-align:left}
   }
-  /* printed, the panel would eat a cartridge — hairline box instead */
+  /* print: drop the grey fill, keep the box so the numbers stay grouped */
   @media print{
     .qb .qb-crisis{background:transparent!important;color:#000!important;border:1.5px solid #000}
-    .qb .qb-crisis-head,.qb .qb-when,.qb .qb-crisis-foot{opacity:1}
+    .qb .qb-crisis-head,.qb .qb-when,.qb .qb-crisis-foot{color:#333!important}
     .qb .qb-line{border-top-color:#999}
   }
   </style>
