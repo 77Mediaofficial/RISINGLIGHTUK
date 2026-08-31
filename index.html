@@ -525,15 +525,21 @@ body.dark .tt-sun{opacity:1;transform:none}
   opacity:0;visibility:hidden;
   transition:opacity .35s cubic-bezier(0.22,1,0.36,1),transform .35s cubic-bezier(0.22,1,0.36,1),visibility .35s;
   max-width:calc(100vw - 24px);
+  /* 6 chapters since Quiet Battles joined: trim the gaps on phones so they
+     fit, and let the strip scroll rather than CLIP on very narrow screens —
+     a nav item you cannot reach is worse than one you have to swipe to. */
+  overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;
 }
+.chapter-bar::-webkit-scrollbar{display:none}
 body.dark .chapter-bar{background:rgba(23,21,15,0.88);box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 1px 0 var(--edge-light)}
 .chapter-bar.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
 .chapter-bar a{
   font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.2px;
   text-transform:uppercase;color:var(--text2);text-decoration:none;
-  padding:9px 12px;border-radius:999px;white-space:nowrap;
+  padding:9px 12px;border-radius:999px;white-space:nowrap;flex:none;
   transition:background .3s,color .3s;
 }
+@media(max-width:430px){.chapter-bar a{padding:9px 9px;letter-spacing:.85px}}
 .chapter-bar a.active{background:var(--text);color:var(--bg)}
 @media(max-width:768px){
   .chapter-bar{display:flex}
@@ -1329,6 +1335,7 @@ body.admin .admin-only{display:inline-flex}
       <a href="#impact">Impact</a>
       <a href="#momentum">Momentum</a>
       <a href="#events">Events</a>
+      <a href="#quiet-battles">Quiet Battles</a>
       <a href="#faq">FAQ</a>
       <a href="#get-involved">Get Involved</a>
     </nav>
@@ -1344,6 +1351,7 @@ body.admin .admin-only{display:inline-flex}
   <a href="#reach" data-spy="reach">Reach</a>
   <a href="#impact" data-spy="impact">Impact</a>
   <a href="#events" data-spy="events">Events</a>
+  <a href="#quiet-battles" data-spy="quiet-battles">Quiet</a>
   <a href="#faq" data-spy="faq">FAQ</a>
   <a href="#get-involved" data-spy="get-involved">Join</a>
 </nav>
@@ -1354,9 +1362,10 @@ body.admin .admin-only{display:inline-flex}
   <a href="#impact" data-spy="impact"><span>Impact</span>02</a>
   <a href="#momentum" data-spy="momentum"><span>Momentum</span>03</a>
   <a href="#events" data-spy="events"><span>Events</span>04</a>
-  <a href="#rl-instagram" data-spy="rl-instagram"><span>Field</span>05</a>
-  <a href="#faq" data-spy="faq"><span>FAQ</span>06</a>
-  <a href="#get-involved" data-spy="get-involved"><span>Join</span>07</a>
+  <a href="#quiet-battles" data-spy="quiet-battles"><span>Quiet</span>05</a>
+  <a href="#rl-instagram" data-spy="rl-instagram"><span>Field</span>06</a>
+  <a href="#faq" data-spy="faq"><span>FAQ</span>07</a>
+  <a href="#get-involved" data-spy="get-involved"><span>Join</span>08</a>
 </nav>
 
 <!-- Admin status bar (only visible when in admin mode) -->
@@ -1373,7 +1382,7 @@ body.admin .admin-only{display:inline-flex}
     <img class="title-logo" src="rl-crest.png" alt="Rising Light"/>
     <h1 class="hero-h1"><span class="w">Compassion</span><br><span class="w">Has</span> <span class="w">No</span> <span class="w">Borders</span></h1>
     <div class="overview">
-      <p>We take help the last mile — by hand, in person, to the people and animals the world overlooks.</p>
+      <p>Help that arrives in person — for the people and animals the world overlooks.</p>
       <p id="mission-reveal">Rising Light UK is a grassroots charity born in London, running hands-on humanitarian and animal-welfare projects across the UK, the United States and Guatemala — and growing wherever the need leads.</p>
     </div>
     <a class="hero-cta" href="#get-involved">Volunteer with us <span aria-hidden="true">&rarr;</span></a>
@@ -1599,11 +1608,176 @@ body.admin .admin-only{display:inline-flex}
   @media(max-width:600px){.faq-section{margin-bottom:52px}.faq-q{padding:16px 18px;font-size:15px}.faq-a{padding:2px 18px 18px}}
   </style>
 </div><!-- /band: events -->
-  <!-- CH. 05 — From the field: curated Instagram stills (moved above the
+
+  <!-- ═══ CH. 05 — QUIET BATTLES ═══════════════════════════════════════════
+       Rising Light's mental health & suicide prevention branch, sitting
+       alongside the international work. Paper ground (the events band just
+       closed) and deliberately quieter than the aid chapters — restraint is
+       the brand.
+
+       ⚠️ TWO THINGS THAT MUST NOT BE "TIDIED AWAY" IN A LATER PASS:
+       1. The crisis numbers are ON the page, never behind a click, an
+          accordion or a modal. Every number is a tel:/sms: link so a phone
+          user taps instead of memorising.
+       2. Numbers and hours drift — PAPYRUS moved from 0800 068 4141 to the
+          number below. Re-verify each against the charity's own site before
+          any redesign of this block ships.  Verified 31 Aug 2026. ── -->
+  <section class="chapter qb" id="quiet-battles" aria-labelledby="qb-title">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 05 — Quiet Battles</span>
+      <div class="sect-title" id="qb-title">Quiet Battles</div>
+      <p class="sect-sub">Our mental health and suicide prevention work, running alongside everything else we do.</p>
+    </div>
+
+    <p class="qb-lede">Some of the people we visit are fighting something nobody can see. Quiet Battles is the part of Rising Light UK that says so out loud — and makes sure that no one we meet has to work out where to turn on their own.</p>
+
+    <div class="qb-scope">
+      <div class="qb-col">
+        <p class="qb-col-head qb-yes">What we do</p>
+        <ul class="qb-list">
+          <li>Listen, without flinching</li>
+          <li>Sit with you while you make the call</li>
+          <li>Point you to people who are trained</li>
+        </ul>
+      </div>
+      <div class="qb-col">
+        <p class="qb-col-head">What we don't</p>
+        <ul class="qb-list qb-list-no">
+          <li>Diagnose</li>
+          <li>Counsel</li>
+          <li>Replace a professional</li>
+        </ul>
+      </div>
+    </div>
+    <p class="qb-note">We're volunteers, not clinicians. That's the promise, and it's the whole promise.</p>
+
+    <div class="qb-crisis" role="region" aria-label="Crisis support numbers">
+      <p class="qb-crisis-head">If today is hard</p>
+      <ul class="qb-lines">
+        <li class="qb-line">
+          <span class="qb-who">Samaritans</span>
+          <a class="qb-num" href="tel:116123">116 123</a>
+          <span class="qb-when">24/7 · Free from any phone · No credit needed</span>
+        </li>
+        <li class="qb-line">
+          <span class="qb-who">Shout</span>
+          <a class="qb-num" href="sms:85258">Text 85258</a>
+          <span class="qb-when">24/7 · Text the word SHOUT · No call needed</span>
+        </li>
+        <li class="qb-line">
+          <span class="qb-who">CALM</span>
+          <a class="qb-num" href="tel:0800585858">0800 58 58 58</a>
+          <span class="qb-when">5pm to midnight, every day of the year</span>
+        </li>
+        <li class="qb-line">
+          <span class="qb-who">Papyrus HOPELINE247</span>
+          <a class="qb-num" href="tel:03001022470">0300 102 2470</a>
+          <span class="qb-when">24/7 · Under 35s, or anyone supporting one</span>
+        </li>
+        <li class="qb-line">
+          <span class="qb-who">NHS urgent mental health</span>
+          <a class="qb-num" href="tel:111">111 → option 2</a>
+          <span class="qb-when">24/7 · England</span>
+        </li>
+        <li class="qb-line">
+          <span class="qb-who">If life is in danger now</span>
+          <a class="qb-num" href="tel:999">999</a>
+          <span class="qb-when">Or go straight to Accident &amp; Emergency</span>
+        </li>
+      </ul>
+      <p class="qb-crisis-foot">You don't have to be in crisis to call any of these. Wanting to talk is enough.</p>
+    </div>
+
+    <p class="qb-outro">Quiet Battles goes out on the same rounds as everything else we do. <a href="#get-involved">Come with us</a>.</p>
+
+  <style>
+  /* ── CH.05 Quiet Battles ─────────────────────────────────────────────────
+     Scoped to .qb so nothing here can leak into the aid chapters. The crisis
+     panel inverts by swapping the two theme tokens (bg on text) — it stays
+     correct in light AND dark with no second palette to maintain. No accent
+     colour inside the panel on purpose: neither green passes contrast on both
+     inverted grounds, and the panel needs no help standing out. */
+  .qb .qb-lede{
+    max-width:660px;margin:0 auto;padding:0 4px;text-align:center;
+    font-size:clamp(16px,1.7vw,18px);line-height:1.75;color:var(--text-dim);
+  }
+  .qb .qb-scope{
+    display:grid;grid-template-columns:1fr 1fr;gap:20px 34px;
+    max-width:660px;margin:34px auto 0;padding:0 4px;
+  }
+  .qb .qb-col-head{
+    font-family:var(--mono);font-size:11px;font-weight:600;
+    letter-spacing:2px;text-transform:uppercase;color:var(--text3);
+    padding-bottom:9px;border-bottom:1px solid var(--border);margin-bottom:12px;
+  }
+  .qb .qb-col-head.qb-yes{color:var(--accent-2);border-bottom-color:var(--accent-2)}
+  .qb .qb-list{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+  .qb .qb-list li{font-size:15px;line-height:1.55;color:var(--text-dim)}
+  .qb .qb-list-no li{color:var(--text3)}
+  .qb .qb-note{
+    max-width:660px;margin:26px auto 0;padding:0 4px;text-align:center;
+    font-size:14.5px;line-height:1.7;color:var(--text2);
+  }
+  /* the inverted panel — paper and ink simply trade places */
+  .qb .qb-crisis{
+    max-width:660px;margin:38px auto 0;
+    background:var(--text);color:var(--bg);
+    border-radius:10px;padding:26px 26px 22px;
+  }
+  .qb .qb-crisis-head{
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    letter-spacing:2.4px;text-transform:uppercase;
+    opacity:.66;margin:0 0 4px;
+  }
+  .qb .qb-lines{list-style:none;margin:0;padding:0}
+  .qb .qb-line{
+    display:grid;grid-template-columns:1fr auto;align-items:baseline;
+    gap:2px 18px;padding:14px 0;
+    border-top:1px solid rgba(128,128,128,.34);
+  }
+  .qb .qb-who{font-size:15px;font-weight:600;line-height:1.35}
+  .qb .qb-num{
+    font-family:var(--mono);font-weight:700;font-size:clamp(17px,2.4vw,21px);
+    letter-spacing:-.2px;font-variant-numeric:tabular-nums;white-space:nowrap;
+    text-align:right;color:inherit;text-decoration:none;
+    border-bottom:1px solid transparent;transition:border-color .2s;
+  }
+  .qb .qb-num:hover,.qb .qb-num:focus-visible{border-bottom-color:currentColor}
+  .qb .qb-when{
+    grid-column:1/-1;
+    font-family:var(--mono);font-size:10.5px;font-weight:500;
+    letter-spacing:1.1px;text-transform:uppercase;opacity:.66;line-height:1.5;
+  }
+  .qb .qb-crisis-foot{
+    margin:18px 0 0;padding-top:16px;
+    border-top:1px solid rgba(128,128,128,.34);
+    font-size:14px;line-height:1.65;opacity:.78;
+  }
+  .qb .qb-outro{
+    max-width:660px;margin:30px auto 0;padding:0 4px;text-align:center;
+    font-size:15px;line-height:1.7;color:var(--text2);
+  }
+  .qb .qb-outro a{color:var(--accent-2);text-decoration:underline;text-underline-offset:3px}
+  @media(max-width:600px){
+    .qb .qb-scope{grid-template-columns:1fr;gap:22px}
+    .qb .qb-crisis{padding:22px 18px 18px;border-radius:8px}
+    .qb .qb-line{grid-template-columns:1fr;gap:3px;padding:13px 0}
+    .qb .qb-num{text-align:left}
+  }
+  /* printed, the panel would eat a cartridge — hairline box instead */
+  @media print{
+    .qb .qb-crisis{background:transparent!important;color:#000!important;border:1.5px solid #000}
+    .qb .qb-crisis-head,.qb .qb-when,.qb .qb-crisis-foot{opacity:1}
+    .qb .qb-line{border-top-color:#999}
+  }
+  </style>
+  </section>
+
+  <!-- CH. 06 — From the field: curated Instagram stills (moved above the
        footer; the loader script at the end of the page finds it by id) -->
   <section class="rl-ig chapter" id="rl-instagram" aria-labelledby="rl-ig-title" hidden>
     <div class="sect-head">
-      <span class="sect-eyebrow">CH. 05 — From the Field</span>
+      <span class="sect-eyebrow">CH. 06 — From the Field</span>
       <div class="sect-title" id="rl-ig-title">Latest from the Field</div>
       <p class="rl-ig-sub sect-sub">Moments from our work — follow <a href="https://www.instagram.com/risinglightuk/" target="_blank" rel="noopener noreferrer">@risinglightuk</a></p>
     </div>
@@ -1613,7 +1787,7 @@ body.admin .admin-only{display:inline-flex}
 <div class="ch-band"><!-- band: faq -->
   <section class="faq-section" id="faq" aria-label="Frequently asked questions">
     <div class="sect-head">
-      <span class="sect-eyebrow">CH. 06 — Questions</span>
+      <span class="sect-eyebrow">CH. 07 — Questions</span>
       <div class="sect-title">Questions</div>
       <p class="sect-sub">What we do, where we work, and how you can help.</p>
     </div>
@@ -1657,7 +1831,7 @@ body.admin .admin-only{display:inline-flex}
   </script>
   <section class="give-section" id="get-involved">
     <div class="sect-head">
-      <span class="sect-eyebrow">CH. 07 — Join Us</span>
+      <span class="sect-eyebrow">CH. 08 — Join Us</span>
       <div class="sect-title">Get Involved</div>
       <p class="sect-sub">Volunteer with us or send a message. We'd love to hear from you.</p>
     </div>
