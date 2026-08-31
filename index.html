@@ -1625,7 +1625,7 @@ body.admin .admin-only{display:inline-flex}
   <section class="chapter qb" id="quiet-battles" aria-labelledby="qb-title">
     <div class="sect-head">
       <span class="sect-eyebrow">CH. 05 — Quiet Battles</span>
-      <div class="sect-title" id="qb-title">Quiet Battles</div>
+      <div class="sect-title qb-lockup" id="qb-title">Quiet Battles<span class="qb-lockup-sub">Rising Light UK</span></div>
       <p class="sect-sub">Our mental health and suicide prevention work, running alongside everything else we do.</p>
     </div>
 
@@ -1701,6 +1701,21 @@ body.admin .admin-only{display:inline-flex}
      PAPER, and drops under AA on the grey card. The small uppercase hours line
      therefore uses a local --qb-muted, darkened the same way .ch-band darkens
      text3. Do not "simplify" it back to var(--text3). */
+  /* the branch wordmark: the section title set as the Quiet Battles text
+     lockup — uppercase Cinzel over a tracked mono credit line, matching the
+     identity sheet. The sub's colours are the AA-safe pair the crisis panel
+     already uses, NOT --text3 (paper-tuned, too thin at 10.5px). */
+  .qb .qb-lockup{
+    text-transform:uppercase;font-weight:700;
+    font-size:clamp(30px,4.6vw,42px);letter-spacing:.09em;
+    display:flex;flex-direction:column;align-items:center;gap:9px;
+    line-height:1.15;
+  }
+  .qb .qb-lockup-sub{
+    font-family:var(--mono);font-size:10.5px;font-weight:600;
+    letter-spacing:.26em;text-transform:uppercase;color:#5F5C4C;
+  }
+  body.dark .qb .qb-lockup-sub{color:#A8A496}
   .qb .qb-lede{
     max-width:660px;margin:0 auto;padding:0 4px;text-align:center;
     font-size:clamp(16px,1.7vw,18px);line-height:1.75;color:var(--text-dim);
