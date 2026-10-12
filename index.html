@@ -359,6 +359,25 @@ body.dark #funds-head,body.dark .funds-note{color:var(--text2)}
 .credits-row dt{font-family:var(--mono);font-size:9.5px;letter-spacing:2.5px;color:var(--text3);text-transform:uppercase;text-align:right}
 .credits-row dd{margin:0;font-size:13px;color:var(--text-dim);text-align:left}
 .credits-row dd a{color:var(--text-dim);text-decoration:none;border-bottom:1px solid var(--border);transition:color .25s,border-color .25s}
+/* ── PRIVACY — one line under each Send button, and the plain-English note that opens in
+   the footer (native <details>, so it works with no JS and with keyboard/screen readers). ── */
+.give-privacy{margin:12px 0 0;font-size:12px;line-height:1.5;color:var(--text-dim);text-align:center}
+.give-urgent{margin-top:6px}
+.give-privacy a{color:var(--text);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.privacy-note{max-width:560px;margin:26px auto 22px;padding:0 20px;text-align:left}
+.privacy-note summary{
+  cursor:pointer;list-style:none;text-align:center;padding:10px 0;
+  font-family:var(--mono);font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2);
+}
+.privacy-note summary::-webkit-details-marker{display:none}
+.privacy-note summary::after{content:" +";content:" +" / ""}
+.privacy-note[open] summary::after{content:" \2212";content:" \2212" / ""}
+.privacy-note summary:hover{color:var(--text)}
+.privacy-body{border-top:1px solid var(--border);padding-top:14px}
+.privacy-body p{margin:0 0 10px;font-size:13px;line-height:1.6;color:var(--text-dim)}
+.privacy-body strong{color:var(--text);font-weight:600}
+.privacy-body a{color:var(--text);text-decoration-thickness:1px;text-underline-offset:3px}
+.privacy-body a[href^="mailto"]{white-space:nowrap} /* never split the address at its hyphen */
 .credits-row dd a:hover{color:var(--text);border-color:var(--text2)}
 .credits-end{font-family:var(--mono);font-size:9px;letter-spacing:2.5px;color:var(--text3);text-transform:uppercase;opacity:.75}
 .loading{text-align:center;padding:60px;color:var(--text2);font-size:15px}
@@ -506,6 +525,23 @@ body.dark .masthead.scrolled{background:rgba(16,15,11,0.82)}
 }
 .mast-nav a:hover{color:var(--text)}
 @media(max-width:768px){.mast-nav{display:none}.masthead-in{height:52px}}
+/* ── JOIN US — the one ask, always in reach on desktop (owner call 12 Oct 2026). An ink
+   pill like the hero CTA; it steps aside (.away) while Get Involved or Quiet Battles is on
+   screen. Phones use the chapter bar's Join, which now shows from the first screen. ── */
+.mast-end{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.mast-join{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;
+  background:var(--text);color:var(--bg);text-decoration:none;
+  padding:9px 16px;border-radius:999px;white-space:nowrap;
+  transition:opacity .3s cubic-bezier(0.22,1,0.36,1),transform .3s cubic-bezier(0.22,1,0.36,1),visibility .3s,background .2s;
+}
+.mast-join:hover{background:var(--accent-hover)}
+.mast-join.away{opacity:0;transform:translateY(-6px);visibility:hidden;pointer-events:none}
+.mast-join.away:focus-visible{opacity:1;transform:none;visibility:visible;pointer-events:auto}
+/* the brand + 7-link nav + pill + toggle row only fits from ~979px (review, 12 Oct): below that
+   the pill would push the theme toggle off-screen, so tablets keep the nav's Get Involved */
+@media(max-width:1023px){.mast-join{display:none}}
+@media(prefers-reduced-motion:reduce){.mast-join{transition:none}}
 [id]{scroll-margin-top:72px}
 
 /* ── THEME TOGGLE — monochrome SVG sun/moon, lives in the masthead ── */
@@ -552,6 +588,11 @@ body.dark .chapter-bar{background:rgba(23,21,15,0.88);box-shadow:0 10px 30px rgb
   transition:background .3s,color .3s;
 }
 @media(max-width:430px){.chapter-bar a{padding:9px 9px;letter-spacing:.85px}}
+@media(max-width:340px){.chapter-bar a{padding:9px 6px;letter-spacing:.5px}}
+@media(max-width:768px){
+  html{scroll-padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+  body .footer{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))} /* body: outranks the later phone .footer padding shorthand */
+}
 .chapter-bar a.active{background:var(--text);color:var(--bg)}
 @media(max-width:768px){
   .chapter-bar{display:flex}
@@ -1351,15 +1392,18 @@ body.admin .admin-only{display:inline-flex}
       <a href="#faq">FAQ</a>
       <a href="#get-involved">Get Involved</a>
     </nav>
+    <div class="mast-end">
+    <a class="mast-join" id="mast-join" href="#get-involved">Join us</a>
     <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" aria-label="Toggle dark mode">
       <svg class="tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
     </button>
+    </div>
   </div>
 </header>
 
 <!-- Mobile chapter bar — fixed bottom pill nav with scroll-spy -->
-<nav class="chapter-bar" id="chapter-bar" aria-label="Page sections">
+<nav class="chapter-bar show" id="chapter-bar" aria-label="Page sections">
   <a href="#reach" data-spy="reach">Reach</a>
   <a href="#impact" data-spy="impact">Impact</a>
   <a href="#events" data-spy="events">Events</a>
@@ -1890,6 +1934,7 @@ body.admin .admin-only{display:inline-flex}
         <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" maxlength="500" placeholder="e.g. events, fundraising, skills"></label>
         <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="give-btn" type="submit">Send</button>
+        <p class="give-privacy">We only use what you send to reply and arrange volunteering. <a class="privacy-link" href="#privacy">How we handle your details</a></p>
       </form>
       <form class="give-card" onsubmit="return rlGiveSubmit(event,'contact')">
         <h3 class="give-card-title">Contact Us</h3>
@@ -1898,6 +1943,8 @@ body.admin .admin-only{display:inline-flex}
         <label class="give-field"><span>Message</span><textarea name="message" rows="3" required maxlength="4000" placeholder="How can we help?"></textarea></label>
         <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="give-btn" type="submit">Send</button>
+        <p class="give-privacy">We only use what you send to reply to you. <a class="privacy-link" href="#privacy">How we handle your details</a></p>
+        <p class="give-privacy give-urgent">This inbox isn't watched around the clock. If you need help now, use the numbers in <a href="#quiet-battles">Quiet Battles</a>.</p>
       </form>
     </div>
   </section>
@@ -1953,7 +2000,27 @@ body.admin .admin-only{display:inline-flex}
       <div class="credits-row"><dt>Contact</dt><dd><a href="mailto:svn-77mediaofficial@outlook.com">svn-77mediaofficial@outlook.com</a></dd></div>
       <div class="credits-row"><dt>Follow</dt><dd><a href="https://www.instagram.com/risinglightuk/" target="_blank" rel="noopener noreferrer">@risinglightuk on Instagram</a></dd></div>
       <div class="credits-row"><dt>Website</dt><dd><a href="https://77mediaofficial.net" target="_blank" rel="noopener noreferrer">77mediaofficial.net</a></dd></div>
+      <div class="credits-row"><dt>Privacy</dt><dd><a class="privacy-link" href="#privacy">How we handle your details</a></dd></div>
     </dl>
+    <!-- Privacy note (owner-approved facts, 12 Oct 2026): Rising Light UK is responsible;
+         only the founder has access to enquiries (true only while he is the ONLY login on the
+         shared Supabase project: its read policy is authenticated/using(true)); kept up to 24
+         months (deleted by the owner-applied retention job). The sharing line keeps the
+         safeguarding exception (never promise secrecy). If any fact changes, update this note
+         in the same commit. Plain English, not legal advice. -->
+    <details class="privacy-note" id="privacy">
+      <summary>Privacy: how we handle your details</summary>
+      <div class="privacy-body">
+        <p><strong>Who we are.</strong> Rising Light UK. You can reach us at <a href="mailto:svn-77mediaofficial@outlook.com">svn-77mediaofficial@outlook.com</a>.</p>
+        <p><strong>What we collect.</strong> Only what you send through our two forms: your name, your email address, your message or how you'd like to help, and the date you sent it.</p>
+        <p><strong>Why.</strong> To reply to you and, if you'd like to volunteer or partner with us, to arrange it. We use your details because you've asked us to get back to you. If you choose to tell us something personal, such as about your health, we only use it to help you and handle it with extra care.</p>
+        <p><strong>Who else sees it.</strong> We don't sell your details or give them to anyone else for their own use, and we don't add you to a mailing list. We would only pass them on if the law requires it, or if we believe someone is at serious risk of harm.</p>
+        <p><strong>Where it's kept.</strong> In a database run for us by Supabase, our database provider (its servers are in Ireland), and in our email inbox (Microsoft Outlook) when we reply, or if the form sends by email instead. Only Rising Light's founder has access to them.</p>
+        <p><strong>How long.</strong> We keep enquiries for up to 24 months, then delete them, including any emails about them.</p>
+        <p><strong>Your rights.</strong> You can ask to see, correct or delete your details, or ask us to stop using them, by emailing us. We'll reply within a month. If you're not happy with our answer, you can complain to the Information Commissioner's Office at <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.</p>
+        <p><strong>The rest of the site.</strong> No tracking or advertising cookies. Your browser remembers your light or dark choice on your own device. The site is hosted by GitHub, our events and forms run on Supabase, our fonts load from Google Fonts and the event viewer from Cloudflare's code library, so those companies see your IP address, as with any site that uses them.</p>
+      </div>
+    </details>
     <div class="credits-end">RL·UK — MMXXVI — Compassion Has No Borders</div>
   </footer>
 </div>
@@ -2621,8 +2688,11 @@ function renderEvents(){
     const daysDiff=Math.floor((new Date()-new Date(e.created_at))/(1000*60*60*24));
     const badge=daysDiff<=7?'New':'';
     const country=detectCountry(e.name);
-    const shareUrl=encodeURIComponent(window.location.href);
-    const shareText=encodeURIComponent('Rising Light event: '+e.name);
+    /* The share text travels as an HTML-escaped data attribute, never inside an inline
+       onclick: encodeURIComponent leaves ' ( ) unescaped, so a name like CHARLIE'S
+       PROMISE broke out of the old onclick string (and an admin-typed name could run
+       code). One delegated listener (initShareButtons) reads it back. */
+    const shareText=escapeHtml('Rising Light event: '+e.name);
     return `
     <div class="event-card">
       ${badge?`<div class="event-badge">${badge}</div>`:''}
@@ -2631,9 +2701,9 @@ function renderEvents(){
         <button class="btn btn-primary" onclick="viewEvent(${e.id})">View Details</button>
       </div>
       <div class="event-share">
-        <button class="share-btn" onclick="shareEvent('twitter','${shareText}','${shareUrl}')" title="Share on Twitter">𝕏</button>
-        <button class="share-btn" onclick="shareEvent('whatsapp','${shareText}','${shareUrl}')" title="Share on WhatsApp">WhatsApp</button>
-        <button class="share-btn" onclick="shareEvent('copy','${shareText}','${shareUrl}')" title="Copy link">Copy Link</button>
+        <button type="button" class="share-btn" data-share="twitter" data-text="${shareText}" aria-label="Share on X" title="Share on X">𝕏</button>
+        <button type="button" class="share-btn" data-share="whatsapp" data-text="${shareText}" title="Share on WhatsApp">WhatsApp</button>
+        <button type="button" class="share-btn" data-share="copy" data-text="${shareText}" title="Copy link">Copy Link</button>
       </div>
     </div>
   `}).join('');
@@ -2904,18 +2974,15 @@ function renderTicker(){
 }
 
 /* ─── SHARE BUTTONS ──────────────────────────────────────────────────── */
-function shareEvent(platform,text,url){
-  text=decodeURIComponent(text);
-  url=decodeURIComponent(url);
+/* text and url arrive RAW (not URL-encoded); btn is the clicked button, passed in by
+   the delegated listener below rather than read from the global `event`. */
+function shareEvent(platform,text,url,btn){
   if(platform==='twitter'){
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank','noopener,noreferrer');
   }else if(platform==='whatsapp'){
-    window.open(`https://wa.me/?text=${encodeURIComponent(text+' '+url)}`,'_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(text+' '+url)}`,'_blank','noopener,noreferrer');
   }else if(platform==='copy'){
     const fullText=text+' '+url;
-    // Capture the clicked button now (synchronously); `event` is unreliable
-    // inside the async clipboard callback.
-    const btn=(typeof event!=='undefined'&&event)?event.target:null;
     navigator.clipboard.writeText(fullText).then(()=>{
       // Tiny non-blocking confirmation — flash the clicked button's text
       if(btn){const orig=btn.textContent;btn.textContent='Copied ✓';setTimeout(()=>{btn.textContent=orig},1400);}
@@ -2923,6 +2990,15 @@ function shareEvent(platform,text,url){
     }).catch(()=>alert('Could not copy. URL: '+url));
   }
 }
+/* One delegated listener for every event card's share buttons (the cards are
+   re-rendered on each filter, so binding per button would leak). */
+(function initShareButtons(){
+  document.addEventListener('click',function(ev){
+    const b=ev.target.closest&&ev.target.closest('.share-btn[data-share]');
+    if(!b)return;
+    shareEvent(b.dataset.share,b.dataset.text||'',window.location.href,b);
+  });
+})();
 
 /* ─── ANIMATED COUNTERS ──────────────────────────────────────────────── */
 function animateCounter(el,target,duration=1400){
@@ -3433,12 +3509,32 @@ window.showToast=function(msg){
       bar.style.transform='scaleX('+(max>0?(h.scrollTop/max):0)+')';
       btn.classList.toggle('show',h.scrollTop>600);
       if(mast)mast.classList.toggle('scrolled',h.scrollTop>10);
-      if(chbar)chbar.classList.toggle('show',h.scrollTop>500);
       ticking=false;
     });
   }
+  /* phones: the chapter bar (with its Join) shows from the first screen, not after 500px
+     (owner call 12 Oct 2026): it carries class="show" in the markup, so it never animates in */
   window.addEventListener('scroll',onScroll,{passive:true});
   onScroll();
+})();
+/* Join us steps aside while the forms or the Quiet Battles chapter are on screen. An
+   IntersectionObserver, so nothing runs per scroll event. */
+(function(){
+  const j=document.getElementById('mast-join');
+  if(!j||!('IntersectionObserver' in window))return;
+  const on=new Set();
+  const io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting)on.add(e.target); else on.delete(e.target); });
+    j.classList.toggle('away',on.size>0);
+  },{rootMargin:'-15% 0px -15% 0px'});
+  ['get-involved','quiet-battles'].forEach(function(id){ const el=document.getElementById(id); if(el)io.observe(el); });
+})();
+/* "How we handle your details" links open the privacy note in the footer before the
+   anchor jump lands on it; a visit straight to #privacy opens it too. */
+(function(){
+  function openPrivacy(){ const d=document.getElementById('privacy'); if(d)d.open=true; }
+  document.addEventListener('click',function(ev){ if(ev.target.closest&&ev.target.closest('a.privacy-link'))openPrivacy(); });
+  if(location.hash==='#privacy')openPrivacy();
 })();
 
 /* ── CHAPTER-BAR SCROLL-SPY — highlights the section in view ─────── */
@@ -4059,6 +4155,9 @@ body.dark .hero-cta:hover{background:var(--accent-hover)}
 @media(hover:none){
   .masthead.scrolled{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
   body.dark .masthead.scrolled{background:var(--bg)}
+  /* the chapter bar is now on screen for the whole scroll on phones (12 Oct 2026), so it
+     drops its backdrop blur there too: a solid surface, same as the masthead above */
+  .chapter-bar,body.dark .chapter-bar{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
 }
 .map-legend-lead{margin-right:2px}
 .map-legend-btn{background:none;border:none;cursor:pointer;
