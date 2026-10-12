@@ -246,6 +246,18 @@ body.dark .title-logo{filter:none}
   .badge-wall{gap:20px 18px}
 }
 
+/* ── FUNDS USED — one figure in the same ledger language as the stats above:
+   Cinzel number, uppercase label, mono note, and the outlined accent tag the
+   site already uses for its filter chip. Edit the figure in the HTML. ── */
+.funds-ledger{max-width:420px;margin:0 auto;padding:0 20px;text-align:center}
+.funds-amount{font-family:var(--cinzel);font-size:46px;font-weight:700;letter-spacing:1px;margin-bottom:8px;font-variant-numeric:lining-nums}
+.funds-note{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-top:10px}
+.funds-tag{display:inline-block;margin-top:16px;padding:7px 16px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-2);border:1px solid var(--accent-2);border-radius:20px}
+@media(max-width:768px){.funds-amount{font-size:28px}}
+/* the band's --text3 override is a light-mode value; in dark it measures 2.7:1, so the
+   funds head and note use the bone --text2 there (7.3:1) */
+body.dark #funds-head,body.dark .funds-note{color:var(--text2)}
+
 /* ── CHAPTER SYSTEM — one film-credit header pattern for every section ── */
 .chapter{margin-bottom:var(--gap-major)}
 .sect-head{text-align:center;margin-bottom:38px}
@@ -1438,6 +1450,16 @@ body.admin .admin-only{display:inline-flex}
          this file; a badge with done:false shows as a dashed "in progress" ring. -->
     <h3 class="badge-head" id="badge-head">Milestones</h3>
     <ul class="badge-wall" id="badge-wall" aria-labelledby="badge-head"></ul>
+    <!-- Funds used — the running total spent on Rising Light's operations.
+         ★ This IS the published figure: to update it, edit the amount and the
+         month below, then commit and push. ★ -->
+    <h3 class="badge-head" id="funds-head">Funds Used</h3>
+    <div class="funds-ledger" role="group" aria-labelledby="funds-head">
+      <div class="funds-amount">£550</div>
+      <div class="stat-label">Spent on our operations so far</div>
+      <div class="funds-note">Estimated total · October 2026</div>
+      <span class="funds-tag">Self-funded</span>
+    </div>
   </section>
 </div><!-- /band: impact -->
 
