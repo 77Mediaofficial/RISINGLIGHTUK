@@ -2596,7 +2596,9 @@ async function handleFiles(e){
 
 async function loadEvents(){
   const grid=document.getElementById('events-grid');
-  const fail=msg=>{if(grid)grid.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div><div style="font-size:14px;margin-top:8px;color:var(--text3)">${msg}</div></div>`;};
+  const fail=msg=>{if(grid)grid.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div><div style="font-size:14px;margin-top:8px;color:var(--text3)">${msg}</div></div>`;
+    /* the request has settled (badly): the calendar leaves its skeleton and shows this month */
+    window._rlEventsSettled=true;if(typeof renderCalendar==='function')renderCalendar();};
 
   /* Network layer: a thrown fetch is a connection problem; a non-OK status is a
      server problem. The OLD code only handled r.ok and the catch — a 4xx/5xx
@@ -2620,6 +2622,7 @@ async function loadEvents(){
     fail('The response could not be read.');
     return;
   }
+  window._rlEventsSettled=true; /* the calendar may now paint a real month (see renderCalendar) */
 
   /* Rendering is isolated from the network try/catch so a rendering exception
      can't masquerade as a "failed to load" message — it surfaces in the console
@@ -3931,6 +3934,16 @@ function renderCalendar(){
   const grid=document.getElementById('cal-grid');
   if(!grid)return;
   const now=new Date();
+  /* First paint (13 Oct 2026 fix): until the events request settles, draw a neutral six-week
+     skeleton instead of the current month. Painting October and then jumping to the month of the
+     next event (5 rows → 6) was the load-time flash and layout shift. If the visitor taps a month
+     arrow first, render for real straight away. */
+  if(!window._rlEventsSettled&&!window._rlCalTouched){
+    grid.setAttribute('aria-busy','true');
+    grid.innerHTML=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="cal-dow">${d}</div>`).join('')
+      +'<div class="cal-cell cal-pad"></div>'.repeat(42);
+    return;
+  }
   if(!calView){
     calView={y:now.getFullYear(),m:now.getMonth()};
     const _evd=(((typeof allEvents!=='undefined'&&allEvents)||[]).filter(e2=>e2&&e2.event_date).map(e2=>new Date(e2.event_date))).sort((a,b)=>a-b);
@@ -3940,6 +3953,7 @@ function renderCalendar(){
     }
   }
   const y=calView.y,m=calView.m,pad=n=>String(n).padStart(2,'0');
+  grid.removeAttribute('aria-busy');
   const monthEl=document.getElementById('cal-month');
   if(monthEl)monthEl.textContent=new Date(y,m,1).toLocaleString('en',{month:'long',year:'numeric'});
   const map=_rlEventsByDate();
@@ -3957,7 +3971,15 @@ function renderCalendar(){
     if(has)cls+=' cal-has';
     html+=`<div class="${cls}"${has?` data-k="${k}"`:''}>${d}</div>`;
   }
+  /* always six week rows (42 slots), so the card keeps one height whichever month is shown */
+  for(let i=lead+dim;i<42;i++)html+='<div class="cal-cell cal-pad"></div>';
   grid.innerHTML=html;
+  /* the first real paint fades the day numbers in once (opacity only) instead of popping */
+  if(!window._rlCalShown){
+    window._rlCalShown=true;
+    grid.classList.add('cal-enter');
+    setTimeout(()=>grid.classList.remove('cal-enter'),400);
+  }
   const det=document.getElementById('cal-detail');
   if(det)det.innerHTML='';
 }
@@ -4155,6 +4177,22 @@ body.dark .ch-band{--text3:var(--text2)}
 /* the Momentum goal and calendar cards sit on the grey card surface (#ECECE9) outside any band:
    light --text3 #706C5E measured 4.44:1 there, so they take the band value (5.68:1). Dark passes already. */
 body:not(.dark) .goal-card,body:not(.dark) .cal-card{--text3:#5F5C4C}
+/* ── 13 Oct 2026 (owner request): dividers, smooth scroll, calendar first paint ── */
+/* hero → CH.01 was the one chapter boundary with no hairline (every band already has one top and
+   bottom; the footer has one): the same full-bleed hairline as the bands */
+.map-section{padding-top:48px}
+.map-section::before{content:'';position:absolute;top:0;left:calc(50% - 50vw);right:calc(50% - 50vw);border-top:1px solid var(--border);pointer-events:none}
+@media(max-width:768px){.map-section{padding-top:36px}}
+/* anchor links glide instead of jumping; reduced-motion visitors keep the instant jump */
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+/* the phone chapter bar is the one inner horizontal scroller without it (old iOS only; momentum is
+   native since iOS 13). The page itself already avoids iOS momentum locks: overflow-x:clip, not hidden */
+.chapter-bar{-webkit-overflow-scrolling:touch}
+/* calendar: the month label keeps its line while blank, and the first real paint fades in (opacity only) */
+.cal-month{min-height:1.4em}
+@keyframes rl-cal-in{from{opacity:0}to{opacity:1}}
+.cal-grid.cal-enter .cal-cell:not(.cal-pad){animation:rl-cal-in .24s ease-out both}
+@media(prefers-reduced-motion:reduce){.cal-grid.cal-enter .cal-cell{animation:none}}
 @media(max-width:768px){.admin-entry{display:none}}
 @media(hover:none){
   .masthead.scrolled{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
