@@ -254,9 +254,6 @@ body.dark .title-logo{filter:none}
 .funds-note{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-top:10px}
 .funds-tag{display:inline-block;margin-top:16px;padding:7px 16px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent-2);border:1px solid var(--accent-2);border-radius:20px}
 @media(max-width:768px){.funds-amount{font-size:28px}}
-/* the band's --text3 override is a light-mode value; in dark it measures 2.7:1, so the
-   funds head and note use the bone --text2 there (7.3:1) */
-body.dark #funds-head,body.dark .funds-note{color:var(--text2)}
 
 /* ── CHAPTER SYSTEM — one film-credit header pattern for every section ── */
 .chapter{margin-bottom:var(--gap-major)}
@@ -4150,7 +4147,14 @@ body.dark .hero-cta{color:#15140F}
 .hero-cta:hover{transform:translateY(-2px);background:var(--accent-hover)}
 body.dark .hero-cta:hover{background:var(--accent-hover)}
 :focus-visible{outline:2px solid var(--accent-2)!important;outline-offset:2px}
+/* inside a band --text3 is retuned for the band surface, per theme: light #5F5C4C
+   (5.68:1 on #ECECE9); dark the bone --text2 (7.32:1 on #151514; the light value
+   measured 2.72:1 there). Milestones, badge subs, Funds Used and the ticker LIVE read it. */
 .ch-band{--text3:#5F5C4C}
+body.dark .ch-band{--text3:var(--text2)}
+/* the Momentum goal and calendar cards sit on the grey card surface (#ECECE9) outside any band:
+   light --text3 #706C5E measured 4.44:1 there, so they take the band value (5.68:1). Dark passes already. */
+body:not(.dark) .goal-card,body:not(.dark) .cal-card{--text3:#5F5C4C}
 @media(max-width:768px){.admin-entry{display:none}}
 @media(hover:none){
   .masthead.scrolled{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
