@@ -217,6 +217,8 @@ body.dark .title-logo{filter:none}
 .stat-ix{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;color:var(--text3);margin-bottom:14px}
 .stat-number{font-family:var(--cinzel);font-size:46px;font-weight:700;margin-bottom:8px;letter-spacing:1px}
 .stat-label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:2.5px;font-weight:600}
+/* the date the three figures were last checked (owner call 13 Oct 2026) */
+.stats-asof{margin:16px 0 0;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
 
 /* ── MILESTONE BADGES — expedition-patch roundels, hairline mono ── */
 .badge-head{
@@ -239,7 +241,7 @@ body.dark .title-logo{filter:none}
   text-transform:uppercase;color:var(--text3);margin-top:2px;line-height:1.5;
 }
 /* not-yet-earned: dashed ring, dimmed — the ring dash is set in the SVG */
-.badge.pending{opacity:.48}
+.badge.pending .badge-medal{opacity:.48} /* dim the roundel only: dimming the whole badge put its name under AA (13 Oct 2026) */
 @media(max-width:480px){
   .badge{width:92px}
   .badge-medal{width:70px;height:70px}
@@ -1477,7 +1479,7 @@ body.admin .admin-only{display:inline-flex}
       </div>
       <div class="stat-card">
         <div class="stat-ix">N&deg;02</div>
-        <div class="stat-number" id="total-events" data-target="4">0</div>
+        <div class="stat-number" id="total-events" data-target="2">0</div>
         <div class="stat-label">Total Events</div>
       </div>
       <div class="stat-card">
@@ -1486,6 +1488,8 @@ body.admin .admin-only{display:inline-flex}
         <div class="stat-label">Lives Touched</div>
       </div>
     </div>
+    <!-- When any figure in RL_IMPACT changes, update this month in the same commit. -->
+    <p class="stats-asof">Figures as of October 2026</p>
     <!-- Milestone badges — expedition-patch roundels for what's been completed.
          Rendered by renderBadges() from the RL_BADGES list near the bottom of
          this file; a badge with done:false shows as a dashed "in progress" ring. -->
@@ -2623,6 +2627,7 @@ async function loadEvents(){
     return;
   }
   window._rlEventsSettled=true; /* the calendar may now paint a real month (see renderCalendar) */
+  window._rlEventsOk=true;      /* the headline event count may now count the real list (rlAutoStats) */
 
   /* Rendering is isolated from the network try/catch so a rendering exception
      can't masquerade as a "failed to load" message — it surfaces in the console
@@ -3626,13 +3631,15 @@ if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
 
    null = let that number calculate itself from the events list.          */
 const RL_IMPACT={
-  countries:4,         /* pinned — set back to null to count from the events */
-  total_events:4,      /* pinned — set back to null to count the events      */
-  lives_touched:320    /* no automatic source — publish the figure here      */
+  countries:3,         /* pinned 13 Oct 2026 (Joe): UK · USA · Guatemala — matches the map, footer and FAQ; Ghana counts once that trip has happened */
+  total_events:null,   /* 13 Oct 2026 (Joe): counts the events on the page, so it rises with every upload */
+  lives_touched:320    /* confirmed by Joe 13 Oct 2026; no automatic source — publish the figure here */
 };
+/* When you change any figure above, update the month in the "Figures as of" line under the stats. */
 
 const RL_LIVES_FALLBACK=320;  /* used only if lives_touched is left null */
 const RL_COUNTRIES_FALLBACK=3;/* shown before events load / none detected */
+const RL_EVENTS_FALLBACK=2;   /* total events shown before the list loads, or if it fails — never a false 0 */
 
 /* Working copy the admin panel previews into. Changing this only affects the
    browser you're sitting at — nothing is published until RL_IMPACT above is
@@ -3648,7 +3655,7 @@ let rlStatsOverride={...RL_IMPACT};
 const RL_BADGES=[
   {id:'first',  glyph:'flame', name:'First Mission',  sub:'The work begins',      done:true},
   {id:'school', glyph:'book',  name:'School Aid',     sub:'Learning supported',   done:true},
-  {id:'ghana',  glyph:'pin',   name:'Ghana Aid',      sub:'First international',  done:true},
+  {id:'ghana',  glyph:'pin',   name:'Ghana Aid',      sub:'First international',  done:false}, /* in progress until the trip (dated 20 Aug 2027) happens — Joe 13 Oct 2026 */
   {id:'ally',   glyph:'rings', name:'Alliance',       sub:'Charlie&rsquo;s Promise',   done:true},
   {id:'snowdon',glyph:'peak',  name:'Yr Wyddfa',      sub:'Snowdon · Summited',   done:true}
 ];
@@ -3691,7 +3698,7 @@ function rlAutoStats(){
   const countries=new Set(evs.map(e=>detectCountry(e.name||''))).size;
   return{
     countries:countries||RL_COUNTRIES_FALLBACK,
-    total_events:evs.length,
+    total_events:window._rlEventsOk?evs.length:RL_EVENTS_FALLBACK,
     lives_touched:RL_LIVES_FALLBACK
   };
 }
