@@ -1426,6 +1426,25 @@ body.admin .admin-only{display:inline-flex}
 }
 @media print{.glb-stage{display:none}}
 
+/* ── Live-site fixes found by the Design Pack (15 Oct 2026) ───────────────────
+   Each rule below restates one that an earlier, weaker-placed rule meant to set.
+   1. Footer closing line: no .75 fade. 9px --text3 at .75 measured 3.17:1 light /
+      3.30:1 dark (under AA 4.5:1); solid --text3 clears it in both themes.
+   2. Phones (<=768): the chapter bar replaces back-to-top. The rule in the 768px
+      block lost to the later base .back-top{display:flex}, so the button sat on
+      top of the chapter bar.
+   3. Touch: 44px calendar arrows and roomier event chips. The (hover:none) rule
+      lost to the later base .cal-btn / .cal-detail-ev rules (measured 32x32). */
+.credits-end{opacity:1}
+@media(max-width:768px){.back-top{display:none}}
+@media (hover:none){
+  .cal-btn{width:44px;height:44px}
+  .cal-detail-ev{padding:11px 16px}
+}
+@media (hover:none) and (max-width:340px){ /* 44px arrows + the widest month ("September 2027", 139px) fit a 320px phone */
+  .cal-nav{gap:6px}
+  .cal-month{min-width:140px}
+}
 </style>
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiI0ZGRkZGRiIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <!-- Single theme-color meta, driven by the in-page toggle (not the OS scheme)
