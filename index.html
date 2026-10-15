@@ -1374,6 +1374,7 @@ body.admin .admin-only{display:inline-flex}
   .glb-pin:hover .glb-pin-dot::after,.glb-pin:hover .glb-pin-tag{opacity:1}
   .glb-item:hover{border-color:var(--text)}
 }
+.glb-pin.glb-dim .glb-pin-tag{opacity:0} /* a pin faded under 60% would composite its label below AA 4.5:1 (light < .58, dark < .47) */
 .glb-side{display:flex;flex-direction:column;gap:20px;width:100%;max-width:520px;margin:0 auto;min-width:0}
 .glb-list{display:grid;gap:8px}
 .glb-item{
@@ -3656,6 +3657,7 @@ function _glbPlacePins(){
     if(o!==p.o){
       p.o=o;p.el.style.opacity=o;
       const off=o<0.3;if(off!==p.off){p.off=off;p.el.classList.toggle('glb-off',off);}
+      const dim=o<0.6;if(dim!==p.dim){p.dim=dim;p.el.classList.toggle('glb-dim',dim);}
     }
   }
 }
