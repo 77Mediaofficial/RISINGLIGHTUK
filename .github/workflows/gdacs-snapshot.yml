@@ -1,0 +1,84 @@
+# Every six hours: fetch current Orange and Red disaster alerts from GDACS (Global Disaster
+# Awareness and Coordination System), normalise them into data/gdacs.json, and commit the file
+# ONLY when the alerts changed. Visitors load that same-origin file; nobody's browser calls GDACS.
+#
+# - Weekly heartbeat: when the alerts are unchanged but the file's generatedAt is over 7 days old,
+#   the script rewrites it with only generatedAt moved on, so this job commits it (at most once a
+#   week). A live pipeline's generatedAt is then never much more than a week old, and the page's
+#   "may be out of date" line (generatedAt over 14 days old) means the workflow has stopped.
+# - A failed fetch fails the job and leaves data/gdacs.json exactly as it was (the last good list).
+# - Commits pushed with GITHUB_TOKEN do not start a classic GitHub Pages build (GitHub docs,
+#   "GITHUB_TOKEN"), so after a data commit the last step asks for one through the REST API
+#   (POST /repos/{owner}/{repo}/pages/builds, which needs `pages: write`).
+# - Minute 17 avoids the top-of-the-hour queue; 05:17 UTC also falls inside the 04:00-06:45 UTC
+#   visiting window GDACS's robots.txt asks crawlers to use. One request per run.
+# - GitHub disables scheduled workflows in a public repository after 60 days without repository
+#   activity: if the data stops updating, check the Actions tab and re-enable the workflow there.
+# - This job pushes "Data: GDACS snapshot ..." commits to main up to four times a day, so a push
+#   from any local clone made after one of them is refused as non-fast-forward. Before every push
+#   to main from a clone, run:  git pull --rebase origin main
+name: GDACS snapshot
+
+on:
+  schedule:
+    - cron: '17 5,11,17,23 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: gdacs-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 22
+
+      - name: Test the normaliser
+        run: node --test scripts/*.test.mjs
+
+      - name: Fetch and normalise GDACS alerts
+        run: node scripts/gdacs-snapshot.mjs
+
+      - name: Commit the snapshot if it changed
+        id: commit
+        run: |
+          if [ -z "$(git status --porcelain -- data/gdacs.json)" ]; then
+            echo "No change in the alerts; nothing to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/gdacs.json
+          git commit -m "Data: GDACS snapshot $(date -u '+%Y-%m-%d %H:%M UTC')"
+          # someone may have pushed since checkout: replay this one data commit on top, once.
+          # An if-block, not `push || { pull && push; }`: under bash -e a failure inside that
+          # brace group is ignored, so a failed rebase or pull would still exit 0 as "changed".
+          if ! git push; then
+            git pull --rebase origin "$GITHUB_REF_NAME"
+            git push
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Request a GitHub Pages build
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pages/builds"

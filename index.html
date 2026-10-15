@@ -1318,21 +1318,28 @@ body.admin .admin-only{display:inline-flex}
 .cal-empty{font-size:12.5px;color:var(--text3);padding:6px 0}
 @media(max-width:768px){.cal-card{padding:22px 18px}.cal-cell{font-size:12px}.mom-grid{grid-template-columns:repeat(4,1fr);gap:8px}.mom-block{min-height:64px;padding:10px 6px}.mom-m{font-size:13px}}
 @media(max-width:430px){.mom-grid{grid-template-columns:repeat(3,1fr)}}
-/* ── CH.05 globe (14 Oct 2026) ─────────────────────────────────────────────
-   Rising Light's three real locations on a cobe WebGL globe. The stage keeps its
-   square from the first paint (aspect-ratio + a hairline circle where the sphere
-   will sit: 0.8 × the stage), so the lazy-loaded globe shifts nothing — and if the
-   globe can't run, the square is only removed while it is wholly below the screen.
+/* ── CH.05 globe (14 Oct 2026; live GDACS alerts 15 Oct 2026) ─────────────────
+   Current Orange and Red disaster alerts from GDACS (Global Disaster Awareness and
+   Coordination System) on a cobe WebGL globe: places where help is needed, not Rising
+   Light projects. The stage keeps its square from the first paint (aspect-ratio + a
+   hairline circle where the sphere will sit: 0.8 × the stage), so the lazy-loaded globe
+   shifts nothing — and if the globe can't run, the square is only removed while it is
+   wholly below the screen. The alert column holds four rows' room (and, below 960px, the
+   "Show all" toggle's) while the file loads (.glb-res), so the alerts arriving move little
+   or nothing below it; room they leave unused is a hairline frame, never a bare gap.
    touch-action:pan-y pinch-zoom sits on the sphere's circle (.glb-hit) and the pins
    only — a vertical swipe still scrolls the page and a pinch still zooms it; only
    sideways drags that start on the sphere reach the globe, and the empty corners of
    the square are ordinary page. The pin buttons are moved by transform from the one
    animation-frame callback (no layout per frame).
+   Urgency is monochrome (Joe, 15 Oct 2026): a Red alert is the larger dot with a slow
+   pulse ring, an Orange alert the original dot with a plain ring, and the words
+   "Red alert" / "Orange alert" are always written in the list and the card.
    Inline card = border, no shadow. Monochrome: ink, paper, the existing greys. ── */
 .rl-globe{max-width:1040px;margin-left:auto;margin-right:auto}
 .glb-wrap{display:grid;gap:24px;align-items:center}
 /* two columns: the list is top-aligned level with the sphere's top edge (10% of the 520px stage),
-   so choosing a place grows the card downward and nothing moves under the pointer */
+   so choosing an alert grows the card downward and nothing moves under the pointer */
 @media(min-width:960px){
   .glb-wrap{grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:56px;align-items:start}
   .glb-side{padding-top:52px}
@@ -1358,72 +1365,165 @@ body.admin .admin-only{display:inline-flex}
   pointer-events:auto;opacity:0;will-change:transform,opacity;-webkit-tap-highlight-color:transparent;
 }
 .glb-pin.glb-off{pointer-events:none}
+/* Orange alert: the original 8px dot + its 20px hairline ring */
 .glb-pin-dot{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:currentColor}
 .glb-pin-dot::after{ /* hairline ring, solid when selected */
   content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid currentColor;opacity:.4;
   transition:opacity .2s cubic-bezier(.22,1,.36,1),transform .2s cubic-bezier(.22,1,.36,1);
 }
 .glb-pin[aria-pressed="true"] .glb-pin-dot::after{opacity:1;transform:scale(1.35)}
-/* the chip itself is the Reach map's .map-node-tag (shared rule); only the differences here */
+/* Red alert: a 12px dot (24px ring) and a second ring that pulses outward every 2.4s —
+   transform + opacity only, so it runs on the compositor. It pauses while the stage is off
+   screen (no .glb-on), while keyboard focus is in the chapter (.glb-focus) and on the far
+   side (.glb-off); it stops for good once the visitor turns the globe or chooses an alert
+   (.glb-calm, the idle spin's WCAG 2.2.2 rule) and never runs under reduced motion. When
+   stopped it stays as a still second ring, so Red still reads as Red */
+.glb-pin.glb-red{z-index:1}
+.glb-red .glb-pin-dot{width:12px;height:12px;margin:-6px 0 0 -6px}
+.glb-red .glb-pin-dot::before{
+  content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid currentColor;
+  opacity:0;animation:glbPulse 2.4s cubic-bezier(.22,1,.36,1) infinite;pointer-events:none;
+}
+@keyframes glbPulse{from{opacity:.6;transform:scale(1)}to{opacity:0;transform:scale(2)}}
+.glb-stage:not(.glb-on) .glb-red .glb-pin-dot::before,
+.rl-globe.glb-focus .glb-red .glb-pin-dot::before,
+.glb-pin.glb-off .glb-pin-dot::before{animation-play-state:paused}
+.glb-stage.glb-calm .glb-red .glb-pin-dot::before{animation:none;opacity:.4;transform:scale(1.5)}
+.glb-pin[aria-pressed="true"]{z-index:2}
+/* the chip itself is the Reach map's .map-node-tag (shared rule); only the differences here.
+   Capped at 200px so a long name can never run far past the stage */
 .glb-pin-tag{
-  margin-top:-6px;text-transform:uppercase;
+  margin-top:-6px;text-transform:uppercase;max-width:200px;overflow:hidden;text-overflow:ellipsis;
   opacity:0;transition:opacity .2s cubic-bezier(.22,1,.36,1);pointer-events:none;
 }
+.glb-red .glb-pin-tag{margin-top:-2px}
 .glb-pin[aria-pressed="true"] .glb-pin-tag{opacity:1}
 @media(hover:hover){
+  .glb-pin:hover{z-index:3}
   .glb-pin:hover .glb-pin-dot::after,.glb-pin:hover .glb-pin-tag{opacity:1}
   .glb-item:hover{border-color:var(--text)}
 }
 .glb-pin.glb-dim .glb-pin-tag{opacity:0} /* a pin faded under 60% would composite its label below AA 4.5:1 (light < .58, dark < .47) */
 .glb-side{display:flex;flex-direction:column;gap:20px;width:100%;max-width:520px;margin:0 auto;min-width:0}
-.glb-list{display:grid;gap:8px}
+/* one line above the list: loading / how many / none / unavailable (role=status, polite) */
+.glb-status{margin:0;font-size:14px;line-height:1.6;color:var(--text2)}
+.glb-status a,.glb-credit a{color:var(--text);text-decoration:underline;text-underline-offset:2px}
+.glb-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.glb-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.glb-list>li{min-width:0}
+.glb-list:empty{display:none}
+/* the loading room (.glb-res on the column, from the first paint): the list keeps four rows (4 × 89px
+   rows + 3 × 8px gaps; the usual count, and the rows phones show before "Show all") and, below 960px,
+   the toggle's row too (its 20px gap + 44px, held invisibly), so alerts arriving while the column is on
+   screen move nothing below them. The room goes once the column is below the screen (_glbSetState /
+   the side observer), where shrinking it moves nothing in view. While it is held, room the alerts do
+   not fill is never a bare gap: fewer than four alerts (.glb-few; below 960px four or fewer, .glb-fit,
+   as there is no toggle then and its room joins the list's) leave a hairline frame under them that
+   says there are no others (alt text '': the status line already gives the count), and none at all
+   (empty or error, .glb-void) turn the status line itself into a hairline frame the size of the
+   room, its message centred */
+.glb-res .glb-list{display:flex;flex-direction:column;min-height:calc(4 * var(--glb-row,89px) + 3 * 8px)}
+.glb-res .glb-list.glb-few::after,.glb-res .glb-list.glb-fit::after{
+  content:'No other current alerts';content:'No other current alerts' / '';
+  flex:1 1 0;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:0 16px;
+  border:1px dashed var(--border);border-radius:12px;font-size:13px;line-height:1.55;color:var(--text3);text-align:center;
+} /* dashed: an empty slot, not one more (solid-bordered, pressable) alert */
+@media(min-width:960px){.glb-res .glb-list.glb-fit:not(.glb-few)::after{content:none}} /* four fill the room there */
+/* the slot only takes room the rows leave (flex-basis 0, no padding), so it never pushes anything down.
+   --glb-row is the row height every room rule assumes: under 375px titles wrap (rows measured
+   105-126px, not 89), so there every variant (list, no-toggle fit, empty/error frame) is sized for 126 */
+@media(max-width:374px){.rl-globe{--glb-row:126px}}
 .glb-item{
-  display:flex;align-items:center;gap:12px;width:100%;min-width:0;min-height:44px;padding:14px 16px;
+  display:flex;align-items:flex-start;gap:12px;width:100%;min-width:0;min-height:44px;padding:14px 16px;
   font:inherit;text-align:left;color:var(--text);background:var(--bg);
   border:1px solid var(--border);border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;
   transition:background-color .25s cubic-bezier(.22,1,.36,1),border-color .25s cubic-bezier(.22,1,.36,1),color .25s cubic-bezier(.22,1,.36,1);
 }
-.glb-item::before{content:'';flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:currentColor}
 .glb-item[aria-pressed="true"]{background:var(--text);border-color:var(--text);color:var(--bg)}
 .glb-item:active{transform:scale(0.97);transition-duration:.08s}
-.glb-item-name{font-family:var(--cinzel);font-size:17px;font-weight:600;letter-spacing:.5px;line-height:1.2}
-.glb-item-role{
-  margin-left:auto;padding-left:12px;text-align:right;white-space:nowrap;
-  font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);
+/* the list mark mirrors the pin: 8px dot for Orange, 12px dot inside a hairline ring for Red */
+.glb-item-mark{flex:0 0 12px;height:16px;display:flex;align-items:center;justify-content:center}
+.glb-item-mark::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
+.glb-red .glb-item-mark::before{width:12px;height:12px;outline:1px solid currentColor;outline-offset:2px}
+.glb-item-main{flex:1 1 auto;min-width:0}
+.glb-item-kicker,.glb-item-date{
+  font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  line-height:1.6;color:var(--text3);
 }
-.glb-item[aria-pressed="true"] .glb-item-role{color:inherit}
-/* the card: the Reach card's copy (MAP_INFO) inline — title, coordinates (.map-card-co), sentence, events action */
-.glb-card{min-width:0}
-.glb-card.on{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px;text-align:left}
-.glb-card-title{font-family:var(--cinzel);font-size:22px;font-weight:600;letter-spacing:1px;line-height:1.25;color:var(--text)}
-.glb-card-body{font-size:14px;line-height:1.6;color:var(--text2);margin:12px 0 14px}
-/* the shared .map-card-link asks for Mono 700, which is not loaded: 600 here (pack 3.1) */
-.glb-card .map-card-link{font-weight:600}
-/* tablets + phones: the globe at full content width, then the places as one row of three */
+.glb-item-kicker{display:block}
+/* "Orange alert" never breaks in two on narrow phones; the type after it may wrap, and the
+   tracking tightens to the 1.2px the map chips use at phone widths */
+.glb-item-alert{white-space:nowrap}
+@media(max-width:430px){.glb-item-kicker,.glb-item-date{letter-spacing:1.2px}}
+.glb-red .glb-item-alert{font-weight:600;color:var(--text)}
+.glb-item-type::before{content:'·';content:'·' / '';margin:0 6px}
+.glb-item-date{flex:0 0 auto;white-space:nowrap}
+/* overflow-wrap here and on the card text: a word with no spaces (odd or hostile data) wraps inside
+   its border instead of spilling past it */
+.glb-item-name{display:block;margin-top:2px;font-size:15px;font-weight:600;line-height:1.4;color:var(--text);overflow-wrap:anywhere}
+.glb-item-where{display:block;font-size:13px;line-height:1.55;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glb-item[aria-pressed="true"] .glb-item-kicker,.glb-item[aria-pressed="true"] .glb-item-alert,
+.glb-item[aria-pressed="true"] .glb-item-date,.glb-item[aria-pressed="true"] .glb-item-name,
+.glb-item[aria-pressed="true"] .glb-item-where{color:inherit}
+/* "Show all N alerts": phones and tablets only (the list is clipped to four there, no inner scroller).
+   scroll-margin-bottom: an alert that takes focus (the first one "Show all" reveals) clears the phone
+   chapter bar — the bar's room (html scroll-padding-bottom) plus 16px for the focus ring */
+.glb-more{align-self:flex-start;font-weight:600;min-height:44px}
+.glb-more[hidden]{display:none}
 @media(max-width:959px){
-  .glb-list{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .glb-item{justify-content:center;gap:8px;padding:12px 8px;text-align:center}
-  .glb-item-name{font-size:15px}
-  .glb-item-role{display:none}
+  .glb-list.glb-clip>li:nth-child(n+5){display:none}
+  .glb-res .glb-more[hidden]{display:inline-block;visibility:hidden} /* the toggle's room, while the room is held */
+  .glb-res .glb-list.glb-fit{min-height:calc(4 * var(--glb-row,89px) + 3 * 8px + 20px + 44px)} /* no toggle: its room joins the frame */
+  .glb-res .glb-list.glb-fit+.glb-more[hidden]{display:none}
 }
-@media(max-width:430px){
-  .glb-item{padding:12px 4px}
-  .glb-item::before{display:none}
-  .glb-item-name{font-size:13.5px;letter-spacing:.3px}
+@media(max-width:768px){.glb-item{scroll-margin-bottom:16px}}
+/* no alerts while the room is held: list and toggle step out and the status line takes their room
+   exactly (its own line + 20px gap + the list's four rows [+ 20px gap + the 44px toggle]) */
+.glb-res.glb-void .glb-list,.glb-res.glb-void .glb-more[hidden]{display:none}
+.glb-res.glb-void .glb-status{
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;
+  min-height:calc(14px * 1.6 + 20px + 4 * var(--glb-row,89px) + 3 * 8px);border:1px solid var(--border);border-radius:12px;
 }
-@media(max-width:340px){.glb-item-name{font-size:12.5px;letter-spacing:0}}
-/* touch: the card's events action gets the house 44px thumb target (TOUCH ERGONOMICS);
+.glb-res.glb-void .glb-status>span{max-width:36ch}
+@media(max-width:959px){.glb-res.glb-void .glb-status{min-height:calc(14px * 1.6 + 20px + 4 * var(--glb-row,89px) + 3 * 8px + 20px + 44px)}}
+/* desktop: the whole list in the column; a long one scrolls inside it (the browser's normal
+   scroll chaining is kept, so a wheel at either end moves the page on). The 4px padding,
+   taken back by the margin, keeps the focus ring clear of the scroller's edge */
+@media(min-width:960px){
+  .glb-list{max-height:400px;overflow-y:auto;padding:4px;margin:-4px}
+  .glb-res .glb-list{min-height:calc(4 * var(--glb-row,89px) + 3 * 8px + 8px)} /* + the 4px padding, top and bottom */
+  .glb-more{display:none}
+}
+/* the card: title, type · alert · country, dates · severity, what the level means, source line, report link */
+.glb-card{min-width:0}
+.glb-card:empty{margin-top:-20px} /* no card yet: take back the column's gap so the credit sits under the list */
+.glb-card.on{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px;text-align:left}
+.glb-card-title{font-family:var(--cinzel);font-size:22px;font-weight:600;letter-spacing:1px;line-height:1.25;color:var(--text);overflow-wrap:anywhere}
+.glb-card .map-card-co{margin:6px 0 0;overflow-wrap:anywhere}
+.glb-card-body{font-size:14px;line-height:1.6;color:var(--text2);margin:12px 0;overflow-wrap:anywhere}
+.glb-card-note{font-size:12.5px;line-height:1.6;color:var(--text3);margin:0 0 14px}
+/* the shared .map-card-link asks for Mono 700, which is not loaded: 600 here (pack 3.1) */
+.glb-card .map-card-link{font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+/* the source credit under the list (GDACS terms: credit, "filtered and simplified", official authorities) */
+.glb-credit{margin:0;font-size:12.5px;line-height:1.6;color:var(--text3)}
+/* the "Updated" stamp has its own line, held from the first paint, so it arrives without moving anything */
+.glb-updated{display:block;min-height:1.6em}
+/* touch: the card's report link gets the house 44px thumb target (TOUCH ERGONOMICS);
    scoped to this card, so the Reach map's floating card is unchanged */
 @media(hover:none){.glb-card .map-card-link{min-height:44px}}
 /* no WebGL (or the module failed to load). glb-nogl: the stage was wholly below the screen, so it is
    removed and the list + card carry the chapter alone. glb-hold: a reader may have seen the stage,
-   so its square stays (empty) and nothing on the page moves. */
+   so its square stays, showing only the hairline circle (a placeholder, not a blank gap), and nothing
+   on the page moves. */
 .rl-globe.glb-nogl .glb-stage{display:none}
 .rl-globe.glb-nogl .glb-wrap{grid-template-columns:minmax(0,520px);justify-content:center}
 .rl-globe.glb-nogl .glb-side{padding-top:0}
-.rl-globe.glb-hold .glb-stage{visibility:hidden}
+.rl-globe.glb-hold .glb-stage{cursor:auto}
+.rl-globe.glb-hold .glb-stage>*{visibility:hidden}
+.rl-globe.glb-hold .glb-stage::before{opacity:1}
 @media(prefers-reduced-motion:reduce){
   .glb-stage::before,.glb-pin-dot::after,.glb-pin-tag,.glb-item{transition:none}
+  .glb-red .glb-pin-dot::before{animation:none;opacity:.4;transform:scale(1.5)}
 }
 @media print{.glb-stage{display:none}}
 
@@ -1804,26 +1904,34 @@ body.admin .admin-only{display:inline-flex}
   </style>
 </div><!-- /band: events -->
 
-  <!-- CH. 05 — Around the World: Rising Light's three REAL locations (London,
-       Arizona, Guatemala; coordinates from LOCATIONS, wording from MAP_INFO) on a
-       3D globe. cobe (vendor/cobe-2.0.1.esm.js, MIT) loads only when the stage
-       nears the viewport, and the stage keeps its square from the first paint,
-       so nothing shifts. The list + card are built by the CH.05 globe script and
-       work without WebGL. Not inside a band: paper ground, like Quiet Battles. -->
+  <!-- CH. 05 — Around the World: current Orange and Red disaster alerts from GDACS
+       (Global Disaster Awareness and Coordination System) on a 3D globe. These are
+       places where help is needed, NOT Rising Light projects (Joe, 15 Oct 2026: Rising
+       Light's own places stay on the CH.01 Reach map). The data is data/gdacs.json, a
+       snapshot .github/workflows/gdacs-snapshot.yml refreshes every six hours; a
+       visitor's browser never calls GDACS. The JSON loads when the chapter is 2000px
+       away and cobe (vendor/cobe-2.0.1.esm.js, MIT) when the stage is 600px away; the
+       stage keeps its square from the first paint and the alert column holds four rows'
+       room while the JSON loads, so its arrival moves little or nothing. The status line,
+       list, card and credit are filled by the CH.05 globe script and work without
+       WebGL. Not inside a band: paper ground, like Quiet Battles. -->
   <section class="chapter rl-globe" id="globe" aria-labelledby="globe-title">
     <div class="sect-head">
       <span class="sect-eyebrow">CH. 05 — Around the World</span>
-      <div class="sect-title" id="globe-title">Where the Work Happens</div>
-      <p class="sect-sub" id="globe-sub">Drag to turn the globe, or choose a place to see what we do there.</p>
+      <div class="sect-title" id="globe-title">Where Help Is Needed</div>
+      <p class="sect-sub" id="globe-sub">Alerts from the Global Disaster Awareness and Coordination System (GDACS): places where help is needed, not Rising Light projects.</p>
     </div>
     <div class="glb-wrap">
       <div class="glb-stage" id="glb-stage">
         <div class="glb-hit" id="glb-hit" aria-hidden="true"></div>
         <div class="glb-pins" id="glb-pins" aria-hidden="true"></div>
       </div>
-      <div class="glb-side">
-        <div class="glb-list" id="glb-list" role="group" aria-label="Places we work"></div>
-        <div class="glb-card" id="glb-card" role="region" aria-live="polite" aria-label="Place details"></div>
+      <div class="glb-side glb-res">
+        <p class="glb-status" id="glb-status" role="status" aria-live="polite">Loading the latest disaster alerts…</p>
+        <ul class="glb-list" id="glb-list" aria-label="Current disaster alerts"></ul>
+        <button type="button" class="map-card-link glb-more" id="glb-more" aria-controls="glb-list" aria-expanded="false" hidden>Show all alerts</button>
+        <div class="glb-card" id="glb-card" aria-live="polite"></div>
+        <p class="glb-credit" id="glb-credit">Data: <a href="https://www.gdacs.org/" target="_blank" rel="noopener noreferrer">GDACS<span class="glb-sr"> (opens in a new tab)</span></a>, checked every six hours, filtered to current Orange and Red alerts and simplified. GDACS alerts are automated estimates: for safety, follow official local authorities.<span class="glb-updated" id="glb-updated"></span></p>
       </div>
     </div>
   </section>
@@ -3331,15 +3439,6 @@ const LOCATIONS=[
   {lat:34.0489,lon:-111.0937,label:'Arizona',country:'USA'},
   {lat:15.7835,lon:-90.2308,label:'Guatemala',country:'Guatemala'}
 ];
-/* CH.05 globe — where Rising Light works (real locations only, Joe 14 Oct 2026).
-   Only the list's short role label lives here. Positions come from LOCATIONS and the card's
-   copy (coordinates + sentence) is MAP_INFO's, the Reach card's, so the two cards never disagree. */
-const RL_GLOBE_SITES=[
-  {id:'london',    label:'London',    role:'Home base'},
-  {id:'arizona',   label:'Arizona',   role:'United States arm'},
-  {id:'guatemala', label:'Guatemala', role:'International projects'}
-];
-
 /* ─── REACH MAP ──────────────────────────────────────────────────────────
    Static blueprint dot-map. Renders ONCE (and again only on resize/theme
    flip) — the globe's permanent requestAnimationFrame loop is gone.
@@ -3442,8 +3541,8 @@ function _mapCardHide(){
   _mapOpenIdx=-1;
 }
 /* The card's events action: "See N events ↓" when this place has events, else the
-   generic "See our events ↓" (which shows the full list). One source, shared by the
-   Reach card below and the CH.05 globe card, so the two can never disagree. */
+   generic "See our events ↓" (which shows the full list), for the Reach card below.
+   (The CH.05 globe card shared it until the globe switched to live alerts, 15 Oct 2026.) */
 function _mapEventsLink(i){
   const loc=LOCATIONS[i];
   const evs=(typeof allEvents!=='undefined'&&allEvents)||[];
@@ -3530,43 +3629,71 @@ renderMap();
 loadEvents().then(()=>animateAllCounters());
 </script>
 <script>
-/* ─── CH.05 GLOBE (14 Oct 2026) ──────────────────────────────────────────
-   Rising Light's three real locations (RL_GLOBE_SITES → LOCATIONS) on a 3D globe
-   drawn by cobe 2.0.1 (vendor/cobe-2.0.1.esm.js, MIT, Shu Ding — self-hosted, no
-   CDN at runtime). Next to the Reach map code, in its own <script> on purpose:
-   dynamic import() is syntax, so a browser without it loses only the globe.
-   · Lazy: nothing globe-related downloads or runs until the stage is within
-     600px of the viewport (IntersectionObserver → import() → an idle slot). cobe
-     compiles its shaders synchronously (one ~80-150 ms task on a cold GPU cache),
-     so it is created in requestIdleCallback, well before the stage arrives.
-   · One loop: cobe 2.0.1 has NO loop of its own (the README's onRender is ignored),
-     so _glbFrame is the only animation-frame callback. It stops whenever the globe
-     is still, off-screen (IntersectionObserver) or the tab is hidden. The idle spin
-     draws at most ~60 times a second (it moves 0.4px a frame at that rate).
-   · Idle spin (WCAG 2.2.2): it turns until the visitor first drags the globe or
-     chooses a place, then stays where they left it; it also pauses while keyboard
-     focus is inside the chapter. Reduced motion: no spin at all.
-   · Smooth inputs: pointer handlers only record numbers; the frame applies them,
-     draws one cobe frame, then moves the pin buttons with transform:translate3d.
+/* ─── CH.05 GLOBE (14 Oct 2026; live GDACS alerts 15 Oct 2026) ───────────
+   Current Orange and Red disaster alerts from GDACS (Global Disaster Awareness and
+   Coordination System) on a 3D globe drawn by cobe 2.0.1 (vendor/cobe-2.0.1.esm.js, MIT,
+   Shu Ding — self-hosted, no CDN at runtime). They are places where help is needed, NOT
+   Rising Light projects (Joe, 15 Oct 2026); Rising Light's own places stay on the CH.01
+   Reach map. In its own <script> on purpose: dynamic import() is syntax, so a browser
+   without it loses only the globe.
+   · Data: data/gdacs.json (same origin, a relative path for the Pages sub-path), written by
+     scripts/gdacs-snapshot.mjs from a GitHub Action every six hours. A visitor's browser
+     never calls GDACS. The file is fetched ONCE, by its own lazy trigger (the chapter within
+     2000px, see Lazy below; cobe's later trigger calls _glbLoad again, a no-op by then), and
+     checked again here (finite coordinates, Red / Orange only, capped strings,
+     https://www.gdacs.org/ links only); everything reaches the DOM through textContent.
+   · States: loading (the globe still draws; one quiet status line), loaded, empty (no
+     Orange or Red alerts, said plainly) and error (the globe still draws; one line and a
+     link to gdacs.org). The status line is role=status, so changes are read out politely.
+     The bot commits when the alerts change, and rewrites an unchanged file once its
+     generatedAt is over 7 days old (a weekly heartbeat), so a live pipeline's generatedAt
+     is never much more than a week old: when it is over 14 days old, the workflow has
+     stopped, and the line says the alerts may be out of date and links to GDACS.
+   · Lazy: the alerts file (about 3 KB) is asked for when the chapter is within 2000px of
+     the viewport, so it has nearly always arrived before the list is on screen; cobe waits
+     until the stage is within 600px (IntersectionObserver → import() → an idle slot). cobe compiles its shaders
+     synchronously (one ~80-150 ms task on a cold GPU cache), so it is created in
+     requestIdleCallback, well before the stage arrives.
+   · One loop: cobe 2.0.1 has NO loop of its own (the README's onRender is ignored), so
+     _glbFrame is the only animation-frame callback. It stops whenever the globe is still,
+     off-screen (IntersectionObserver) or the tab is hidden. The idle spin draws at most
+     ~60 times a second (it moves 0.4px a frame at that rate).
+   · Idle spin (WCAG 2.2.2): it turns until the visitor first drags the globe or chooses an
+     alert, then stays where they left it; it also pauses while keyboard focus is inside the
+     chapter. Reduced motion: no spin at all. The Red pins' pulse follows the same rule
+     (.glb-calm / .glb-focus) and pauses off screen (.glb-on); it is CSS on the compositor.
+   · Smooth inputs: pointer handlers only record numbers; the frame applies them, draws one
+     cobe frame, then moves the pin buttons with transform:translate3d. Each pin's position
+     on the sphere is worked out once; a pin already hidden on the far side is skipped.
      Sizes come from a ResizeObserver (stored, applied in the next frame).
-   · Touch: the sphere's circle (.glb-hit) and the pins are touch-action:pan-y
-     pinch-zoom, so a vertical swipe scrolls the page natively (we just get
-     pointercancel) and only sideways drags turn the globe; the stage's empty corners
-     are ordinary page. A second finger hands the gesture to the page (pinch-zoom) and
-     puts the globe back where the drag started. No wheel listener, no preventDefault
-     on touch.
-   · cobe rewrites a <style> in <head> on EVERY update (a full-page style recalc per
-     frame). We give it no markers / ids, so that element only ever holds ':root{}'
-     and is detached right after createGlobe: its writes then cost nothing.
-   · No WebGL / import failure: the list + card still work, and the stage's square is
-     removed only while it is wholly below the screen (no layout shift); otherwise it
-     stays, empty. The pins are pointer shortcuts and aria-hidden: the list is the
-     keyboard and screen-reader route. */
+   · Touch: the sphere's circle (.glb-hit) and the pins are touch-action:pan-y pinch-zoom, so
+     a vertical swipe scrolls the page natively (we just get pointercancel) and only sideways
+     drags turn the globe; the stage's empty corners are ordinary page. A second finger hands
+     the gesture to the page (pinch-zoom) and puts the globe back where the drag started.
+     No wheel listener, no preventDefault on touch.
+   · cobe rewrites a <style> in <head> on EVERY update (a full-page style recalc per frame).
+     We give it no markers / ids, so that element only ever holds ':root{}' and is detached
+     right after createGlobe: its writes then cost nothing.
+   · No WebGL / import failure: the list + card still work, and the stage's square is removed
+     only while it is wholly below the screen (no layout shift); otherwise it stays, showing
+     only its hairline circle (.glb-hold).
+     The pins are pointer shortcuts and aria-hidden: the list is the keyboard and
+     screen-reader route. */
 const _GLB_D2R=Math.PI/180,_GLB_TAU=Math.PI*2;
 const _GLB_SPIN=_GLB_TAU/50000; /* idle spin in rad per ms: one turn every 50 s, by the clock */
 const _GLB_TILT=0.32;           /* idle tilt (theta, rad): the northern hemisphere leans in */
 const _GLB_ZOOM=1.1;            /* selected zoom; the halo still fits the stage up to ~1.12 */
 const _GLB_FLY=900;             /* select / deselect glide, ms */
+const _GLB_DATA='data/gdacs.json';
+const _GLB_SITE='https://www.gdacs.org/';
+const _GLB_MAX=60;              /* the snapshot's own cap */
+const _GLB_PINS=30;             /* at most this many pins on the globe, the most urgent first: style work per
+                                   frame grows with the pins, and the list (and the fly-to) still covers every alert */
+const _GLB_STALE=14*864e5;      /* a snapshot whose generatedAt is older than this says it may be out of date */
+const _GLB_FEW=4;               /* below 960px the list shows four, then "Show all N alerts" (= the rows of
+                                   loading room the CSS holds, .glb-res: change both together) */
+const _GLB_TZ='Europe/London';
+const _GLB_SHORT={EQ:'Earthquake',TC:'Cyclone',FL:'Flood',VO:'Volcano',DR:'Drought',WF:'Wildfire'};
 /* pure-monochrome cobe colours per site theme (14 Oct spike: neutral greys only, R=G=B).
    Light and dark use opposite land maths in cobe, so they are two separate sets. */
 const _GLB_THEME={
@@ -3574,8 +3701,10 @@ const _GLB_THEME={
   dark:{dark:1,baseColor:[0.3,0.3,0.3],glowColor:[0.1,0.1,0.1],mapBrightness:1.5,diffuse:1.2,mapBaseBrightness:0,opacity:1}
 };
 const _glb={
-  sites:[],items:[],pins:[],stage:null,layer:null,hit:null,canvas:null,G:null,cobe:null,
-  /* opens on the Atlantic (centre longitude 55° W) so all three places are in view */
+  events:[],items:[],pins:[],stage:null,layer:null,hit:null,side:null,list:null,status:null,more:null,canvas:null,G:null,cobe:null,
+  data:'',gen:null, /* data: '' (not asked yet) | loading | ready | empty | error; gen = the snapshot's time */
+  /* opens on the Atlantic (centre longitude 55° W); if the alerts arrive before the globe is
+     made, it opens on the most urgent one instead */
   phi:-Math.PI/2+55*_GLB_D2R,theta:_GLB_TILT,scale:1,lp:NaN,lt:NaN,ls:NaN,
   size:0,pendSize:0,isDark:false,themeDirty:false,
   on:false,vis:false,sideVis:false,lost:false,raf:0,last:0,drawT:0,force:0,spinK:0,held:false,focusIn:false,
@@ -3589,7 +3718,8 @@ function _glbCentre(lat,lon){return {phi:-Math.PI/2-lon*_GLB_D2R,theta:lat*_GLB_
 /* phi keeps growing while the globe spins, so glide along the shortest arc */
 function _glbNearPhi(cur,tgt){return cur+((((tgt-cur+Math.PI)%_GLB_TAU)+_GLB_TAU)%_GLB_TAU-Math.PI);}
 /* [lat, lon] → stage CSS px + facing (1 = dead centre, 0 = the edge, <0 = far side).
-   Mirrors cobe's marker vertex shader; the pins sit on the surface (radius 0.8). */
+   Mirrors cobe's marker vertex shader; the pins sit on the surface (radius 0.8).
+   _glbPlacePins runs the same maths with each pin's surface point worked out once. */
 function _glbProject(lat,lon){
   const la=lat*_GLB_D2R,lo=lon*_GLB_D2R,cl=Math.cos(la),r=0.8;
   const px=cl*Math.cos(lo)*r,py=Math.sin(la)*r,pz=-cl*Math.sin(lo)*r;
@@ -3646,13 +3776,20 @@ function _glbFrame(t){
   }
   if(busy)_glb.raf=requestAnimationFrame(_glbFrame);else _glb.last=0;
 }
-/* pins follow the globe by transform only; they fade toward the edge and stop taking
-   pointer input before the far side (the list is the always-available route) */
+/* pins follow the globe by transform only; they fade toward the edge and stop taking pointer
+   input before the far side (the list is the always-available route). The rotation is worked
+   out once per frame; a pin already invisible on the far side costs one dot product. */
 function _glbPlacePins(){
+  const cp=Math.cos(_glb.phi),sp=Math.sin(_glb.phi),ct=Math.cos(_glb.theta),st=Math.sin(_glb.theta);
+  const h=_glb.size/2,k=_glb.scale*h;
   for(let i=0;i<_glb.pins.length;i++){
-    const p=_glb.pins[i],q=_glbProject(p.lat,p.lon);
-    const o=Math.round(Math.min(1,Math.max(0,(q.facing-0.08)/0.22))*100)/100;
-    const tf='translate3d('+q.x.toFixed(1)+'px,'+q.y.toFixed(1)+'px,0)';
+    const p=_glb.pins[i];
+    const facing=(-sp*ct*p.px+st*p.py+cp*ct*p.pz)/0.8;
+    const o=Math.round(Math.min(1,Math.max(0,(facing-0.08)/0.22))*100)/100;
+    if(o===0&&p.o===0)continue;
+    const x=h+(cp*p.px+sp*p.pz)*k,y=h-(sp*st*p.px+ct*p.py-cp*st*p.pz)*k;
+    p.x=x;p.y=y; /* kept for _glbNearest */
+    const tf='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
     if(tf!==p.tf){p.tf=tf;p.el.style.transform=tf;}
     if(o!==p.o){
       p.o=o;p.el.style.opacity=o;
@@ -3662,13 +3799,21 @@ function _glbPlacePins(){
   }
 }
 function _glbKick(){if(_glb.on&&!_glb.raf)_glb.raf=requestAnimationFrame(_glbFrame);}
-/* run only while the stage is on screen, the tab is visible and the context is alive */
+/* run only while the stage is on screen, the tab is visible and the context is alive
+   (.glb-on also lets the Red pulse run; off screen it is paused) */
 function _glbSync(){
   const run=_glb.vis&&!document.hidden&&!!_glb.G&&!_glb.lost;
   if(run===_glb.on)return;
   _glb.on=run;_glb.last=0;_glb.spinK=0;
+  if(_glb.stage)_glb.stage.classList.toggle('glb-on',run);
   if(run){_glb.force=Math.max(_glb.force,1);_glbKick();}
   else if(_glb.raf){cancelAnimationFrame(_glb.raf);_glb.raf=0;}
+}
+/* the first drag or choice: the idle spin and the Red pulse stop for good (WCAG 2.2.2) */
+function _glbHold(){
+  if(_glb.held)return;
+  _glb.held=true;
+  if(_glb.stage)_glb.stage.classList.add('glb-calm');
 }
 
 /* ── selection ── */
@@ -3679,13 +3824,31 @@ function _glbFly(p1,h1,s1){
   else _glb.tw={t0:performance.now(),p0:_glb.phi,h0:_glb.theta,s0:_glb.scale,p1:p1,h1:h1,s1:s1};
   _glbKick();
 }
-function _glbSelect(i,opener){
+function _glbSelect(i,opener,kbd){
   if(i===_glb.sel){_glbDeselect(false);return;}
-  const s=_glb.sites[i];if(!s)return;
-  _glb.sel=i;_glb.opener=opener||null;_glb.held=true; /* from now on the globe stays where the visitor leaves it */
+  const s=_glb.events[i];if(!s)return;
+  _glb.sel=i;_glb.opener=opener||null;_glbHold(); /* from now on the globe stays where the visitor leaves it */
   _glbShowCard();
-  const c=_glbCentre(s.lat,s.lon);
+  const c=_glbCentre(s.lat,s.lng);
   _glbFly(_glbNearPhi(_glb.phi,c.phi),c.theta,_GLB_ZOOM);
+  /* phones and tablets: the card sits under the whole list, so a tap (list or pin) could open it
+     below the fold; bring it into view (one read on the tap). From the keyboard (kbd: a list button
+     pressed with Enter / Space) focus moves to the card's title first, so it follows the scroll
+     instead of staying on a button the scroll may carry off the screen; Escape brings it back */
+  if(window.matchMedia&&matchMedia('(max-width:959px)').matches){
+    const card=document.getElementById('glb-card');if(!card)return;
+    const t=kbd&&card.querySelector('.glb-card-title');if(t)t.focus({preventScroll:true});
+    _glbIntoView(card);
+  }
+}
+/* scroll the page by just enough to show el clear of the masthead (72px, as [id] scroll-margin) and
+   of the phone chapter bar (html's scroll-padding-bottom), nearest edge first; one read, on a tap or
+   a key press only. The page's own scroll-behavior decides smooth or instant. */
+function _glbIntoView(el){
+  const r=el.getBoundingClientRect();
+  const pb=parseFloat(getComputedStyle(document.documentElement).scrollPaddingBottom)||0,bot=window.innerHeight-pb-16;
+  if(r.top<72)window.scrollBy({top:r.top-72});
+  else if(r.bottom>bot)window.scrollBy({top:Math.min(r.bottom-bot,r.top-72)});
 }
 function _glbDeselect(refocus){
   if(_glb.sel<0)return;
@@ -3693,32 +3856,212 @@ function _glbDeselect(refocus){
   _glb.sel=-1;_glb.opener=null;
   _glbShowCard();
   _glbFly(_glb.phi,_GLB_TILT,1);
-  /* back to the button that opened it, without scrolling the page to it */
-  if(refocus&&op&&document.contains(op))op.focus({preventScroll:true});
+  /* back to the button that opened it, without scrolling the page to it; if that list item is
+     folded away (phones, past the first four), to the "Show all" toggle instead */
+  if(refocus&&op&&document.contains(op)){
+    const to=op.getClientRects().length?op:(_glb.more&&!_glb.more.hidden?_glb.more:null);
+    if(to){
+      to.focus({preventScroll:true});
+      /* ...but never leave focus where it cannot be seen (WCAG 2.4.7): if the button is hidden inside
+         the desktop list's own scroller or off the screen, bring it into view (one read, on the key press) */
+      const k=_glb.items.indexOf(to);if(k>=0)_glbReveal(k);
+      _glbIntoView(to);
+    }
+  }
 }
-/* the card: built with createElement/textContent only (never innerHTML with data).
-   Same copy as the Reach card (MAP_INFO): title, coordinates, sentence, events action. */
+/* a pin picked from the globe: bring its list item into view inside the desktop list's own
+   scroller (a one-off read on click; never the page) */
+function _glbReveal(i){
+  const b=_glb.items[i],l=_glb.list;
+  if(!b||!l||l.scrollHeight<=l.clientHeight+1||!b.getClientRects().length)return;
+  const lr=l.getBoundingClientRect(),br=b.getBoundingClientRect();
+  if(br.top<lr.top)l.scrollTop-=lr.top-br.top+4;
+  else if(br.bottom>lr.bottom)l.scrollTop+=br.bottom-lr.bottom+4;
+}
+
+/* ── dates: UK time, en-GB ("14–15 Oct 2026", "15 Oct 2026, 13:23 UK time") ── */
+let _glbFmtDay=null,_glbFmtStamp=null;
+function _glbDate(iso){if(typeof iso!=='string'||!iso)return null;const d=new Date(iso);return isNaN(d.getTime())?null:d;}
+function _glbParts(d){
+  try{
+    if(!_glbFmtDay)_glbFmtDay=new Intl.DateTimeFormat('en-GB',{timeZone:_GLB_TZ,day:'numeric',month:'short',year:'numeric'});
+    const o={};_glbFmtDay.formatToParts(d).forEach(function(p){o[p.type]=p.value;});
+    return {d:o.day,m:o.month,y:o.year};
+  }catch(e){
+    return {d:String(d.getUTCDate()),m:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()],y:String(d.getUTCFullYear())};
+  }
+}
+function _glbRange(from,to){
+  const a=_glbDate(from),b=_glbDate(to);
+  if(!a&&!b)return '';
+  const A=_glbParts(a||b),B=_glbParts(b||a);
+  if(A.y!==B.y)return A.d+' '+A.m+' '+A.y+' – '+B.d+' '+B.m+' '+B.y;
+  if(A.m!==B.m)return A.d+' '+A.m+' – '+B.d+' '+B.m+' '+B.y;
+  if(A.d!==B.d)return A.d+'–'+B.d+' '+B.m+' '+B.y;
+  return B.d+' '+B.m+' '+B.y;
+}
+function _glbDay(iso){const d=_glbDate(iso);if(!d)return '';const P=_glbParts(d);return P.d+' '+P.m;}
+function _glbStamp(d){
+  try{
+    if(!_glbFmtStamp)_glbFmtStamp=new Intl.DateTimeFormat('en-GB',{timeZone:_GLB_TZ,day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+    return _glbFmtStamp.format(d)+' UK time';
+  }catch(e){return d.toISOString().slice(0,16).replace('T',' ')+' Coordinated Universal Time';}
+}
+
+/* ── the alerts: fetched once, re-checked, then list + pins ── */
+/* the normaliser's clean-up again (defence in depth): control, invisible and bidirectional
+   characters out, then whitespace collapsed and the length capped */
+const _GLB_STRIP=/[\u0000-\u001F\u007F-\u009F\u00AD\u061C\u200B-\u200F\u2028-\u202E\u2060-\u2069\uFEFF]/g;
+function _glbStr(v,max){
+  if(typeof v!=='string')return '';
+  const t=v.replace(_GLB_STRIP,' ').replace(/\s+/g,' ').trim();
+  return t.length>max?t.slice(0,max-1).trim()+'…':t;
+}
+/* only ever link to GDACS itself */
+function _glbUrl(v){return typeof v==='string'&&v.indexOf(_GLB_SITE)===0&&v.length<=300&&!/[\s"'<>\\]/.test(v)?v:'';}
+function _glbClean(d){
+  if(!d||typeof d!=='object'||!Array.isArray(d.events))return null;
+  const out=[];
+  for(let i=0;i<d.events.length&&out.length<_GLB_MAX;i++){
+    const e=d.events[i];
+    if(!e||typeof e!=='object'||typeof e.lat!=='number'||typeof e.lng!=='number')continue;
+    if(!(e.lat>=-90&&e.lat<=90&&e.lng>=-180&&e.lng<=180))continue;
+    if(e.alert!=='Red'&&e.alert!=='Orange')continue;
+    const title=_glbStr(e.title,120);if(!title)continue;
+    const type=typeof e.type==='string'&&Object.prototype.hasOwnProperty.call(_GLB_SHORT,e.type)?e.type:'';
+    out.push({
+      lat:e.lat,lng:e.lng,title:title,alert:e.alert,red:e.alert==='Red',
+      typeLabel:_glbStr(e.typeLabel,40)||'Disaster',short:type?_GLB_SHORT[type]:'Alert',
+      place:_glbStr(e.place,40),country:_glbStr(e.country,140),severity:_glbStr(e.severityText,60),
+      description:_glbStr(e.description,320),from:_glbStr(e.from,30),to:_glbStr(e.to,30),url:_glbUrl(e.url)
+    });
+  }
+  /* Red first, then the most recently updated (the file is already in this order) */
+  return out.sort(function(a,b){return (b.red-a.red)||(a.to<b.to?1:a.to>b.to?-1:0);});
+}
+function _glbLoad(){
+  if(_glb.data)return;
+  _glbSetState('loading');
+  if(typeof fetch!=='function'){_glbSetState('error');return;}
+  const ac=window.AbortController?new AbortController():null;
+  const timer=ac?setTimeout(function(){ac.abort();},15000):0;
+  fetch(_GLB_DATA,{cache:'no-cache',credentials:'same-origin',signal:ac?ac.signal:undefined})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(d){
+      clearTimeout(timer);
+      const ev=_glbClean(d);
+      if(!ev||(!ev.length&&d.events.length))throw new Error('unusable data');
+      const g=typeof d.generatedAt==='string'?new Date(d.generatedAt):null;
+      _glb.gen=g&&!isNaN(g.getTime())?g:null;
+      _glbSetEvents(ev);
+    })
+    .catch(function(){clearTimeout(timer);_glbSetState('error');});
+}
+function _glbLink(text){
+  const a=_glbEl('a',null,text);
+  a.href=_GLB_SITE;a.target='_blank';a.rel='noopener noreferrer';
+  a.appendChild(_glbEl('span','glb-sr',' (opens in a new tab)'));
+  return a;
+}
+/* the one status line + the credit's "Updated" time */
+function _glbSetState(st){
+  _glb.data=st;
+  const s=_glb.status;
+  if(s){
+    /* the whole message in one span: when the loading room is held with nothing to list (.glb-void),
+       the line becomes a frame with the span centred in it, its text and link still one flow */
+    const m=document.createElement('span');
+    if(st==='loading')m.textContent='Loading the latest disaster alerts…';
+    else if(st==='empty')m.textContent='No current Orange or Red disaster alerts from GDACS.';
+    else if(st==='error'){
+      m.appendChild(document.createTextNode('Live alerts are unavailable right now. '));
+      m.appendChild(_glbLink('See the latest on GDACS'));
+    }else if(st==='ready'){
+      const n=_glb.events.length,r=_glb.events.filter(function(e){return e.red;}).length;
+      m.textContent=n===1?'1 current disaster alert ('+_glb.events[0].alert+').'
+        :r===0?n+' current disaster alerts, all Orange.'
+        :r===n?n+' current disaster alerts, all Red.'
+        :n+' current disaster alerts: '+r+' Red, '+(n-r)+' Orange.';
+    }
+    if((st==='ready'||st==='empty')&&_glbStale()){
+      m.appendChild(document.createTextNode(' This may be out of date: '));
+      m.appendChild(_glbLink('see the latest on GDACS'));
+      m.appendChild(document.createTextNode('.'));
+    }
+    s.textContent='';s.appendChild(m);
+  }
+  const up=document.getElementById('glb-updated');
+  if(up)up.textContent=(st==='ready'||st==='empty')&&_glb.gen?'Updated '+_glbStamp(_glb.gen)+'.':'';
+  const side=_glb.side;
+  if(side){
+    side.classList.toggle('glb-void',st==='empty'||st==='error');
+    /* the column's loading room (.glb-res) goes now only if the column is wholly BELOW the screen (one
+       read, once): on or above the screen, a shorter result would pull everything in view up (scroll
+       anchoring does not cover it here: the reveal transforms suppress it), so the room stays, framed
+       (see the .glb-res CSS), until the side observer sees the column go below the screen */
+    if(st!=='loading'&&side.getBoundingClientRect().top>=window.innerHeight)side.classList.remove('glb-res');
+  }
+}
+/* the snapshot's generatedAt is over 14 days old, or missing. The pipeline rewrites even an unchanged
+   file once its generatedAt is a week old, so only a stopped workflow gets here; the alerts' own dates
+   play no part (an alert's end date can lie ahead, e.g. a cyclone forecast, and would hide a dead feed) */
+function _glbStale(){return !_glb.gen||Date.now()-_glb.gen.getTime()>_GLB_STALE;}
+function _glbSetEvents(ev){
+  _glb.events=ev;_glb.sel=-1;_glb.items=[];
+  const list=_glb.list;
+  list.textContent='';
+  ev.forEach(function(s,i){
+    const li=document.createElement('li');
+    const b=_glbEl('button','glb-item'+(s.red?' glb-red':''));
+    b.type='button';b.setAttribute('aria-pressed','false');
+    b.appendChild(_glbEl('span','glb-item-mark')).setAttribute('aria-hidden','true');
+    const main=_glbEl('span','glb-item-main'),k=_glbEl('span','glb-item-kicker');
+    k.appendChild(_glbEl('span','glb-item-alert',s.alert+' alert'));
+    k.appendChild(_glbEl('span','glb-sr',', ')); /* the visible "·" has empty alt text: this keeps the two apart when read out */
+    k.appendChild(_glbEl('span','glb-item-type',s.typeLabel));
+    main.appendChild(k);
+    main.appendChild(_glbEl('span','glb-item-name',s.title));
+    if(s.country&&s.title.indexOf(s.country)<0)main.appendChild(_glbEl('span','glb-item-where',s.country));
+    b.appendChild(main);
+    const iso=s.to||s.from,day=_glbDay(iso);
+    if(day){const t=_glbEl('time','glb-item-date',day);t.dateTime=iso;b.appendChild(t);}
+    /* detail 0: pressed with Enter / Space (or a screen reader's click), not a pointer */
+    b.addEventListener('click',function(e){_glbSelect(i,b,!e.detail);});
+    li.appendChild(b);list.appendChild(li);_glb.items.push(b);
+  });
+  /* phones and tablets: the first four, then a real toggle (no scroller inside the page) */
+  const n=ev.length,clip=n>_GLB_FEW,more=_glb.more;
+  list.classList.toggle('glb-clip',clip);
+  /* while the loading room is held, these frame the part of it the alerts leave (see the .glb-res CSS) */
+  list.classList.toggle('glb-few',n>0&&n<_GLB_FEW);
+  list.classList.toggle('glb-fit',n>0&&!clip);
+  if(more){more.hidden=!clip;more.setAttribute('aria-expanded','false');more.textContent='Show all '+n+' alerts';}
+  _glbSetState(n?'ready':'empty');
+  _glbShowCard();
+  if(_glb.G){_glbMakePins();_glb.force=Math.max(_glb.force,1);_glbKick();}
+}
+/* the card: built with createElement/textContent only (never innerHTML with data) */
 function _glbShowCard(){
   const card=document.getElementById('glb-card');if(!card)return;
-  const i=_glb.sel,s=_glb.sites[i];
+  const i=_glb.sel,s=_glb.events[i];
   _glb.items.forEach(function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false');});
   _glb.pins.forEach(function(p,k){p.el.setAttribute('aria-pressed',k===i?'true':'false');});
   card.textContent='';
-  if(!s){card.classList.remove('on');return;} /* the chapter's sub-line already says what to do */
-  card.classList.add('on');
-  card.appendChild(_glbEl('div','glb-card-title',s.label));
-  card.appendChild(_glbEl('div','map-card-co',s.co));
-  card.appendChild(_glbEl('p','glb-card-body',s.body));
-  /* same "See N events ↓ / See our events ↓" action as the Reach card */
-  const lk=_mapEventsLink(s.idx),b=_glbEl('button','map-card-link',lk.text);
-  b.type='button';
-  b.addEventListener('click',function(){
-    _mapSeeEvents(lk.idx);
-    /* the page is gliding to the events: keyboard focus goes with it (no second scroll) */
-    const h=document.querySelector('#events .sect-title');
-    if(h){if(!h.hasAttribute('tabindex'))h.setAttribute('tabindex','-1');h.focus({preventScroll:true});}
-  });
-  card.appendChild(b);
+  /* a landmark only while it holds a card: an empty "Alert details" region would sit in the landmark list */
+  if(!s){card.classList.remove('on');card.removeAttribute('role');card.removeAttribute('aria-label');return;}
+  card.classList.add('on');card.setAttribute('role','region');card.setAttribute('aria-label','Alert details');
+  card.appendChild(_glbEl('div','glb-card-title',s.title)).tabIndex=-1; /* focus target for a keyboard choice on phones (_glbSelect) */
+  card.appendChild(_glbEl('div','map-card-co',s.typeLabel+' · '+s.alert+' alert'+(s.country?' · '+s.country:'')));
+  const facts=[_glbRange(s.from,s.to),s.severity].filter(Boolean).join(' · ');
+  if(facts)card.appendChild(_glbEl('div','map-card-co',facts));
+  if(s.description)card.appendChild(_glbEl('p','glb-card-body',s.description));
+  card.appendChild(_glbEl('p','glb-card-note','A GDACS alert'+(_glb.gen?', data updated '+_glbStamp(_glb.gen):'')
+    +'. A place where help is needed, not a Rising Light project.'));
+  const a=_glbEl('a','map-card-link',s.url?'Full report on GDACS':'GDACS website');
+  a.href=s.url||_GLB_SITE;a.target='_blank';a.rel='noopener noreferrer';
+  a.appendChild(_glbEl('span',null,'↗')).setAttribute('aria-hidden','true');
+  a.appendChild(_glbEl('span','glb-sr',' (opens in a new tab)'));
+  card.appendChild(a);
 }
 
 /* ── pointer input: record numbers only; _glbFrame does the work ── */
@@ -3754,7 +4097,7 @@ function _glbMove(e){
     _glb.sx+=dx;_glb.sy+=dy;
     const ax=Math.abs(_glb.sx),ay=Math.abs(_glb.sy);
     if(_glb.mouse?ax+ay<6:(ax<8||ax<=ay))return;
-    _glb.drag=true;_glb.held=true;_glb.phi0=_glb.phi; /* phi0: where a pinch puts the globe back */
+    _glb.drag=true;_glbHold();_glb.phi0=_glb.phi; /* phi0: where a pinch puts the globe back */
     /* mouse tilt clamps to ±0.5 rad, widened to where a selection left it so nothing jumps */
     _glb.tLo=Math.min(-0.5,_glb.theta);_glb.tHi=Math.max(0.5,_glb.theta);
     if(_glb.mouse){try{_glb.stage.setPointerCapture(e.pointerId);}catch(err){}}
@@ -3777,25 +4120,43 @@ function _glbUp(e){ /* pointerup, or pointercancel = the browser took a vertical
 function _glbMakePins(){
   const layer=_glb.layer;
   layer.textContent='';_glb.pins=[];
-  _glb.sites.forEach(function(s,i){
-    const b=_glbEl('button','glb-pin');
+  _glb.events.slice(0,_GLB_PINS).forEach(function(s,i){
+    const b=_glbEl('button','glb-pin'+(s.red?' glb-red':''));
     /* pointer shortcuts only: the layer is aria-hidden and the keyboard route is the list, so a pin
        never takes focus (mousedown) and the card's opener is the matching list button */
     b.type='button';b.tabIndex=-1;
     b.setAttribute('aria-pressed',i===_glb.sel?'true':'false');
-    b.appendChild(_glbEl('span','glb-pin-dot'));b.appendChild(_glbEl('span','glb-pin-tag',s.label));
+    b.appendChild(_glbEl('span','glb-pin-dot'));
+    b.appendChild(_glbEl('span','glb-pin-tag',s.short+(s.place?' · '+s.place:'')));
     b.addEventListener('mousedown',function(e){e.preventDefault();});
-    b.addEventListener('click',function(){_glbSelect(i,_glb.items[i]);});
+    b.addEventListener('click',function(e){const k=_glbNearest(e,i);_glbSelect(k,_glb.items[k]);_glbReveal(k);});
     layer.appendChild(b);
-    _glb.pins.push({el:b,lat:s.lat,lon:s.lon,tf:'',o:-1,off:null});
+    /* the pin's point on the sphere (radius 0.8), worked out once */
+    const la=s.lat*_GLB_D2R,lo=s.lng*_GLB_D2R,cl=Math.cos(la);
+    _glb.pins.push({el:b,px:cl*Math.cos(lo)*0.8,py:Math.sin(la)*0.8,pz:-cl*Math.sin(lo)*0.8,tf:'',o:-1,off:null,dim:null});
   });
+}
+/* pins can sit closer together than their 44px targets (a cyclone and a flood in one region), and the
+   one drawn on top would swallow every tap meant for its neighbour: a pointer click goes to the
+   visible pin whose CENTRE is nearest (the numbers the last frame wrote, plus one rect read) */
+function _glbNearest(e,i){
+  if(!e||!e.detail||!_glb.stage)return i; /* detail 0: not a pointer click */
+  const sr=_glb.stage.getBoundingClientRect(),x=e.clientX-sr.left,y=e.clientY-sr.top;
+  let best=i,bd=Infinity;
+  for(let k=0;k<_glb.pins.length;k++){
+    const p=_glb.pins[k];if(p.off!==false)continue;
+    const d=(p.x-x)*(p.x-x)+(p.y-y)*(p.y-y);if(d<bd){bd=d;best=k;}
+  }
+  return bd<=22*22?best:i;
 }
 function _glbCreate(){
   const stage=_glb.stage,S=stage.clientWidth;
   if(!S||!_glb.cobe)return false;
-  if(_glb.sel>=0){ /* a place was chosen from the list before the globe arrived */
-    const c=_glbCentre(_glb.sites[_glb.sel].lat,_glb.sites[_glb.sel].lon);
+  if(_glb.sel>=0){ /* an alert was chosen from the list before the globe arrived */
+    const c=_glbCentre(_glb.events[_glb.sel].lat,_glb.events[_glb.sel].lng);
     _glb.phi=c.phi;_glb.theta=c.theta;_glb.scale=_GLB_ZOOM;
+  }else if(!_glb.held&&_glb.events.length){ /* the alerts came first: open on the most urgent */
+    _glb.phi=_glbCentre(_glb.events[0].lat,_glb.events[0].lng).phi;
   }
   _glb.isDark=document.body.classList.contains('dark');
   const coarse=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
@@ -3843,16 +4204,13 @@ function _glbRebuild(){
   _glb.lost=false;
   if(_glbCreate())_glbSync();else _glbFallback();
 }
-/* no globe: the list + card carry the chapter. The stage's square goes only while it is wholly
-   below the screen (a one-off read on this failure path); if a reader may have seen it, it stays,
-   empty, and the sub-line keeps its height, so nothing on the page moves. */
+/* no globe: the status line, list + card carry the chapter. The stage's square goes only while it
+   is wholly below the screen (a one-off read on this failure path); if a reader may have seen it,
+   it stays, showing just its hairline circle (.glb-hold), so nothing on the page moves. (The
+   sub-line names no globe gesture, so it stays as it is.) */
 function _glbFallback(){
-  const sec=document.getElementById('globe'),sub=document.getElementById('globe-sub'),stage=_glb.stage;
+  const sec=document.getElementById('globe'),stage=_glb.stage;
   const keep=!!stage&&stage.getBoundingClientRect().top<window.innerHeight;
-  if(sub){
-    if(keep)sub.style.minHeight=sub.offsetHeight+'px';
-    sub.textContent='Choose a place to see what we do there.';
-  }
   if(sec)sec.classList.add(keep?'glb-hold':'glb-nogl');
   _glb.G=null;_glbSync();
 }
@@ -3891,32 +4249,33 @@ function _glbBoot(){
   }).catch(function(){_glbFallback();});
 }
 
-/* list + card now (cheap, and they work without WebGL); the globe itself only on approach */
+/* wiring now (cheap); the alerts and the globe itself only on approach */
 (function(){
   const sec=document.getElementById('globe'),stage=document.getElementById('glb-stage'),
         list=document.getElementById('glb-list'),layer=document.getElementById('glb-pins'),
-        hit=document.getElementById('glb-hit'),side=list&&list.parentElement;
-  if(!sec||!stage||!list||!layer||!hit||typeof RL_GLOBE_SITES==='undefined'||typeof LOCATIONS==='undefined'||typeof MAP_INFO==='undefined')return;
-  _glb.stage=stage;_glb.layer=layer;_glb.hit=hit;
-  /* position (and the country the events action filters by) from LOCATIONS; card copy from MAP_INFO */
-  RL_GLOBE_SITES.forEach(function(s){
-    const idx=LOCATIONS.findIndex(function(l){return l.label===s.label;});
-    if(idx<0||!MAP_INFO[idx])return;
-    const loc=LOCATIONS[idx];
-    _glb.sites.push({id:s.id,label:s.label,role:s.role,idx:idx,lat:loc.lat,lon:loc.lon,co:MAP_INFO[idx].co,body:MAP_INFO[idx].body});
-  });
-  _glb.sites.forEach(function(s,i){
-    const b=_glbEl('button','glb-item');
-    b.type='button';b.setAttribute('aria-pressed','false');
-    b.appendChild(_glbEl('span','glb-item-name',s.label));
-    b.appendChild(_glbEl('span','glb-item-role',s.role));
-    b.addEventListener('click',function(){_glbSelect(i,b);});
-    list.appendChild(b);_glb.items.push(b);
+        hit=document.getElementById('glb-hit'),status=document.getElementById('glb-status'),
+        more=document.getElementById('glb-more'),side=list&&list.parentElement;
+  if(!sec||!stage||!list||!layer||!hit||!status)return;
+  _glb.stage=stage;_glb.side=side;_glb.layer=layer;_glb.hit=hit;_glb.list=list;_glb.status=status;_glb.more=more;
+  if(more)more.addEventListener('click',function(e){
+    const open=more.getAttribute('aria-expanded')!=='true';
+    more.setAttribute('aria-expanded',open?'true':'false');
+    list.classList.toggle('glb-clip',!open);
+    more.textContent=open?'Show fewer alerts':'Show all '+_glb.events.length+' alerts';
+    /* the alerts just shown sit BEFORE the toggle, so from the keyboard (detail 0) start on the first
+       of them; otherwise the next Tab would skip them all. Brought fully into view, clear of the phone
+       chapter bar (one read, on the key press) */
+    const f=open&&!e.detail&&_glb.items[_GLB_FEW];
+    if(f){f.focus({preventScroll:true});_glbIntoView(f);}
+    else if(!open&&!e.detail)_glbIntoView(more); /* collapsing from the keyboard: the toggle moved up with the list - keep it (and its focus ring) in view */
   });
   _glbShowCard();
-  /* keyboard focus inside the chapter pauses the idle spin (WCAG 2.2.2) */
-  sec.addEventListener('focusin',function(){_glb.focusIn=true;});
-  sec.addEventListener('focusout',function(e){_glb.focusIn=!!(e.relatedTarget&&sec.contains(e.relatedTarget));_glbKick();});
+  /* keyboard focus inside the chapter pauses the idle spin and the Red pulse (WCAG 2.2.2) */
+  sec.addEventListener('focusin',function(){_glb.focusIn=true;sec.classList.add('glb-focus');});
+  sec.addEventListener('focusout',function(e){
+    _glb.focusIn=!!(e.relatedTarget&&sec.contains(e.relatedTarget));
+    sec.classList.toggle('glb-focus',_glb.focusIn);_glbKick();
+  });
   /* Escape closes the card and returns focus to the list button that opened it. Ours only when focus
      is in this chapter, or on the page itself (Safari doesn't focus buttons on click) while the list +
      card are on screen, and never while a dialog or panel is open: this runs first (window, capture),
@@ -3928,15 +4287,35 @@ function _glbBoot(){
     if((a&&a!==document.body)?!sec.contains(a):!_glb.sideVis)return;
     _glbDeselect(true);
   },true);
-  if(!('IntersectionObserver' in window)||!('ResizeObserver' in window)){_glbFallback();return;}
-  if(side)new IntersectionObserver(function(es){_glb.sideVis=es[es.length-1].isIntersecting;},{threshold:0}).observe(side);
-  /* no WebGL at all: never download cobe (a blocked GPU is caught by _glbCreate instead) */
-  if(!window.WebGLRenderingContext){_glbFallback();return;}
+  if(!('IntersectionObserver' in window)){_glbFallback();_glbLoad();return;}
+  if(side)new IntersectionObserver(function(es){
+    const en=es[es.length-1];
+    _glb.sideVis=en.isIntersecting;
+    /* the column's loading room, kept while the column was on or above the screen, goes once the column
+       is below the screen, where shrinking it moves nothing in view */
+    if(!en.isIntersecting&&en.boundingClientRect.top>0&&_glb.data&&_glb.data!=='loading')side.classList.remove('glb-res');
+  },{threshold:0}).observe(side);
+  /* no WebGL at all (or no ResizeObserver): never download cobe (a blocked GPU is caught by
+     _glbCreate instead); the alerts still load, as a list */
+  const gl=!!window.WebGLRenderingContext&&('ResizeObserver' in window);
+  if(!gl)_glbFallback();
+  /* the alerts file first: the chapter within 2000px (the section starts about 4000px down, so never
+     on the first screen); it has then nearly always arrived before the list is in view */
+  const dio=new IntersectionObserver(function(es){
+    if(!es.some(function(e){return e.isIntersecting;}))return;
+    dio.disconnect();_glbLoad();
+  },{rootMargin:'2000px 0px'});
+  /* the globe: the stage within 600px of the viewport (the section, if the stage was removed);
+     _glbLoad again here is a no-op unless the first observer has not fired yet */
   const io=new IntersectionObserver(function(es){
     if(!es.some(function(e){return e.isIntersecting;}))return;
-    io.disconnect();_glbBoot();
+    io.disconnect();_glbLoad();if(gl)_glbBoot();
   },{rootMargin:'600px 0px'});
-  io.observe(stage);
+  /* both start watching only once the page has finished parsing: a first check made mid-parse, before
+     the late <style> block lower down applies (about 1900px of height above this chapter at 390px),
+     could see the chapter within 2000px and fetch the alerts on page load */
+  const watch=function(){dio.observe(sec);io.observe(sec.classList.contains('glb-nogl')?sec:stage);};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch,{once:true});else watch();
 })();
 </script>
 
