@@ -2,14 +2,14 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-10-15T11:03:33Z",
-  "count": 4,
+  "generatedAt": "2026-10-16T15:23:13Z",
+  "count": 3,
   "dropped": 0,
   "events": [
     {
       "id": "TC-1001335",
-      "lat": 19.2,
-      "lng": -108.5,
+      "lat": 20.6,
+      "lng": -109.5,
       "title": "Tropical Cyclone SIMON-26",
       "priority": 1,
       "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
@@ -17,28 +17,28 @@
       "typeLabel": "Tropical cyclone",
       "alert": "Orange",
       "severityText": "Maximum wind 250 km/h",
-      "country": "Mexico",
+      "country": "México",
       "place": "SIMON-26",
       "from": "2026-10-07T15:00:00Z",
-      "to": "2026-10-15T09:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001335&episodeid=32&eventtype=TC"
+      "to": "2026-10-16T15:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001335&episodeid=37&eventtype=TC"
     },
     {
       "id": "TC-1001338",
-      "lat": 10.9,
-      "lng": 158.4,
+      "lat": 11.4,
+      "lng": 151.4,
       "title": "Tropical Cyclone CHAMPI-26",
       "priority": 1,
       "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
       "type": "TC",
       "typeLabel": "Tropical cyclone",
       "alert": "Orange",
-      "severityText": "Maximum wind 231 km/h",
-      "country": "Guam, Northern Mariana Islands",
+      "severityText": "Maximum wind 250 km/h",
+      "country": "Guam",
       "place": "CHAMPI-26",
       "from": "2026-10-14T12:00:00Z",
-      "to": "2026-10-15T06:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=4&eventtype=TC"
+      "to": "2026-10-16T12:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=9&eventtype=TC"
     },
     {
       "id": "DR-1018332",
@@ -54,25 +54,8 @@
       "country": "Austria and 28 more countries",
       "place": "Europe-2026",
       "from": "2025-12-21T00:00:00Z",
-      "to": "2026-10-13T00:00:00Z",
+      "to": "2026-10-14T00:00:00Z",
       "url": "https://www.gdacs.org/report.aspx?eventid=1018332&episodeid=24&eventtype=DR"
-    },
-    {
-      "id": "TC-1001334",
-      "lat": 37.5,
-      "lng": -84,
-      "title": "Tropical Cyclone ISAIAS-26",
-      "priority": 1,
-      "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
-      "type": "TC",
-      "typeLabel": "Tropical cyclone",
-      "alert": "Orange",
-      "severityText": "Maximum wind 194 km/h",
-      "country": "United States",
-      "place": "ISAIAS-26",
-      "from": "2026-10-06T21:00:00Z",
-      "to": "2026-10-11T15:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001334&episodeid=20&eventtype=TC"
     }
   ]
 }
