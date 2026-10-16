@@ -1149,19 +1149,33 @@ body.dark .search-container.spotlit .search-input {
 .goal-nums{font-family:var(--cinzel);font-size:22px;font-weight:700;letter-spacing:.5px}
 .goal-nums .goal-of{color:var(--text3);font-size:14px;font-weight:600}
 .goal-track{height:10px;border-radius:99px;background:var(--hover-bg2);overflow:hidden}
+/* Smooth on phones (16 Oct 2026). The fill is laid at its final width at once and grows on the
+   compositor (transform:scaleX from the left edge) instead of animating width, which was layout and
+   paint on the main thread every frame and froze whenever the page was busy. At rest the transform is
+   none, so the bar is the same box as before. overflow:hidden keeps the shimmer strip inside the fill. */
 .goal-fill{
   height:100%;width:0;border-radius:99px;background:var(--text);
-  position:relative;transition:width 1.6s cubic-bezier(0.22,1,0.36,1);
+  position:relative;overflow:hidden;
+  transform:scaleX(0);transform-origin:left center;transition:transform 1.6s cubic-bezier(0.22,1,0.36,1);
 }
+/* The shimmer, also on the compositor: the same 220%-wide gradient tile, laid four tiles wide on a
+   strip that slides (transform) instead of a background-position animation that repainted the fill
+   every frame. Same speed, same phase, same 2.4 s loop. It runs only while the goal card is on screen
+   (.goal-live, from an IntersectionObserver) and never under reduced motion. */
 .goal-fill::after{
-  content:'';position:absolute;inset:0;
+  content:'';position:absolute;top:0;bottom:0;left:-440%;width:880%;
   background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,0.35) 50%,transparent 70%);
-  background-size:220% 100%;animation:skelShimmer 2.4s linear infinite;
+  background-size:25% 100%;animation:goalShine 2.4s linear infinite paused;
 }
+.goal-card.goal-live .goal-fill::after{animation-play-state:running}
+@keyframes goalShine{from{transform:translateX(-27.2727%)}to{transform:translateX(27.2727%)}}
 body.dark .goal-fill::after{
   background:linear-gradient(100deg,transparent 30%,rgba(0,0,0,0.30) 50%,transparent 70%);
-  background-size:220% 100%;
+  background-size:25% 100%;
 }
+/* the count-up holds this box at the final number's width (script), so the head never re-wraps */
+#goal-now{display:inline-block;text-align:right}
+@media (prefers-reduced-motion:reduce){.goal-fill{transition:none}}
 .goal-foot{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--text3);margin-top:8px;letter-spacing:.4px}
 .goal-pct{font-family:var(--mono)}
 .heat-wrap{margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}
@@ -1181,6 +1195,7 @@ body.dark .goal-fill::after{
 /* v7.8 Scroll reveal */
 .rl-sr{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(0.22,1,0.36,1),transform .8s cubic-bezier(0.22,1,0.36,1)}
 .rl-sr.rl-sr-in{opacity:1;transform:none}
+.rl-sr.rl-sr-now{transition:none} /* CH.03 cards: a reveal the reader has already scrolled into is shown at once */
 
 /* v7.10 Scroll progress + back-to-top (bottom-left; quick-capture FAB owns bottom-right)
    Compositor-only: full-width bar scaled on X, not width-animated (no layout). */
@@ -1570,8 +1585,13 @@ body.admin .admin-only{display:inline-flex}
   var _shown=false,_reveal=function(){if(_shown)return;_shown=true;_b.classList.add('hero-in');};
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(_reveal);}
   setTimeout(_reveal,900);
-  window.addEventListener('load',function(){_reveal();window.scrollTo(0,0);});
-  window.addEventListener('pageshow',function(){window.scrollTo(0,0);});
+  /* back to the top on load, as before, but never under a reader who has already started scrolling
+     (on a phone load can land seconds late, mid-scroll), and as a jump, not a smooth glide (16 Oct 2026) */
+  var _rlHeld=false,_rlHold=function(){_rlHeld=true;};
+  ['touchstart','wheel','keydown','mousedown'].forEach(function(t){window.addEventListener(t,_rlHold,{passive:true,capture:true});});
+  var _rlTop=function(){if(_rlHeld)return;var _h=document.documentElement,_sb=_h.style.scrollBehavior;_h.style.scrollBehavior='auto';window.scrollTo(0,0);_h.style.scrollBehavior=_sb;};
+  window.addEventListener('load',function(){_reveal();_rlTop();});
+  window.addEventListener('pageshow',function(e){if(e&&e.persisted)_rlHeld=false;_rlTop();});
 }catch(e){document.body.classList.add('hero-in');}</script>
 
 <!-- Scroll ink reveal on the hero mission line. Words are wrapped in spans at
@@ -1662,7 +1682,7 @@ body.admin .admin-only{display:inline-flex}
 
 <div class="container">
   <div class="header">
-    <img class="title-logo" src="rl-crest.png" alt="Rising Light"/>
+    <img class="title-logo" src="rl-crest.png" width="600" height="454" alt="Rising Light"/>
     <h1 class="hero-h1"><span class="w">Compassion</span><br><span class="w">Has</span> <span class="w">No</span> <span class="w">Borders</span></h1>
     <div class="overview">
       <p>Help that arrives in person — for the people and animals the world overlooks.</p>
@@ -2899,12 +2919,17 @@ async function loadEvents(){
     if(!window._rlCalTouched){calView=null;if(typeof renderCalendar==='function')renderCalendar();}
     if(typeof rlFillStatsForm==='function')rlFillStatsForm();
     renderCountryFilters();
-    renderTicker();
-    renderEvents();
     if(window.rlOnEventsLoaded)window.rlOnEventsLoaded(); // v7: heatmap etc.
   }catch(e){
     console.error('[Rising Light] post-load render failed:',e);
   }
+  /* The ticker and the events list sit below CH.03 and are the heavy part of this render (layout and
+     text shaping of every new card). They run after the next frame, so CH.03's own updates paint first,
+     and while CH.03's goal is counting up they wait for it to land, so the count never freezes
+     mid-climb (16 Oct 2026). The wait is capped at 2 s (a hidden tab pauses the count). */
+  const _rest=()=>{try{renderTicker();renderEvents();}catch(e){console.error('[Rising Light] post-load render failed:',e);}};
+  if(window.rlGoalBusy)Promise.race([window.rlGoalBusy,new Promise(r=>setTimeout(r,2000))]).then(_rest);
+  else requestAnimationFrame(()=>setTimeout(_rest,0));
 }
 
 function filterEvents(filter){
@@ -3267,15 +3292,18 @@ function shareEvent(platform,text,url,btn){
 
 /* ─── ANIMATED COUNTERS ──────────────────────────────────────────────── */
 function animateCounter(el,target,duration=1400){
-  const start=performance.now();
+  /* The clock starts on the first frame (16 Oct 2026): a frame's timestamp can be older than a
+     performance.now() taken just before it, which made the first value negative ("-17 / 500"). */
+  let start=null,last=null;
   const startVal=0;
   function step(now){
+    if(start===null)start=now;
     const elapsed=now-start;
-    const progress=Math.min(elapsed/duration,1);
+    const progress=Math.min(Math.max(elapsed/duration,0),1);
     // ease-out for a more natural feel
     const eased=1-Math.pow(1-progress,3);
     const value=Math.floor(startVal+(target-startVal)*eased);
-    el.textContent=value;
+    if(value!==last){el.textContent=value;last=value;}
     if(progress<1)requestAnimationFrame(step);
     else el.textContent=target;
   }
@@ -4537,16 +4565,30 @@ window.showToast=function(msg){
       if(e.isIntersecting){e.target.classList.add('rl-sr-in');io.unobserve(e.target);}
     });
   },{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
-  function attach(el,delay){
+  /* CH.03's two cards (16 Oct 2026). On a phone flick they crossed the screen still invisible, then
+     ghosted in late under the reader's thumb. They now start their reveal a little before they reach
+     the screen (15% of a screen height early). If the observer only reports once a card is already 15%
+     into the screen, the scroll is too fast for a fade to read as anything but a ghost, so the card is
+     shown at once. */
+  const ioEarly=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting)return;
+      ioEarly.unobserve(e.target);
+      if(e.boundingClientRect.top<window.innerHeight*0.85)e.target.classList.add('rl-sr-now');
+      e.target.classList.add('rl-sr-in');
+    });
+  },{threshold:0,rootMargin:'0px 0px 15% 0px'});
+  function attach(el,delay,obs){
     if(el.classList.contains('rl-sr')||el.classList.contains('rl-sr-in'))return;
     // Never hide something already in the first viewport — no flash on load
     if(el.getBoundingClientRect().top<window.innerHeight*0.9)return;
     el.classList.add('rl-sr');
     if(delay)el.style.transitionDelay=Math.min(delay,360)+'ms';
-    io.observe(el);
+    (obs||io).observe(el);
   }
-  document.querySelectorAll('#impact,.goal-card,.cal-card,.map-section,.ticker-wrap,.events-header,.rl-globe,.upload-section,.rl-ig,.faq-section,.give-section,.footer')
+  document.querySelectorAll('#impact,.map-section,.ticker-wrap,.events-header,.rl-globe,.upload-section,.rl-ig,.faq-section,.give-section,.footer')
     .forEach(el=>attach(el,0));
+  document.querySelectorAll('.goal-card,.cal-card').forEach(el=>attach(el,0,ioEarly));
   // Event cards arrive async and re-render on filter — reveal each new batch
   const grid=document.getElementById('events-grid');
   if(grid){
@@ -4799,27 +4841,93 @@ const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goa
   const card=document.getElementById('goal-card');
   if(!card)return;
   document.getElementById('goal-target').textContent=RL_GOAL;
-  let painted=false;
+  const fill=document.getElementById('goal-fill'),nowEl=document.getElementById('goal-now');
+  const reduce=window.matchMedia?window.matchMedia('(prefers-reduced-motion:reduce)'):{matches:false};
+  let armed=false,painted=false,filling=false,count=null;
   /* Read "lives" at paint time rather than parse time, so a pinned number that
      arrives with the async stats fetch is reflected in the bar. */
+  const livesNow=()=>+(((document.querySelectorAll('.stats-section .stat-number')[2]||{}).dataset||{}).target||RL_LIVES_FALLBACK);
+  /* Smooth on phones (16 Oct 2026). The number's box is held at the final value's width before the
+     count-up starts. Cinzel's digits differ in width, so on phones 410–442 px wide the head used to wrap
+     and unwrap as the count climbed, moving the bar, the month blocks and the calendar card by 33 px.
+     The hold is cleared when the count lands, so the resting layout is the natural one. */
+  function reserve(v){
+    const shown=nowEl.textContent;
+    nowEl.style.width='';nowEl.textContent=v;
+    const w=nowEl.getBoundingClientRect().width;
+    nowEl.textContent=shown;nowEl.style.width=w+'px';
+  }
+  /* The count-up, driven here rather than through animateCounter. It runs on the bar's own clock (the
+     fill transition's start time), so the number and the bar stay in step even when the page is busy;
+     progress is clamped, so never a negative number; the text is written only when the value changes;
+     no stat-pulse reflow; and a repaint mid-count steers the running count instead of fighting it.
+     Same 1600 ms cubic ease-out as before. While it runs, window.rlGoalBusy lets the events render
+     wait for it. */
+  function countUp(target){
+    const c=count={target:target};
+    let t0=null,last=null,bar=null,wait=0;
+    try{bar=(fill.getAnimations?fill.getAnimations():[]).find(a=>a.transitionProperty==='transform')||null;}catch(e){}
+    window.rlGoalBusy=new Promise(res=>{c.done=res;});
+    const step=ts=>{
+      if(count!==c)return;
+      if(t0===null){
+        if(bar&&bar.startTime==null&&bar.playState!=='idle'&&++wait<60){} /* the bar has not started yet: hold at 0 */
+        else t0=(bar&&bar.startTime!=null)?bar.startTime:ts;
+      }
+      const p=t0===null?0:Math.min(Math.max((ts-t0)/1600,0),1);
+      const v=p<1?Math.floor(c.target*(1-Math.pow(1-p,3))):c.target;
+      if(v!==last){nowEl.textContent=v;last=v;}
+      if(p<1){requestAnimationFrame(step);return;}
+      count=null;nowEl.style.width='';
+      window.rlGoalBusy=null;c.done();
+    };
+    requestAnimationFrame(step);
+  }
   function paint(animate){
-    const lives=+(((document.querySelectorAll('.stats-section .stat-number')[2]||{}).dataset||{}).target||RL_LIVES_FALLBACK);
+    const lives=livesNow();
     const pct=Math.min(100,Math.round(lives/RL_GOAL*100));
-    document.getElementById('goal-fill').style.width=pct+'%';
+    const w=pct+'%',was=fill.style.width;
+    if(was!==w){
+      /* a later change of the number (an admin edit) glides from the old width, still on the compositor */
+      if(painted&&!filling&&!reduce.matches&&parseFloat(was)>0&&pct>0){
+        fill.style.transition='none';fill.style.transform='scaleX('+(parseFloat(was)/pct)+')';fill.style.width=w;
+        void getComputedStyle(fill).transform;
+        fill.style.transition='';
+      }else fill.style.width=w;
+    }
+    fill.style.transform='none';
     document.getElementById('goal-pct').textContent=pct+'% of goal';
-    const nowEl=document.getElementById('goal-now');
-    if(animate&&typeof animateCounter==='function')animateCounter(nowEl,lives,1600);
-    else nowEl.textContent=lives;
+    if(count){count.target=lives;return;}
+    if(animate&&!reduce.matches){reserve(lives);countUp(lives);}
+    else{nowEl.style.width='';nowEl.textContent=lives;}
+  }
+  fill.addEventListener('transitionend',e=>{if(e.target===fill&&e.propertyName==='transform')filling=false;});
+  /* The bar and the count start once the card's own scroll reveal has finished, not mid-slide. */
+  function afterReveal(cb){
+    let anims=[];
+    try{anims=card.getAnimations?card.getAnimations():[];}catch(e){}
+    if(!anims.length){cb();return;}
+    Promise.all(anims.map(a=>a.finished.catch(()=>{}))).then(cb);
   }
   const io=new IntersectionObserver(es=>{
     es.forEach(en=>{
-      if(!en.isIntersecting)return;
+      if(!en.isIntersecting||armed)return;
       io.disconnect();
-      painted=true;
-      paint(true);
+      armed=true;
+      afterReveal(()=>{painted=true;filling=!reduce.matches;paint(true);});
     });
   },{threshold:0.4});
   io.observe(card);
+  /* The head takes its final layout a screen before the card arrives, so nothing moves on screen. */
+  const near=new IntersectionObserver(es=>{
+    if(!es.some(e=>e.isIntersecting))return;
+    near.disconnect();
+    if(!painted)reserve(livesNow());
+  },{rootMargin:'0px 0px 100% 0px'});
+  near.observe(card);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!painted&&nowEl.style.width)reserve(livesNow());});
+  /* The shimmer runs only while the card is on screen. */
+  new IntersectionObserver(es=>{es.forEach(e=>card.classList.toggle('goal-live',e.isIntersecting));}).observe(card);
   /* Re-paint (no count-up) when the numbers change under it. */
   window.rlRefreshGoal=function(){if(painted)paint(false);};
 })();
@@ -4831,6 +4939,7 @@ rlApplyStats();
 rlFillStatsForm();
 
 const MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_LONG=['January','February','March','April','May','June','July','August','September','October','November','December'];
 /* Group events by the month ("yyyy-mm") of their event_date, each list sorted by day. */
 function _rlEventsByMonth(){
   const map={};
@@ -4859,9 +4968,11 @@ function renderMomentum(){
       (has?`<span class="mom-n">${evs.length}</span>`:'')+
       `<span class="mom-m">${MONTHS_SHORT[m]}</span><span class="mom-y">${y}</span></div>`;
   }
-  grid.innerHTML=html;
+  /* rebuild only when the blocks change (16 Oct 2026): the events load rebuilt all 18 even when
+     nothing in the next 18 months had moved */
+  if(grid._rlHtml!==html){grid.innerHTML=html;grid._rlHtml=html;}
   const det=document.getElementById('mom-detail');
-  if(det)det.innerHTML='';
+  if(det&&det.firstChild)det.innerHTML='';
 }
 (function(){
   const g=document.getElementById('mom-grid');
@@ -4905,6 +5016,7 @@ function renderCalendar(){
     grid.setAttribute('aria-busy','true');
     grid.innerHTML=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="cal-dow">${d}</div>`).join('')
       +'<div class="cal-cell cal-pad"></div>'.repeat(42);
+    grid._rlHtml=null;
     return;
   }
   if(!calView){
@@ -4918,7 +5030,8 @@ function renderCalendar(){
   const y=calView.y,m=calView.m,pad=n=>String(n).padStart(2,'0');
   grid.removeAttribute('aria-busy');
   const monthEl=document.getElementById('cal-month');
-  if(monthEl)monthEl.textContent=new Date(y,m,1).toLocaleString('en',{month:'long',year:'numeric'});
+  /* same text as toLocaleString('en',{month:'long',year:'numeric'}), without the cost of Intl's first call */
+  if(monthEl){const lbl=MONTHS_LONG[m]+' '+y;if(monthEl.textContent!==lbl)monthEl.textContent=lbl;}
   const map=_rlEventsByDate();
   const dows=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const lead=(new Date(y,m,1).getDay()+6)%7;       // Monday-first
@@ -4936,7 +5049,8 @@ function renderCalendar(){
   }
   /* always six week rows (42 slots), so the card keeps one height whichever month is shown */
   for(let i=lead+dim;i<42;i++)html+='<div class="cal-cell cal-pad"></div>';
-  grid.innerHTML=html;
+  /* rebuilt only when it changes: each events load used to render the calendar twice (16 Oct 2026) */
+  if(grid._rlHtml!==html){grid.innerHTML=html;grid._rlHtml=html;}
   /* the first real paint fades the day numbers in once (opacity only) instead of popping */
   if(!window._rlCalShown){
     window._rlCalShown=true;
@@ -4944,7 +5058,7 @@ function renderCalendar(){
     setTimeout(()=>grid.classList.remove('cal-enter'),400);
   }
   const det=document.getElementById('cal-detail');
-  if(det)det.innerHTML='';
+  if(det&&det.firstChild)det.innerHTML='';
 }
 function renderManage(){
   const list=document.getElementById('manage-list');
@@ -5158,9 +5272,13 @@ body:not(.dark) .goal-card,body:not(.dark) .cal-card{--text3:#5F5C4C}
 .chapter-bar{-webkit-overflow-scrolling:touch}
 /* calendar: the month label keeps its line while blank, and the first real paint fades in (opacity only) */
 .cal-month{min-height:1.4em}
-@keyframes rl-cal-in{from{opacity:0}to{opacity:1}}
-.cal-grid.cal-enter .cal-cell:not(.cal-pad){animation:rl-cal-in .24s ease-out both}
-@media(prefers-reduced-motion:reduce){.cal-grid.cal-enter .cal-cell{animation:none}}
+/* (16 Oct 2026) one card-coloured veil over the six week rows fades out, instead of 31 day cells each
+   fading in on a layer of its own: the same pixels frame by frame (cell x o + card x (1 - o), same
+   0.24 s ease-out), one layer instead of 31. The day-name row is not under it, as before. */
+@keyframes rl-cal-veil{from{opacity:1}to{opacity:0}}
+.cal-grid{position:relative}
+.cal-grid.cal-enter::after{content:'';position:absolute;grid-column:1/-1;grid-row:2/8;inset:0;background:var(--card);pointer-events:none;animation:rl-cal-veil .24s ease-out both}
+@media(prefers-reduced-motion:reduce){.cal-grid.cal-enter::after{display:none}}
 @media(max-width:768px){.admin-entry{display:none}}
 @media(hover:none){
   .masthead.scrolled{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
