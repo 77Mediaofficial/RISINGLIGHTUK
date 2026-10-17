@@ -2,26 +2,26 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-10-17T01:20:11Z",
-  "count": 4,
+  "generatedAt": "2026-10-17T09:24:20Z",
+  "count": 3,
   "dropped": 0,
   "events": [
     {
       "id": "TC-1001338",
-      "lat": 11.9,
-      "lng": 150.2,
+      "lat": 12.5,
+      "lng": 147.3,
       "title": "Tropical Cyclone CHAMPI-26",
       "priority": 2,
       "description": "Red is the highest of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
       "type": "TC",
       "typeLabel": "Tropical cyclone",
       "alert": "Red",
-      "severityText": "Maximum wind 250 km/h",
-      "country": "Guam",
+      "severityText": "Maximum wind 259 km/h",
+      "country": "Guam, Northern Mariana Islands",
       "place": "CHAMPI-26",
       "from": "2026-10-14T12:00:00Z",
-      "to": "2026-10-16T18:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=10&eventtype=TC"
+      "to": "2026-10-17T06:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=12&eventtype=TC"
     },
     {
       "id": "TC-1001335",
@@ -41,23 +41,6 @@
       "url": "https://www.gdacs.org/report.aspx?eventid=1001335&episodeid=38&eventtype=TC"
     },
     {
-      "id": "TC-1001339",
-      "lat": -12.7,
-      "lng": -163.4,
-      "title": "Tropical Cyclone ONE-26",
-      "priority": 1,
-      "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
-      "type": "TC",
-      "typeLabel": "Tropical cyclone",
-      "alert": "Orange",
-      "severityText": "Maximum wind 120 km/h",
-      "country": "Cook Islands",
-      "place": "ONE-26",
-      "from": "2026-10-16T06:00:00Z",
-      "to": "2026-10-16T18:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001339&episodeid=2&eventtype=TC"
-    },
-    {
       "id": "DR-1018332",
       "lat": 48.764,
       "lng": 13.696,
@@ -71,7 +54,7 @@
       "country": "Austria and 28 more countries",
       "place": "Europe-2026",
       "from": "2025-12-21T00:00:00Z",
-      "to": "2026-10-14T00:00:00Z",
+      "to": "2026-10-15T00:00:00Z",
       "url": "https://www.gdacs.org/report.aspx?eventid=1018332&episodeid=24&eventtype=DR"
     }
   ]
