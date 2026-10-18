@@ -168,10 +168,12 @@ function alertLevel(v) {
 }
 
 /* the reporting agency's name or code as GDACS gives it; anything but letters, digits, space,
-   "." "-" "/" is dropped (the page shows it as "JTWC via GDACS") */
+   "." "-" "/" is dropped, and the cap cuts without an ellipsis so the value never holds a character
+   outside that set (the page spells out the codes it has checked: "Joint Typhoon Warning Center (JTWC)
+   via GDACS") */
 function agencyText(v) {
   const t = cleanText(v).normalize('NFC').replace(/[^\p{L}\p{N} ./-]/gu, '').replace(/\s+/g, ' ').trim();
-  return capText(t, CAP.agency);
+  return Array.from(t).slice(0, CAP.agency).join('').trim();
 }
 
 /** One feature → a parsed record, or null when it is structurally unusable. */

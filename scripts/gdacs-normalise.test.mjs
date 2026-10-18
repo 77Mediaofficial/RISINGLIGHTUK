@@ -215,14 +215,17 @@ test('agency (properties.source) and episode (properties.episodeid): cleaned, ca
     feature({ eventid: 5, source: undefined, episodeid: undefined }),
     feature({ eventid: 6, source: 42, episodeid: 2.5 }),
     feature({ eventid: 7, source: '!!!', episodeid: -3 }),
-    feature({ eventid: 8, source: 'GDO', episodeid: 'abc' })
+    feature({ eventid: 8, source: 'GDO', episodeid: 'abc' }),
+    feature({ eventid: 9, source: 'ABC '.repeat(15) })
   ]), { generatedAt: GEN });
   const by = Object.fromEntries(s.events.map((e) => [e.id, [e.agency, e.episode]]));
   assert.deepEqual(by['EQ-1'], ['NEIC', 7]);
   assert.deepEqual(by['EQ-2'], ['JTWC bx/b y', 12]); /* only letters, digits, space . - / survive; "12" is read as 12 */
   assert.deepEqual(by['EQ-3'], ['Météo-France / RSMC La Réunion', 1]);
   assert.equal(Array.from(by['EQ-4'][0]).length, 40);
-  assert.ok(by['EQ-4'][0].endsWith('…'));
+  /* capped with no ellipsis, so even a cut value stays inside the allowed set */
+  assert.match(by['EQ-4'][0], /^[\p{L}\p{N} ./-]+$/u);
+  assert.equal(by['EQ-9'][0], 'ABC '.repeat(10).trim()); /* a cut that ends on a space is trimmed */
   assert.deepEqual(by['EQ-5'], ['', null]);
   assert.deepEqual(by['EQ-6'], ['', null]);
   assert.deepEqual(by['EQ-7'], ['', null]);

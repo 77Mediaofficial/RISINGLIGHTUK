@@ -1402,7 +1402,10 @@ body.admin .admin-only{display:inline-flex}
 .glb-stage.glb-live .glb-hud-read{opacity:1}
 .glb-hud-k{display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
 .glb-hud-v{display:block;font-size:10.5px;font-weight:500;letter-spacing:.8px;color:var(--text);font-variant-numeric:tabular-nums}
-.glb-hud-lat,.glb-hud-lng{display:inline-block;text-align:right}
+/* contain:strict makes each box its own layout root, so a rewrite lays out that box alone (2 objects,
+   partial) instead of the whole page (12, full); the explicit height (the 1.6 line) and top alignment
+   keep every rect where it was (a contained box has no baseline) */
+.glb-hud-lat,.glb-hud-lng{display:inline-block;text-align:right;contain:strict;height:1.6em;vertical-align:top}
 .glb-hud-lat{width:calc(7 * (1ch + .8px))}
 .glb-hud-lng{width:calc(8 * (1ch + .8px))}
 .glb-hud-sep{margin:0 4px;color:var(--text3)}
@@ -1470,8 +1473,8 @@ body.admin .admin-only{display:inline-flex}
 .glb-status a,.glb-credit a{color:var(--text);text-decoration:underline;text-underline-offset:2px}
 .glb-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* the feed status strip (18 Oct 2026), above the status line: feed state, source, when the DATA last
-   changed (the snapshot's generatedAt, UK time), the check cadence and the counts by level with the list's
-   own marks (it is also the legend). aria-hidden: the status line and the credit carry the same facts as
+   changed (the snapshot's generatedAt, UK time), the check cadence and the counts by level beside the
+   pins' own marks (it is also the legend). aria-hidden: the status line and the credit carry the same facts as
    text. Every cell is one line and the line count depends only on the strip's width (container
    queries), never on the data, so loading -> ready moves nothing: 3 lines by default, 2 from 460px
    (needs 440 at worst), 4 under 324px (where cadence + counts no longer fit one line) */
@@ -1491,9 +1494,16 @@ body.admin .admin-only{display:inline-flex}
 .glb-bar-cad{grid-area:cad;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .glb-bar-count{grid-area:count;display:flex;justify-content:flex-end;gap:8px;white-space:nowrap}
 .glb-bar-n{display:inline-flex;align-items:center;gap:5px}
-/* the legend marks are the list's own (ink, 8px dot / 12px dot in a ring), each in an 18px box so the
-   Red ring (18px outside) never hangs past the strip's edge */
-.glb-bar-n .glb-item-mark{flex-basis:18px;color:var(--text)}
+/* the legend marks are the globe's pins at half size, drawn still (review, 18 Oct 2026: the list's marks
+   showed Orange with no ring, but on the globe both levels have one). Orange: 4px dot + 10px ring at the
+   pin's 40%; Red: 6px dot + 12px ring + the second ring a calm Red pin rests at (18px, the outline), both
+   40%. One 18px box each, so the outer ring never hangs past the strip's edge (the strip keeps its height) */
+.glb-bar-pin{position:relative;flex:0 0 18px;height:16px}
+.glb-bar-pin::before,.glb-bar-pin::after{content:'';position:absolute;left:50%;top:50%;box-sizing:border-box;border-radius:50%}
+.glb-bar-pin::before{width:4px;height:4px;margin:-2px 0 0 -2px;background:var(--text)}
+.glb-bar-pin::after{width:10px;height:10px;margin:-5px 0 0 -5px;border:1px solid var(--text);opacity:.4}
+.glb-red .glb-bar-pin::before{width:6px;height:6px;margin:-3px 0 0 -3px}
+.glb-red .glb-bar-pin::after{width:12px;height:12px;margin:-6px 0 0 -6px;outline:1px solid var(--text);outline-offset:2px}
 .glb-bar-v{font-weight:600;color:var(--text)}
 @container (min-width:460px){
   .glb-bar-in{grid-template-areas:"feed count" "upd cad";letter-spacing:1.5px}
@@ -2050,8 +2060,8 @@ body.admin .admin-only{display:inline-flex}
       <div class="glb-side glb-res">
         <div class="glb-bar" id="glb-bar" aria-hidden="true"><div class="glb-bar-in">
           <span class="glb-bar-feed"><span class="glb-bar-dot"></span><span class="glb-bar-src">GDACS</span><span class="glb-bar-state" id="glb-bar-state">Loading feed</span></span>
-          <span class="glb-bar-count"><span class="glb-bar-n glb-red"><span class="glb-item-mark"></span>Red <span class="glb-bar-v" id="glb-bar-red">--</span></span><span class="glb-bar-n"><span class="glb-item-mark"></span>Orange <span class="glb-bar-v" id="glb-bar-orange">--</span></span></span>
-          <span class="glb-bar-upd" id="glb-bar-upd">Updated —</span>
+          <span class="glb-bar-count"><span class="glb-bar-n glb-red"><span class="glb-bar-pin"></span>Red <span class="glb-bar-v" id="glb-bar-red">--</span></span><span class="glb-bar-n"><span class="glb-bar-pin"></span>Orange <span class="glb-bar-v" id="glb-bar-orange">--</span></span></span>
+          <span class="glb-bar-upd" id="glb-bar-upd">Updated --</span>
           <span class="glb-bar-cad">Checked every 6 hours</span>
         </div></div>
         <p class="glb-status" id="glb-status" role="status" aria-live="polite">Loading the latest disaster alerts…</p>
@@ -3834,6 +3844,17 @@ const _GLB_SHORT={EQ:'Earthquake',TC:'Cyclone',FL:'Flood',VO:'Volcano',DR:'Droug
 /* the full name every short code is shown beside ("TC · Tropical cyclone"; the normaliser's TYPE_LABELS) */
 const _GLB_FULL={EQ:'Earthquake',TC:'Tropical cyclone',FL:'Flood',VO:'Volcano',DR:'Drought',WF:'Wildfire'};
 const _GLB_HUD_MS=100;          /* the view-centre readout is rewritten at most this often (about 10 a second) */
+/* the card's SOURCE row spells out the agency GDACS names (properties.source) beside its code. Each name was
+   checked on 18 Oct 2026 against the source's own text: JTWC and NOAA on gdacs.org/Knowledge/models_tc.aspx,
+   GDO on models_dr.aspx, GWIS on models_wf.aspx, NEIC on the USGS page "National Earthquake Information
+   Center (NEIC)", GloFAS on the Copernicus page "Global Flood Awareness System (GloFAS)". Any other code
+   (GDACS also sends TOKYO and DARWIN for volcanoes: city names, not agency names) shows "GDACS" alone,
+   so an expansion is never guessed */
+const _GLB_AGENCY={
+  JTWC:['Joint Typhoon Warning Center','JTWC'],NOAA:['National Oceanic and Atmospheric Administration','NOAA'],
+  NEIC:['National Earthquake Information Center','NEIC'],GDO:['Global Drought Observatory','GDO'],
+  GLOFAS:['Global Flood Awareness System','GloFAS'],GWIS:['Global Wildfire Information System','GWIS']
+};
 /* pure-monochrome cobe colours per site theme (14 Oct spike: neutral greys only, R=G=B).
    Light and dark use opposite land maths in cobe, so they are two separate sets. */
 const _GLB_THEME={
@@ -3876,6 +3897,8 @@ function _glbPad(n){return (n<10?'0':'')+n;}
    follows the ROUNDED value, so -0.04 reads "0.0° N", never "0.0° S" */
 function _glbDeg(v,pos,neg){const r=Math.round(Math.abs(v)*10)/10;return r.toFixed(1)+'°\u00A0'+(v<0&&r>0?neg:pos);}
 function _glbLatLng(lat,lng){return _glbDeg(lat,'N','S')+' · '+_glbDeg(lng,'E','W');}
+/* the same value in words, for screen readers ("13.1 degrees north"), on the same rounding and letter rule */
+function _glbSay(v,pos,neg){const r=Math.round(Math.abs(v)*10)/10;return r.toFixed(1)+' degrees '+(v<0&&r>0?neg:pos);}
 /* the view centre from the globe's own angles (inverse of _glbCentre): lat = theta, lng = -(phi + 90°),
    brought into -180..180. Written into the readout's fixed boxes only when the rounded text changes,
    from _glbFrame (the one animation-frame callback), at most every _GLB_HUD_MS; fin = the loop is about
@@ -4061,11 +4084,23 @@ function _glbRange(from,to){
   return B.d+' '+B.m+' '+B.y;
 }
 function _glbDay(iso){const d=_glbDate(iso);if(!d)return '';const P=_glbParts(d);return P.d+' '+P.m;}
-/* how many calendar days (UTC) an alert spans, first and last day included: 14 Oct 12:00 → 17 Oct 18:00
-   is 4 days. 0 (no duration shown) when a date is missing or the two are the wrong way round */
+/* how many calendar days an alert spans, first and last day included, counted on the same UK (Europe/London)
+   dates the range beside it prints, so the two always agree (review, 18 Oct 2026: counting UTC days gave
+   "15–16 Oct 2026 · 3 days" for an alert starting 23:30 UTC in summer time): 14 Oct 12:00 → 17 Oct 18:00
+   reads "14–17 Oct 2026 · 4 days". 0 (no duration shown) when a date is missing or the two are the wrong way round */
+let _glbFmtYmd=null;
+function _glbYmd(d){ /* the UK calendar date as a UTC midnight, in ms (UTC if Intl fails, as _glbParts) */
+  try{
+    if(!_glbFmtYmd)_glbFmtYmd=new Intl.DateTimeFormat('en-GB',{timeZone:_GLB_TZ,day:'numeric',month:'numeric',year:'numeric'});
+    const o={};_glbFmtYmd.formatToParts(d).forEach(function(p){o[p.type]=p.value;});
+    const t=Date.UTC(+o.year,+o.month-1,+o.day);
+    if(!isNaN(t))return t;
+  }catch(e){}
+  return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate());
+}
 function _glbDays(from,to){
   const a=_glbDate(from),b=_glbDate(to);if(!a||!b)return 0;
-  const n=Math.floor(b.getTime()/864e5)-Math.floor(a.getTime()/864e5)+1;
+  const n=Math.round((_glbYmd(b)-_glbYmd(a))/864e5)+1;
   return n>=1&&n<100000?n:0;
 }
 function _glbStamp(d){
@@ -4114,7 +4149,10 @@ function _glbClean(d){
        files lack both), else the same numbers from the GDACS report link; no row if neither is there */
     const id=typeof e.id==='string'&&/^(EQ|TC|FL|VO|DR|WF)-\d{1,10}$/.test(e.id)?e.id
       :(type&&q.eventtype===type&&/^\d{1,10}$/.test(q.eventid||'')?type+'-'+q.eventid:'');
-    const ep=Number.isInteger(e.episode)&&e.episode>=0&&e.episode<1e9?e.episode
+    /* never for an earthquake: there GDACS's episodeid is a GDACS-wide sequence, not a count of the event's
+       updates (EQ-1570339 is episode 1738684 in the fixtures; every other type carries 1 to 44), so "Episode
+       1738684" would mislead. An earthquake's EVENT row is its id alone */
+    const ep=type==='EQ'?null:Number.isInteger(e.episode)&&e.episode>=0&&e.episode<1e9?e.episode
       :(/^\d{1,9}$/.test(q.episodeid||'')?parseInt(q.episodeid,10):null);
     out.push({
       lat:e.lat,lng:e.lng,title:title,alert:e.alert,red:e.alert==='Red',code:type,id:id,episode:ep,
@@ -4204,7 +4242,7 @@ function _glbBar(st){
   const have=st==='ready'||st==='empty',stale=have&&_glbStale();
   b.el.classList.toggle('glb-bar-ok',have&&!stale);
   b.state.textContent=st==='error'?'Feed unavailable':!have?'Loading feed':stale?'Feed may be out of date':'Feed active';
-  b.upd.textContent='Updated '+(have&&_glb.gen?_glbStamp(_glb.gen):'—');
+  b.upd.textContent='Updated '+(have&&_glb.gen?_glbStamp(_glb.gen):'--'); /* '--' like the counts while loading */
   const r=have?_glb.events.filter(function(e){return e.red;}).length:-1;
   /* two digits, like the list's "01/04" (at most 60 alerts), so the cell never changes width */
   b.red.textContent=have?_glbPad(r):'--';
@@ -4223,8 +4261,12 @@ function _glbSetEvents(ev){
     /* "01/04": the index is visual only (the list already says "1 of 4" to a screen reader) */
     k.appendChild(_glbEl('span','glb-item-ix',_glbPad(i+1)+'/'+_glbPad(ev.length))).setAttribute('aria-hidden','true');
     k.appendChild(_glbEl('span','glb-item-alert',s.alert+' alert'));
+    /* hidden ", " between the parts (alert, title, type / country, date), so a screen reader pauses
+       between them: "Red alert, Tropical Cyclone CHAMPI-26, Tropical cyclone, Guam, 17 Oct" */
+    k.appendChild(_glbEl('span','glb-sr',', '));
     main.appendChild(k);
     main.appendChild(_glbEl('span','glb-item-name',s.title));
+    main.appendChild(_glbEl('span','glb-sr',', '));
     /* "TC · Tropical cyclone · Guam": the code beside its full name (code aria-hidden), then the country.
        The visible "·" have empty alt text; the hidden ", " keep the parts apart when read out */
     const w=_glbEl('span','glb-item-where');
@@ -4237,7 +4279,7 @@ function _glbSetEvents(ev){
     main.appendChild(w);
     b.appendChild(main);
     const iso=s.to||s.from,day=_glbDay(iso);
-    if(day){const t=_glbEl('time','glb-item-date',day);t.dateTime=iso;main.appendChild(t);}
+    if(day){main.appendChild(_glbEl('span','glb-sr',', '));const t=_glbEl('time','glb-item-date',day);t.dateTime=iso;main.appendChild(t);}
     /* detail 0: pressed with Enter / Space (or a screen reader's click), not a pointer */
     b.addEventListener('click',function(e){_glbSelect(i,b,!e.detail);});
     li.appendChild(b);list.appendChild(li);_glb.items.push(b);
@@ -4284,10 +4326,16 @@ function _glbShowCard(){
   row('Alert',s.alert);
   row('Severity',s.severity);
   row('Area',s.country);
-  row('Position',_glbLatLng(s.lat,s.lng));
+  /* "13.1° N · 144.8° E" on screen; read out as "13.1 degrees north, 144.8 degrees east" */
+  const pos=document.createDocumentFragment();
+  pos.appendChild(_glbEl('span',null,_glbLatLng(s.lat,s.lng))).setAttribute('aria-hidden','true');
+  pos.appendChild(_glbEl('span','glb-sr',_glbSay(s.lat,'north','south')+', '+_glbSay(s.lng,'east','west')));
+  row('Position',pos);
   const span=_glbRange(s.from,s.to),days=_glbDays(s.from,s.to);
   row('Active',span?span+(days?' · '+days+(days===1?' day':' days'):''):'');
-  row('Source',(s.agency?s.agency+' via ':'')+'GDACS');
+  /* "Joint Typhoon Warning Center (JTWC) via GDACS": only a checked name (_GLB_AGENCY), else "GDACS" alone */
+  const ak=s.agency.toUpperCase(),ag=Object.prototype.hasOwnProperty.call(_GLB_AGENCY,ak)?_GLB_AGENCY[ak]:null;
+  row('Source',(ag?ag[0]+' ('+ag[1]+') via ':'')+'GDACS');
   card.appendChild(dl);
   if(s.description)card.appendChild(_glbEl('p','glb-card-body',s.description));
   card.appendChild(_glbEl('p','glb-card-note','A GDACS alert'+(_glb.gen?', data updated '+_glbStamp(_glb.gen):'')
