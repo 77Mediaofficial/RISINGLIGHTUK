@@ -21,7 +21,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const load = (name) => JSON.parse(readFileSync(join(HERE, 'fixtures', name), 'utf8'));
 const GEN = '2026-10-15T09:00:00Z';
 const EVENT_KEYS = ['id', 'lat', 'lng', 'title', 'priority', 'description', 'type', 'typeLabel', 'alert',
-  'severityText', 'country', 'place', 'from', 'to', 'url'];
+  'severityText', 'country', 'place', 'from', 'to', 'url', 'agency', 'episode'];
 
 /* a minimal valid feature; override any property */
 function feature(props = {}, coords = [10, 20], geometryType = 'Point') {
@@ -61,7 +61,8 @@ test('real SEARCH response: the 4 events GDACS marks current, in order, mapped f
     severityText: 'Maximum wind 231 km/h', /* rebuilt from 231.48 km/h, not the misleading stage text */
     country: 'Guam, Northern Mariana Islands', place: 'CHAMPI-26',
     from: '2026-10-14T12:00:00Z', to: '2026-10-15T06:00:00Z',
-    url: 'https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=4&eventtype=TC'
+    url: 'https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=4&eventtype=TC',
+    agency: 'JTWC', episode: 4 /* properties.source and properties.episodeid */
   });
   const drought = s.events[2];
   assert.equal(drought.title, 'Drought Europe-2026'); /* the 311-character name is not used */
@@ -99,6 +100,8 @@ test('real 12-month sample: Red first, every type labelled, severity only where 
     assert.ok(Number.isFinite(e.lat) && Number.isFinite(e.lng));
     assert.ok(e.url.startsWith('https://www.gdacs.org/'));
     assert.ok(!/\s{2}/.test(e.title) && !/[\s,]$/.test(e.title), `clean title: ${e.title}`);
+    assert.match(e.agency, /^[A-Z]+$/, `${e.id} agency`); /* JTWC, NOAA, GDO, TOKYO, NEIC, DARWIN, GLOFAS, GWIS */
+    assert.ok(Number.isInteger(e.episode) && e.episode >= 0, `${e.id} episode`);
   }
   const kanlaon = s.events.find((e) => e.id === 'VO-1000152');
   assert.equal(kanlaon.title, 'Eruption Kanlaon'); /* "Eruption  Kanlaon": double space collapsed */
@@ -201,6 +204,31 @@ test('duplicate episodes of one event collapse to the latest episode', () => {
   assert.equal(s.count, 2);
   assert.equal(s.events.find((e) => e.id === 'TC-7').title, 'Tropical Cyclone NEW-26');
   assert.ok(s.events.some((e) => e.id === 'EQ-7'));
+});
+
+test('agency (properties.source) and episode (properties.episodeid): cleaned, capped, safe when absent', () => {
+  const s = normaliseGdacs(fc([
+    feature({ eventid: 1, source: 'NEIC', episodeid: 7 }),
+    feature({ eventid: 2, source: '  JTWC\u202E <b>x</b>; "y" ', episodeid: '12' }),
+    feature({ eventid: 3, source: 'Météo-France / RSMC La Réunion' }),
+    feature({ eventid: 4, source: 'A'.repeat(60) }),
+    feature({ eventid: 5, source: undefined, episodeid: undefined }),
+    feature({ eventid: 6, source: 42, episodeid: 2.5 }),
+    feature({ eventid: 7, source: '!!!', episodeid: -3 }),
+    feature({ eventid: 8, source: 'GDO', episodeid: 'abc' })
+  ]), { generatedAt: GEN });
+  const by = Object.fromEntries(s.events.map((e) => [e.id, [e.agency, e.episode]]));
+  assert.deepEqual(by['EQ-1'], ['NEIC', 7]);
+  assert.deepEqual(by['EQ-2'], ['JTWC bx/b y', 12]); /* only letters, digits, space . - / survive; "12" is read as 12 */
+  assert.deepEqual(by['EQ-3'], ['Météo-France / RSMC La Réunion', 1]);
+  assert.equal(Array.from(by['EQ-4'][0]).length, 40);
+  assert.ok(by['EQ-4'][0].endsWith('…'));
+  assert.deepEqual(by['EQ-5'], ['', null]);
+  assert.deepEqual(by['EQ-6'], ['', null]);
+  assert.deepEqual(by['EQ-7'], ['', null]);
+  assert.deepEqual(by['EQ-8'], ['GDO', null]);
+  /* the two new keys come last, after url, so older readers of the file are unaffected */
+  assert.deepEqual(Object.keys(s.events[0]).slice(-3), ['url', 'agency', 'episode']);
 });
 
 test('a genuinely empty feed is a valid empty list', () => {

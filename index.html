@@ -1375,6 +1375,50 @@ body.admin .admin-only{display:inline-flex}
 /* the touch target: the sphere's circle, above cobe's canvas wrapper and under the pins */
 .glb-hit{position:absolute;inset:10%;z-index:1;border-radius:50%;touch-action:pan-y pinch-zoom}
 .glb-pins{position:absolute;inset:0;z-index:2;pointer-events:none}
+/* the instrument frame (18 Oct 2026): corner brackets, a centre crosshair, the view-centre readout and a
+   compass in the Reach map's style. Static CSS on one layer above cobe's canvas and under the pins
+   (z-index 1 after .glb-hit; pointer-events none, so it never takes a pin's or the sphere's input).
+   Only the readout's text changes, from the animation-frame callback, at most ~10 times a second, in
+   fixed-width boxes (no layout shift). Hidden with the rest of the stage under glb-hold / glb-nogl */
+.glb-hud{position:absolute;inset:0;z-index:1;pointer-events:none}
+.glb-hud-c{position:absolute;width:18px;height:18px;border:0 solid var(--text3)}
+.glb-hud-tl{top:0;left:0;border-top-width:1px;border-left-width:1px}
+.glb-hud-tr{top:0;right:0;border-top-width:1px;border-right-width:1px}
+.glb-hud-bl{bottom:0;left:0;border-bottom-width:1px;border-left-width:1px}
+.glb-hud-br{bottom:0;right:0;border-bottom-width:1px;border-right-width:1px}
+/* crosshair: four 12px ticks around a 48px gap, so a chosen pin (ring 36px at most, hit area 44px) sits
+   clear inside it; each pair of ticks is one 1px line drawn by its two side borders (no gradient) */
+.glb-hud-x{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px}
+.glb-hud-x::before,.glb-hud-x::after{content:'';position:absolute;box-sizing:border-box;border:0 solid var(--text3)}
+.glb-hud-x::before{left:0;top:36px;width:72px;height:1px;border-left-width:12px;border-right-width:12px}
+.glb-hud-x::after{top:0;left:36px;width:1px;height:72px;border-top-width:12px;border-bottom-width:12px}
+/* the readout sits on a --bg chip (the map labels' halo trick), so it stays AA if the zoomed sphere's
+   edge passes under it; mono, right-aligned in fixed boxes: 7 and 8 characters ("90.0° N", "180.0° W") */
+.glb-hud-read{
+  position:absolute;top:12px;left:12px;padding:2px 6px;border-radius:4px;background:var(--bg);
+  font-family:var(--mono);line-height:1.6;white-space:nowrap;
+  opacity:0;transition:opacity .6s cubic-bezier(.22,1,.36,1);
+}
+.glb-stage.glb-live .glb-hud-read{opacity:1}
+.glb-hud-k{display:block;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
+.glb-hud-v{display:block;font-size:10.5px;font-weight:500;letter-spacing:.8px;color:var(--text);font-variant-numeric:tabular-nums}
+.glb-hud-lat,.glb-hud-lng{display:inline-block;text-align:right}
+.glb-hud-lat{width:calc(7 * (1ch + .8px))}
+.glb-hud-lng{width:calc(8 * (1ch + .8px))}
+.glb-hud-sep{margin:0 4px;color:var(--text3)}
+.glb-hud-compass{position:absolute;left:12px;bottom:12px;width:34px;height:48px;overflow:visible;opacity:.75}
+.glb-hud-compass line,.glb-hud-compass circle{stroke:var(--text);fill:none}
+.glb-hud-compass .mc-dot{fill:var(--text);stroke:none}
+.glb-hud-compass text{fill:var(--text);font-family:var(--mono);font-size:9px;font-weight:600}
+/* phones: smaller brackets; the readout drops its label and stacks latitude over longitude so it
+   stays outside the resting sphere on a 284px stage (320 phones) */
+@media(max-width:480px){
+  .glb-hud-c{width:14px;height:14px}
+  .glb-hud-read{top:8px;left:8px}
+  .glb-hud-k,.glb-hud-sep{display:none}
+  .glb-hud-lat,.glb-hud-lng{display:block;width:calc(8 * (1ch + .8px))} /* one width, so N/S sits over E/W */
+  .glb-hud-compass{left:8px;bottom:8px}
+}
 .glb-pin{
   position:absolute;left:0;top:0;width:44px;height:44px;margin:-22px 0 0 -22px;padding:0;
   border:0;border-radius:50%;background:none;color:var(--text);cursor:pointer;touch-action:pan-y pinch-zoom;
@@ -1425,6 +1469,40 @@ body.admin .admin-only{display:inline-flex}
 .glb-status{margin:0;font-size:14px;line-height:1.6;color:var(--text2)}
 .glb-status a,.glb-credit a{color:var(--text);text-decoration:underline;text-underline-offset:2px}
 .glb-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* the feed status strip (18 Oct 2026), above the status line: feed state, source, when the DATA last
+   changed (the snapshot's generatedAt, UK time), the check cadence and the counts by level with the list's
+   own marks (it is also the legend). aria-hidden: the status line and the credit carry the same facts as
+   text. Every cell is one line and the line count depends only on the strip's width (container
+   queries), never on the data, so loading -> ready moves nothing: 3 lines by default, 2 from 460px
+   (needs 440 at worst), 4 under 324px (where cadence + counts no longer fit one line) */
+.glb-bar{container-type:inline-size;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0}
+.glb-bar-in{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"feed feed" "upd upd" "cad count";
+  column-gap:12px;row-gap:2px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.2px;
+  line-height:1.6;text-transform:uppercase;color:var(--text3);font-variant-numeric:tabular-nums;
+}
+.glb-bar-feed{grid-area:feed;display:flex;align-items:center;min-width:0;white-space:nowrap}
+.glb-bar-dot{flex:0 0 6px;height:6px;margin-right:8px;border:1px solid var(--text);border-radius:50%;box-sizing:border-box}
+.glb-bar.glb-bar-ok .glb-bar-dot{background:var(--text)} /* filled = active; hollow = loading, unavailable or out of date. Never pulses */
+.glb-bar-state{min-width:0;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:var(--text)}
+.glb-bar-src{flex:none}
+.glb-bar-state::before{content:'·';content:'·' / '';margin:0 6px;font-weight:500;color:var(--text3)}
+.glb-bar-upd{grid-area:upd;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.glb-bar-cad{grid-area:cad;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glb-bar-count{grid-area:count;display:flex;justify-content:flex-end;gap:8px;white-space:nowrap}
+.glb-bar-n{display:inline-flex;align-items:center;gap:5px}
+/* the legend marks are the list's own (ink, 8px dot / 12px dot in a ring), each in an 18px box so the
+   Red ring (18px outside) never hangs past the strip's edge */
+.glb-bar-n .glb-item-mark{flex-basis:18px;color:var(--text)}
+.glb-bar-v{font-weight:600;color:var(--text)}
+@container (min-width:460px){
+  .glb-bar-in{grid-template-areas:"feed count" "upd cad";letter-spacing:1.5px}
+  .glb-bar-cad{text-align:right}
+}
+@container (max-width:323.98px){ /* measured: cadence + counts need 321.2px ("Red 01  Orange 03": counts are always two digits) */
+  .glb-bar-in{grid-template-columns:minmax(0,1fr);grid-template-areas:"feed" "upd" "cad" "count"}
+  .glb-bar-count{justify-content:flex-start}
+}
 .glb-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
 .glb-list>li{min-width:0}
 .glb-list:empty{display:none}
@@ -1461,26 +1539,37 @@ body.admin .admin-only{display:inline-flex}
 .glb-item-mark{flex:0 0 12px;height:16px;display:flex;align-items:center;justify-content:center}
 .glb-item-mark::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
 .glb-red .glb-item-mark::before{width:12px;height:12px;outline:1px solid currentColor;outline-offset:2px}
-.glb-item-main{flex:1 1 auto;min-width:0}
+/* main column: the kicker and the date share the first line (date right), so the title and the type /
+   country line below get the row's full width (18 Oct 2026; the date stays last in reading order) */
+.glb-item-main{flex:1 1 auto;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px}
 .glb-item-kicker,.glb-item-date{
   font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
   line-height:1.6;color:var(--text3);
 }
-.glb-item-kicker{display:block}
-/* "Orange alert" never breaks in two on narrow phones; the type after it may wrap, and the
+.glb-item-kicker{display:block;min-width:0}
+/* "Orange alert" never breaks in two on narrow phones (the type now sits on the third line), and the
    tracking tightens to the 1.2px the map chips use at phone widths */
 .glb-item-alert{white-space:nowrap}
 @media(max-width:430px){.glb-item-kicker,.glb-item-date{letter-spacing:1.2px}}
 .glb-red .glb-item-alert{font-weight:600;color:var(--text)}
-.glb-item-type::before{content:'·';content:'·' / '';margin:0 6px}
-.glb-item-date{flex:0 0 auto;white-space:nowrap}
+/* indexed list (18 Oct 2026): the kicker reads "01/04 · Orange alert" (the index is aria-hidden: the list
+   itself gives "1 of 4"); the third line names the type as its short code beside its full name, then the
+   country: "TC · Tropical cyclone · Guam". The code is aria-hidden (the full name follows). Every row is
+   now three lines, so rows are 89 tall wherever the title fits one line */
+.glb-item-ix{font-variant-numeric:tabular-nums}
+.glb-item-alert::before{content:'·';content:'·' / '';margin:0 6px;font-weight:500;color:var(--text3)}
+.glb-item-code{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--text)}
+.glb-item-code+.glb-item-type::before,.glb-item-country::before{content:'·';content:'·' / '';margin:0 6px}
+.glb-item-date{grid-row:1;grid-column:2;white-space:nowrap}
+.glb-item-name,.glb-item-where{grid-column:1 / -1}
 /* overflow-wrap here and on the card text: a word with no spaces (odd or hostile data) wraps inside
    its border instead of spilling past it */
 .glb-item-name{display:block;margin-top:2px;font-size:15px;font-weight:600;line-height:1.4;color:var(--text);overflow-wrap:anywhere}
 .glb-item-where{display:block;font-size:13px;line-height:1.55;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .glb-item[aria-pressed="true"] .glb-item-kicker,.glb-item[aria-pressed="true"] .glb-item-alert,
 .glb-item[aria-pressed="true"] .glb-item-date,.glb-item[aria-pressed="true"] .glb-item-name,
-.glb-item[aria-pressed="true"] .glb-item-where{color:inherit}
+.glb-item[aria-pressed="true"] .glb-item-where,.glb-item[aria-pressed="true"] .glb-item-code,
+.glb-item[aria-pressed="true"] .glb-item-alert::before{color:inherit}
 /* "Show all N alerts": phones and tablets only (the list is clipped to four there, no inner scroller).
    scroll-margin-bottom: an alert that takes focus (the first one "Show all" reveals) clears the phone
    chapter bar — the bar's room (html scroll-padding-bottom) plus 16px for the focus ring */
@@ -1515,7 +1604,12 @@ body.admin .admin-only{display:inline-flex}
 .glb-card:empty{margin-top:-20px} /* no card yet: take back the column's gap so the credit sits under the list */
 .glb-card.on{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px;text-align:left}
 .glb-card-title{font-family:var(--cinzel);font-size:22px;font-weight:600;letter-spacing:1px;line-height:1.25;color:var(--text);overflow-wrap:anywhere}
-.glb-card .map-card-co{margin:6px 0 0;overflow-wrap:anywhere}
+/* the data sheet (18 Oct 2026): aligned mono label / value rows between hairlines. Both columns share an
+   18px line so the 10px labels and 11px values sit on (near) one baseline; long values wrap in place */
+.glb-spec{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;margin:12px 0 0;border-top:1px solid var(--border)}
+.glb-spec dt,.glb-spec dd{margin:0;padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--mono);line-height:18px}
+.glb-spec dt{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.glb-spec dd{font-size:11px;font-weight:400;letter-spacing:.5px;color:var(--text);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 .glb-card-body{font-size:14px;line-height:1.6;color:var(--text2);margin:12px 0;overflow-wrap:anywhere}
 .glb-card-note{font-size:12.5px;line-height:1.6;color:var(--text3);margin:0 0 14px}
 /* the shared .map-card-link asks for Mono 700, which is not loaded: 600 here (pack 3.1) */
@@ -1538,7 +1632,7 @@ body.admin .admin-only{display:inline-flex}
 .rl-globe.glb-hold .glb-stage>*{visibility:hidden}
 .rl-globe.glb-hold .glb-stage::before{opacity:1}
 @media(prefers-reduced-motion:reduce){
-  .glb-stage::before,.glb-pin-dot::after,.glb-pin-tag,.glb-item{transition:none}
+  .glb-stage::before,.glb-pin-dot::after,.glb-pin-tag,.glb-item,.glb-hud-read{transition:none}
   .glb-red .glb-pin-dot::before{animation:none;opacity:.4;transform:scale(1.5)}
 }
 @media print{.glb-stage{display:none}}
@@ -1945,9 +2039,21 @@ body.admin .admin-only{display:inline-flex}
     <div class="glb-wrap">
       <div class="glb-stage" id="glb-stage">
         <div class="glb-hit" id="glb-hit" aria-hidden="true"></div>
+        <div class="glb-hud" aria-hidden="true">
+          <span class="glb-hud-c glb-hud-tl"></span><span class="glb-hud-c glb-hud-tr"></span><span class="glb-hud-c glb-hud-bl"></span><span class="glb-hud-c glb-hud-br"></span>
+          <span class="glb-hud-x"></span>
+          <span class="glb-hud-read"><span class="glb-hud-k">View centre</span><span class="glb-hud-v"><span class="glb-hud-lat" id="glb-hud-lat"></span><span class="glb-hud-sep">·</span><span class="glb-hud-lng" id="glb-hud-lng"></span></span></span>
+          <svg class="glb-hud-compass" viewBox="0 0 34 48" focusable="false"><circle cx="17" cy="31" r="11" stroke-width="1"/><circle cx="17" cy="31" r="6.05" stroke-width="0.8"/><line x1="0" y1="31" x2="34" y2="31" stroke-width="0.8"/><line x1="17" y1="14" x2="17" y2="48" stroke-width="0.8"/><line x1="17" y1="31" x2="17" y2="22.2" stroke-width="1.8"/><circle class="mc-dot" cx="17" cy="31" r="2"/><text x="17" y="10" text-anchor="middle">N</text></svg>
+        </div>
         <div class="glb-pins" id="glb-pins" aria-hidden="true"></div>
       </div>
       <div class="glb-side glb-res">
+        <div class="glb-bar" id="glb-bar" aria-hidden="true"><div class="glb-bar-in">
+          <span class="glb-bar-feed"><span class="glb-bar-dot"></span><span class="glb-bar-src">GDACS</span><span class="glb-bar-state" id="glb-bar-state">Loading feed</span></span>
+          <span class="glb-bar-count"><span class="glb-bar-n glb-red"><span class="glb-item-mark"></span>Red <span class="glb-bar-v" id="glb-bar-red">--</span></span><span class="glb-bar-n"><span class="glb-item-mark"></span>Orange <span class="glb-bar-v" id="glb-bar-orange">--</span></span></span>
+          <span class="glb-bar-upd" id="glb-bar-upd">Updated —</span>
+          <span class="glb-bar-cad">Checked every 6 hours</span>
+        </div></div>
         <p class="glb-status" id="glb-status" role="status" aria-live="polite">Loading the latest disaster alerts…</p>
         <ul class="glb-list" id="glb-list" aria-label="Current disaster alerts"></ul>
         <button type="button" class="map-card-link glb-more" id="glb-more" aria-controls="glb-list" aria-expanded="false" hidden>Show all alerts</button>
@@ -3725,6 +3831,9 @@ const _GLB_FEW=4;               /* below 960px the list shows four, then "Show a
                                    loading room the CSS holds, .glb-res: change both together) */
 const _GLB_TZ='Europe/London';
 const _GLB_SHORT={EQ:'Earthquake',TC:'Cyclone',FL:'Flood',VO:'Volcano',DR:'Drought',WF:'Wildfire'};
+/* the full name every short code is shown beside ("TC · Tropical cyclone"; the normaliser's TYPE_LABELS) */
+const _GLB_FULL={EQ:'Earthquake',TC:'Tropical cyclone',FL:'Flood',VO:'Volcano',DR:'Drought',WF:'Wildfire'};
+const _GLB_HUD_MS=100;          /* the view-centre readout is rewritten at most this often (about 10 a second) */
 /* pure-monochrome cobe colours per site theme (14 Oct spike: neutral greys only, R=G=B).
    Light and dark use opposite land maths in cobe, so they are two separate sets. */
 const _GLB_THEME={
@@ -3741,6 +3850,7 @@ const _glb={
   on:false,vis:false,sideVis:false,lost:false,raf:0,last:0,drawT:0,force:0,spinK:0,held:false,focusIn:false,
   ptr:null,mouse:false,touches:new Set(),px:0,py:0,sx:0,sy:0,drag:false,grab:false,swallow:0,ddx:0,ddy:0,vel:0,phi0:0,tLo:-0.5,tHi:0.5,
   tw:null,sel:-1,opener:null,
+  hud:null,hudT:-1e9,bar:null, /* the readout's two boxes + their last text; the status strip's parts */
   reduce:!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)
 };
 
@@ -3761,6 +3871,24 @@ function _glbProject(lat,lon){
 }
 function _glbTheme(){return document.body.classList.contains('dark')?_GLB_THEME.dark:_GLB_THEME.light;}
 function _glbEl(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!=null)n.textContent=txt;return n;}
+function _glbPad(n){return (n<10?'0':'')+n;}
+/* one coordinate to one decimal with its hemisphere ("13.1° N", "144.8° E"; no-break space). The letter
+   follows the ROUNDED value, so -0.04 reads "0.0° N", never "0.0° S" */
+function _glbDeg(v,pos,neg){const r=Math.round(Math.abs(v)*10)/10;return r.toFixed(1)+'°\u00A0'+(v<0&&r>0?neg:pos);}
+function _glbLatLng(lat,lng){return _glbDeg(lat,'N','S')+' · '+_glbDeg(lng,'E','W');}
+/* the view centre from the globe's own angles (inverse of _glbCentre): lat = theta, lng = -(phi + 90°),
+   brought into -180..180. Written into the readout's fixed boxes only when the rounded text changes,
+   from _glbFrame (the one animation-frame callback), at most every _GLB_HUD_MS; fin = the loop is about
+   to go idle, so the resting value is always written */
+function _glbHud(t,fin){
+  const h=_glb.hud;if(!h)return;
+  if(!fin&&t-_glb.hudT<_GLB_HUD_MS)return;
+  _glb.hudT=t;
+  let lng=-(_glb.phi+Math.PI/2)/_GLB_D2R;lng=((lng+180)%360+360)%360-180;
+  const a=_glbDeg(_glb.theta/_GLB_D2R,'N','S'),b=_glbDeg(lng,'E','W');
+  if(a!==h.a){h.a=a;h.lat.textContent=a;}
+  if(b!==h.b){h.b=b;h.lng.textContent=b;}
+}
 
 /* ── the one animation-frame callback ── */
 function _glbFrame(t){
@@ -3804,8 +3932,9 @@ function _glbFrame(t){
     u.phi=_glb.lp=_glb.phi;u.theta=_glb.lt=_glb.theta;u.scale=_glb.ls=_glb.scale;
     _glb.G.update(u);_glb.drawT=t;
     _glbPlacePins();
+    if(busy)_glbHud(t,false); /* the readout, throttled; the frame that goes idle writes it below */
   }
-  if(busy)_glb.raf=requestAnimationFrame(_glbFrame);else _glb.last=0;
+  if(busy)_glb.raf=requestAnimationFrame(_glbFrame);else{_glb.last=0;_glbHud(t,true);}
 }
 /* pins follow the globe by transform only; they fade toward the edge and stop taking pointer
    input before the far side (the list is the always-available route). The rotation is worked
@@ -3932,6 +4061,13 @@ function _glbRange(from,to){
   return B.d+' '+B.m+' '+B.y;
 }
 function _glbDay(iso){const d=_glbDate(iso);if(!d)return '';const P=_glbParts(d);return P.d+' '+P.m;}
+/* how many calendar days (UTC) an alert spans, first and last day included: 14 Oct 12:00 → 17 Oct 18:00
+   is 4 days. 0 (no duration shown) when a date is missing or the two are the wrong way round */
+function _glbDays(from,to){
+  const a=_glbDate(from),b=_glbDate(to);if(!a||!b)return 0;
+  const n=Math.floor(b.getTime()/864e5)-Math.floor(a.getTime()/864e5)+1;
+  return n>=1&&n<100000?n:0;
+}
 function _glbStamp(d){
   try{
     if(!_glbFmtStamp)_glbFmtStamp=new Intl.DateTimeFormat('en-GB',{timeZone:_GLB_TZ,day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
@@ -3950,6 +4086,19 @@ function _glbStr(v,max){
 }
 /* only ever link to GDACS itself */
 function _glbUrl(v){return typeof v==='string'&&v.indexOf(_GLB_SITE)===0&&v.length<=300&&!/[\s"'<>\\]/.test(v)?v:'';}
+/* a GDACS link's query, short letters-and-digits pairs only ("eventid=1001338&episodeid=14&eventtype=TC") */
+function _glbQuery(u){
+  const o=Object.create(null),i=u.indexOf('?');
+  if(i>=0)u.slice(i+1).split('&').forEach(function(p){
+    const kv=p.split('=');
+    if(kv.length===2&&/^[a-z]{1,12}$/i.test(kv[0])&&/^[A-Za-z0-9]{1,12}$/.test(kv[1]))o[kv[0].toLowerCase()]=kv[1];
+  });
+  return o;
+}
+/* the agency's name, as the normaliser cleans it: letters, digits, space . - / only (Latin-only where the
+   browser has no Unicode property escapes) */
+let _GLB_AGENCY_BAD;
+try{_GLB_AGENCY_BAD=new RegExp('[^\\p{L}\\p{N} ./-]','gu');}catch(e){_GLB_AGENCY_BAD=/[^A-Za-z0-9\u00C0-\u024F .\/-]/g;}
 function _glbClean(d){
   if(!d||typeof d!=='object'||!Array.isArray(d.events))return null;
   const out=[];
@@ -3960,11 +4109,19 @@ function _glbClean(d){
     if(e.alert!=='Red'&&e.alert!=='Orange')continue;
     const title=_glbStr(e.title,120);if(!title)continue;
     const type=typeof e.type==='string'&&Object.prototype.hasOwnProperty.call(_GLB_SHORT,e.type)?e.type:'';
+    const url=_glbUrl(e.url),q=_glbQuery(url);
+    /* the data sheet's EVENT row: the snapshot's id ("TC-1001338") and episode (added 18 Oct 2026; older
+       files lack both), else the same numbers from the GDACS report link; no row if neither is there */
+    const id=typeof e.id==='string'&&/^(EQ|TC|FL|VO|DR|WF)-\d{1,10}$/.test(e.id)?e.id
+      :(type&&q.eventtype===type&&/^\d{1,10}$/.test(q.eventid||'')?type+'-'+q.eventid:'');
+    const ep=Number.isInteger(e.episode)&&e.episode>=0&&e.episode<1e9?e.episode
+      :(/^\d{1,9}$/.test(q.episodeid||'')?parseInt(q.episodeid,10):null);
     out.push({
-      lat:e.lat,lng:e.lng,title:title,alert:e.alert,red:e.alert==='Red',
-      typeLabel:_glbStr(e.typeLabel,40)||'Disaster',short:type?_GLB_SHORT[type]:'Alert',
+      lat:e.lat,lng:e.lng,title:title,alert:e.alert,red:e.alert==='Red',code:type,id:id,episode:ep,
+      typeLabel:type?_GLB_FULL[type]:(_glbStr(e.typeLabel,40)||'Disaster'),short:type?_GLB_SHORT[type]:'Alert',
       place:_glbStr(e.place,40),country:_glbStr(e.country,140),severity:_glbStr(e.severityText,60),
-      description:_glbStr(e.description,320),from:_glbStr(e.from,30),to:_glbStr(e.to,30),url:_glbUrl(e.url)
+      agency:_glbStr(e.agency,40).replace(_GLB_AGENCY_BAD,'').replace(/\s+/g,' ').trim(),
+      description:_glbStr(e.description,320),from:_glbStr(e.from,30),to:_glbStr(e.to,30),url:url
     });
   }
   /* Red first, then the most recently updated (the file is already in this order) */
@@ -4023,6 +4180,7 @@ function _glbSetState(st){
   }
   const up=document.getElementById('glb-updated');
   if(up)up.textContent=(st==='ready'||st==='empty')&&_glb.gen?'Updated '+_glbStamp(_glb.gen)+'.':'';
+  _glbBar(st);
   const side=_glb.side;
   if(side){
     side.classList.toggle('glb-void',st==='empty'||st==='error');
@@ -4037,6 +4195,21 @@ function _glbSetState(st){
    file once its generatedAt is a week old, so only a stopped workflow gets here; the alerts' own dates
    play no part (an alert's end date can lie ahead, e.g. a cyclone forecast, and would hide a dead feed) */
 function _glbStale(){return !_glb.gen||Date.now()-_glb.gen.getTime()>_GLB_STALE;}
+/* the status strip. Accuracy (Joe repeats this to funders): the file is a snapshot whose generatedAt moves
+   only when the alerts change (or a weekly heartbeat), and the scheduled checks can land hours after their
+   slot, so the strip gives when the DATA was last updated and "checked every 6 hours": never "synced", never
+   a next-check time, never "real time". "Feed active" = a usable file no older than the 14-day stale guard */
+function _glbBar(st){
+  const b=_glb.bar;if(!b)return;
+  const have=st==='ready'||st==='empty',stale=have&&_glbStale();
+  b.el.classList.toggle('glb-bar-ok',have&&!stale);
+  b.state.textContent=st==='error'?'Feed unavailable':!have?'Loading feed':stale?'Feed may be out of date':'Feed active';
+  b.upd.textContent='Updated '+(have&&_glb.gen?_glbStamp(_glb.gen):'—');
+  const r=have?_glb.events.filter(function(e){return e.red;}).length:-1;
+  /* two digits, like the list's "01/04" (at most 60 alerts), so the cell never changes width */
+  b.red.textContent=have?_glbPad(r):'--';
+  b.orange.textContent=have?_glbPad(_glb.events.length-r):'--';
+}
 function _glbSetEvents(ev){
   _glb.events=ev;_glb.sel=-1;_glb.items=[];
   const list=_glb.list;
@@ -4047,15 +4220,24 @@ function _glbSetEvents(ev){
     b.type='button';b.setAttribute('aria-pressed','false');
     b.appendChild(_glbEl('span','glb-item-mark')).setAttribute('aria-hidden','true');
     const main=_glbEl('span','glb-item-main'),k=_glbEl('span','glb-item-kicker');
+    /* "01/04": the index is visual only (the list already says "1 of 4" to a screen reader) */
+    k.appendChild(_glbEl('span','glb-item-ix',_glbPad(i+1)+'/'+_glbPad(ev.length))).setAttribute('aria-hidden','true');
     k.appendChild(_glbEl('span','glb-item-alert',s.alert+' alert'));
-    k.appendChild(_glbEl('span','glb-sr',', ')); /* the visible "·" has empty alt text: this keeps the two apart when read out */
-    k.appendChild(_glbEl('span','glb-item-type',s.typeLabel));
     main.appendChild(k);
     main.appendChild(_glbEl('span','glb-item-name',s.title));
-    if(s.country&&s.title.indexOf(s.country)<0)main.appendChild(_glbEl('span','glb-item-where',s.country));
+    /* "TC · Tropical cyclone · Guam": the code beside its full name (code aria-hidden), then the country.
+       The visible "·" have empty alt text; the hidden ", " keep the parts apart when read out */
+    const w=_glbEl('span','glb-item-where');
+    if(s.code)w.appendChild(_glbEl('span','glb-item-code',s.code)).setAttribute('aria-hidden','true');
+    w.appendChild(_glbEl('span','glb-item-type',s.typeLabel));
+    if(s.country&&s.title.indexOf(s.country)<0){
+      w.appendChild(_glbEl('span','glb-sr',', '));
+      w.appendChild(_glbEl('span','glb-item-country',s.country));
+    }
+    main.appendChild(w);
     b.appendChild(main);
     const iso=s.to||s.from,day=_glbDay(iso);
-    if(day){const t=_glbEl('time','glb-item-date',day);t.dateTime=iso;b.appendChild(t);}
+    if(day){const t=_glbEl('time','glb-item-date',day);t.dateTime=iso;main.appendChild(t);}
     /* detail 0: pressed with Enter / Space (or a screen reader's click), not a pointer */
     b.addEventListener('click',function(e){_glbSelect(i,b,!e.detail);});
     li.appendChild(b);list.appendChild(li);_glb.items.push(b);
@@ -4082,9 +4264,31 @@ function _glbShowCard(){
   if(!s){card.classList.remove('on');card.removeAttribute('role');card.removeAttribute('aria-label');return;}
   card.classList.add('on');card.setAttribute('role','region');card.setAttribute('aria-label','Alert details');
   card.appendChild(_glbEl('div','glb-card-title',s.title)).tabIndex=-1; /* focus target for a keyboard choice on phones (_glbSelect) */
-  card.appendChild(_glbEl('div','map-card-co',s.typeLabel+' · '+s.alert+' alert'+(s.country?' · '+s.country:'')));
-  const facts=[_glbRange(s.from,s.to),s.severity].filter(Boolean).join(' · ');
-  if(facts)card.appendChild(_glbEl('div','map-card-co',facts));
+  /* the data sheet: label / value rows (a row with nothing to say is left out, never "undefined") */
+  const dl=_glbEl('dl','glb-spec');
+  const row=function(k,v){
+    if(!v)return null;
+    dl.appendChild(_glbEl('dt',null,k));
+    const dd=dl.appendChild(_glbEl('dd',null,typeof v==='string'?v:null));
+    if(typeof v!=='string')dd.appendChild(v);
+    return dd;
+  };
+  row('Event',s.id?s.id+(s.episode!=null?' · Episode '+s.episode:''):'');
+  let ty=s.typeLabel;
+  if(s.code){ /* "TC · Tropical cyclone", the code hidden from screen readers (the full name follows) */
+    ty=document.createDocumentFragment();
+    ty.appendChild(_glbEl('span',null,s.code+' · ')).setAttribute('aria-hidden','true');
+    ty.appendChild(document.createTextNode(s.typeLabel));
+  }
+  row('Type',ty);
+  row('Alert',s.alert);
+  row('Severity',s.severity);
+  row('Area',s.country);
+  row('Position',_glbLatLng(s.lat,s.lng));
+  const span=_glbRange(s.from,s.to),days=_glbDays(s.from,s.to);
+  row('Active',span?span+(days?' · '+days+(days===1?' day':' days'):''):'');
+  row('Source',(s.agency?s.agency+' via ':'')+'GDACS');
+  card.appendChild(dl);
   if(s.description)card.appendChild(_glbEl('p','glb-card-body',s.description));
   card.appendChild(_glbEl('p','glb-card-note','A GDACS alert'+(_glb.gen?', data updated '+_glbStamp(_glb.gen):'')
     +'. A place where help is needed, not a Rising Light project.'));
@@ -4288,6 +4492,11 @@ function _glbBoot(){
         more=document.getElementById('glb-more'),side=list&&list.parentElement;
   if(!sec||!stage||!list||!layer||!hit||!status)return;
   _glb.stage=stage;_glb.side=side;_glb.layer=layer;_glb.hit=hit;_glb.list=list;_glb.status=status;_glb.more=more;
+  const hl=document.getElementById('glb-hud-lat'),hg=document.getElementById('glb-hud-lng');
+  if(hl&&hg)_glb.hud={lat:hl,lng:hg,a:'',b:''};
+  const bar=document.getElementById('glb-bar'),bs=document.getElementById('glb-bar-state'),bu=document.getElementById('glb-bar-upd'),
+        br=document.getElementById('glb-bar-red'),bo=document.getElementById('glb-bar-orange');
+  if(bar&&bs&&bu&&br&&bo)_glb.bar={el:bar,state:bs,upd:bu,red:br,orange:bo};
   if(more)more.addEventListener('click',function(e){
     const open=more.getAttribute('aria-expanded')!=='true';
     more.setAttribute('aria-expanded',open?'true':'false');

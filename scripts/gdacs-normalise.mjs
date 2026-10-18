@@ -6,7 +6,7 @@
 //   https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH
 // Output: { source, sourceName, sourceUrl, generatedAt, count, dropped, events[] }, each event
 //   { id, lat, lng, title, priority, description, type, typeLabel, alert, severityText,
-//     country, place, from, to, url }
+//     country, place, from, to, url, agency, episode }
 //
 // Rules (from the 15 Oct 2026 research brief, checked against live responses):
 // - keep only features GDACS itself marks current: properties.iscurrent is the STRING "true"
@@ -20,6 +20,9 @@
 // - strings are cleaned (control and bidirectional characters removed, whitespace collapsed,
 //   trailing commas trimmed) and length-capped
 // - a link is kept only when it is an https://www.gdacs.org/ address
+// - agency = the reporting agency GDACS names in properties.source ("JTWC", "NEIC", "GLOFAS"...),
+//   cleaned, letters / digits / space / . - / only, capped at 40; "" when absent (18 Oct 2026)
+// - episode = properties.episodeid as a whole number, or null when absent or not one (18 Oct 2026)
 // - severity is shown only where its number means something for that type (never compared
 //   across types: the units differ and flood / volcano severity is always 0)
 
@@ -47,7 +50,7 @@ const DESCRIPTION = Object.freeze({
   Orange: "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance."
 });
 
-const CAP = Object.freeze({ title: 100, place: 40, country: 120, countryName: 60 });
+const CAP = Object.freeze({ title: 100, place: 40, country: 120, countryName: 60, agency: 40 });
 
 const STRIP = /[\u0000-\u001F\u007F-\u009F\u00AD\u061C\u200B-\u200F\u2028-\u202E\u2060-\u2069\uFEFF]/g;
 
@@ -164,6 +167,13 @@ function alertLevel(v) {
   return a ? a.charAt(0).toUpperCase() + a.slice(1) : '';
 }
 
+/* the reporting agency's name or code as GDACS gives it; anything but letters, digits, space,
+   "." "-" "/" is dropped (the page shows it as "JTWC via GDACS") */
+function agencyText(v) {
+  const t = cleanText(v).normalize('NFC').replace(/[^\p{L}\p{N} ./-]/gu, '').replace(/\s+/g, ' ').trim();
+  return capText(t, CAP.agency);
+}
+
 /** One feature → a parsed record, or null when it is structurally unusable. */
 function parseFeature(f) {
   if (!f || typeof f !== 'object') return null;
@@ -209,7 +219,9 @@ function buildEvent(r) {
     place,
     from: toUtcIso(p.fromdate),
     to: toUtcIso(p.todate),
-    url: gdacsUrl(report)
+    url: gdacsUrl(report),
+    agency: agencyText(p.source),
+    episode: Number.isInteger(r.episode) && r.episode >= 0 ? r.episode : null
   };
 }
 
