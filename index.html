@@ -271,8 +271,10 @@ body.dark .title-logo{filter:none}
 .sect-title{font-family:var(--cinzel);font-size:30px;font-weight:600;letter-spacing:2px;color:var(--text)}
 .sect-sub{font-size:14px;color:var(--text2);margin-top:10px}
 /* Goal + calendar pair into one two-up ledger movement on desktop */
-.ledger-grid{display:grid;gap:24px}
-@media(min-width:960px){.ledger-grid{grid-template-columns:1fr 1fr;align-items:start}}
+/* CH.03: the goal card and the calendar card stack, one above the other, at every width, and are the same
+   box (Joe 18 Oct 2026): one column, so the same width, capped at the width each card had side by side
+   ((1160px chapter - 24px gap) / 2 = 568px), and equal rows, so the taller card sets both heights */
+.ledger-grid{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);grid-auto-rows:1fr;max-width:calc((1160px - 24px) / 2);margin-left:auto;margin-right:auto}
 @media(max-width:768px){
   .sect-title{font-size:22px}
   .sect-head{margin-bottom:28px}
@@ -4884,7 +4886,7 @@ if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
    null = let that number calculate itself from the events list.          */
 const RL_IMPACT={
   countries:3,         /* pinned 13 Oct 2026 (Joe): UK · USA · Guatemala — matches the map, footer and FAQ; Ghana counts once that trip has happened */
-  total_events:null,   /* 13 Oct 2026 (Joe): counts the events on the page, so it rises with every upload */
+  total_events:4,      /* pinned 18 Oct 2026 (Joe): "change total events to 4" — no longer counts the events list; set null to count again */
   lives_touched:320    /* confirmed by Joe 13 Oct 2026; no automatic source — publish the figure here */
 };
 /* When you change any figure above, update the month in the "Figures as of" line under the stats. */
