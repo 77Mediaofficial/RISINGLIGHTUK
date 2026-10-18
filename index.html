@@ -1149,14 +1149,16 @@ body.dark .search-container.spotlit .search-input {
 .goal-nums{font-family:var(--cinzel);font-size:22px;font-weight:700;letter-spacing:.5px}
 .goal-nums .goal-of{color:var(--text3);font-size:14px;font-weight:600}
 .goal-track{height:10px;border-radius:99px;background:var(--hover-bg2);overflow:hidden}
-/* Smooth on phones (16 Oct 2026). The fill is laid at its final width at once and grows on the
-   compositor (transform:scaleX from the left edge) instead of animating width, which was layout and
-   paint on the main thread every frame and froze whenever the page was busy. At rest the transform is
-   none, so the bar is the same box as before. overflow:hidden keeps the shimmer strip inside the fill. */
+/* Smooth on phones (16 Oct 2026). The fill is laid at its final width at once and slides in on the
+   compositor (transform:translateX from fully left of the track) instead of animating width, which was
+   layout and paint on the main thread every frame and froze whenever the page was busy. The track's own
+   rounded overflow clip hides the part still to come, so the leading end stays a rounded pill in every
+   frame (18 Oct 2026: a scaleX grow squashed it flat). At rest the transform is none, so the bar is the
+   same box as before. overflow:hidden keeps the shimmer strip inside the fill. */
 .goal-fill{
   height:100%;width:0;border-radius:99px;background:var(--text);
   position:relative;overflow:hidden;
-  transform:scaleX(0);transform-origin:left center;transition:transform 1.6s cubic-bezier(0.22,1,0.36,1);
+  transform:translateX(-100%);transition:transform 1.6s cubic-bezier(0.22,1,0.36,1);
 }
 /* The shimmer, also on the compositor: the same 220%-wide gradient tile, laid four tiles wide on a
    strip that slides (transform) instead of a background-position animation that repainted the fill
@@ -1195,7 +1197,6 @@ body.dark .goal-fill::after{
 /* v7.8 Scroll reveal */
 .rl-sr{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(0.22,1,0.36,1),transform .8s cubic-bezier(0.22,1,0.36,1)}
 .rl-sr.rl-sr-in{opacity:1;transform:none}
-.rl-sr.rl-sr-now{transition:none} /* CH.03 cards: a reveal the reader has already scrolled into is shown at once */
 
 /* v7.10 Scroll progress + back-to-top (bottom-left; quick-capture FAB owns bottom-right)
    Compositor-only: full-width bar scaled on X, not width-animated (no layout). */
@@ -2926,10 +2927,12 @@ async function loadEvents(){
   /* The ticker and the events list sit below CH.03 and are the heavy part of this render (layout and
      text shaping of every new card). They run after the next frame, so CH.03's own updates paint first,
      and while CH.03's goal is counting up they wait for it to land, so the count never freezes
-     mid-climb (16 Oct 2026). The wait is capped at 2 s (a hidden tab pauses the count). */
+     mid-climb (16 Oct 2026). The wait is capped at 2 s (a hidden tab pauses the count). After the count
+     lands they still wait one frame, so its final number paints before this render (18 Oct 2026). */
   const _rest=()=>{try{renderTicker();renderEvents();}catch(e){console.error('[Rising Light] post-load render failed:',e);}};
-  if(window.rlGoalBusy)Promise.race([window.rlGoalBusy,new Promise(r=>setTimeout(r,2000))]).then(_rest);
-  else requestAnimationFrame(()=>setTimeout(_rest,0));
+  const _next=()=>requestAnimationFrame(()=>setTimeout(_rest,0));
+  if(window.rlGoalBusy)Promise.race([window.rlGoalBusy,new Promise(r=>setTimeout(r,2000))]).then(_next);
+  else _next();
 }
 
 function filterEvents(filter){
@@ -4565,30 +4568,20 @@ window.showToast=function(msg){
       if(e.isIntersecting){e.target.classList.add('rl-sr-in');io.unobserve(e.target);}
     });
   },{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
-  /* CH.03's two cards (16 Oct 2026). On a phone flick they crossed the screen still invisible, then
-     ghosted in late under the reader's thumb. They now start their reveal a little before they reach
-     the screen (15% of a screen height early). If the observer only reports once a card is already 15%
-     into the screen, the scroll is too fast for a fade to read as anything but a ghost, so the card is
-     shown at once. */
-  const ioEarly=new IntersectionObserver(es=>{
-    es.forEach(e=>{
-      if(!e.isIntersecting)return;
-      ioEarly.unobserve(e.target);
-      if(e.boundingClientRect.top<window.innerHeight*0.85)e.target.classList.add('rl-sr-now');
-      e.target.classList.add('rl-sr-in');
-    });
-  },{threshold:0,rootMargin:'0px 0px 15% 0px'});
-  function attach(el,delay,obs){
+  function attach(el,delay){
     if(el.classList.contains('rl-sr')||el.classList.contains('rl-sr-in'))return;
     // Never hide something already in the first viewport — no flash on load
     if(el.getBoundingClientRect().top<window.innerHeight*0.9)return;
     el.classList.add('rl-sr');
     if(delay)el.style.transitionDelay=Math.min(delay,360)+'ms';
-    (obs||io).observe(el);
+    io.observe(el);
   }
+  /* CH.03's goal and calendar cards have no scroll reveal (18 Oct 2026). On a phone fling the observer
+     reports them late (it runs on the main thread, the fling does not), so they crossed the screen blank
+     and then faded in under the reader's thumb, however early the reveal was started. They are simply
+     there; the chapter's own motion (the bar, the count, the calendar's first paint) carries it. */
   document.querySelectorAll('#impact,.map-section,.ticker-wrap,.events-header,.rl-globe,.upload-section,.rl-ig,.faq-section,.give-section,.footer')
     .forEach(el=>attach(el,0));
-  document.querySelectorAll('.goal-card,.cal-card').forEach(el=>attach(el,0,ioEarly));
   // Event cards arrive async and re-render on filter — reveal each new batch
   const grid=document.getElementById('events-grid');
   if(grid){
@@ -4842,27 +4835,36 @@ const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goa
   if(!card)return;
   document.getElementById('goal-target').textContent=RL_GOAL;
   const fill=document.getElementById('goal-fill'),nowEl=document.getElementById('goal-now');
+  const pctEl=document.getElementById('goal-pct'),foot=card.querySelector('.goal-foot');
   const reduce=window.matchMedia?window.matchMedia('(prefers-reduced-motion:reduce)'):{matches:false};
-  let armed=false,painted=false,filling=false,count=null;
+  let armed=false,painted=false,filling=false,count=null,shrinkTo=null;
   /* Read "lives" at paint time rather than parse time, so a pinned number that
      arrives with the async stats fetch is reflected in the bar. */
   const livesNow=()=>+(((document.querySelectorAll('.stats-section .stat-number')[2]||{}).dataset||{}).target||RL_LIVES_FALLBACK);
-  /* Smooth on phones (16 Oct 2026). The number's box is held at the final value's width before the
-     count-up starts. Cinzel's digits differ in width, so on phones 410–442 px wide the head used to wrap
-     and unwrap as the count climbed, moving the bar, the month blocks and the calendar card by 33 px.
-     The hold is cleared when the count lands, so the resting layout is the natural one. */
+  const pctOf=v=>Math.min(100,Math.round(v/RL_GOAL*100));
+  /* Smooth on phones (16 Oct 2026). Until the count lands, the head and the foot are held at their final
+     layout: the number's box at the final value's width (Cinzel's digits differ in width, so on phones
+     410–442 px wide the head used to wrap and unwrap as the count climbed, moving the bar, the month
+     blocks and the calendar card by 33 px) and the foot at its final height ("0%" becoming "64% of goal"
+     made it wrap at 320–324 px, 18 Oct 2026). The hold is taken at boot, while the card is still below
+     the screen, so it holds whichever way the reader arrives, and it is cleared when the count lands, so
+     the resting layout is the natural one. Before the count the "0" sits right-aligned in the held box,
+     where the last digit of the final number will be. */
   function reserve(v){
-    const shown=nowEl.textContent;
-    nowEl.style.width='';nowEl.textContent=v;
-    const w=nowEl.getBoundingClientRect().width;
-    nowEl.textContent=shown;nowEl.style.width=w+'px';
+    const shown=nowEl.textContent,pShown=pctEl.textContent;
+    nowEl.style.width='';if(foot)foot.style.minHeight='';
+    nowEl.textContent=v;pctEl.textContent=pctOf(v)+'% of goal';
+    const w=nowEl.getBoundingClientRect().width,h=foot?foot.getBoundingClientRect().height:0;
+    nowEl.textContent=shown;pctEl.textContent=pShown;
+    nowEl.style.width=w+'px';if(foot)foot.style.minHeight=h+'px';
   }
+  function release(){nowEl.style.width='';if(foot)foot.style.minHeight='';}
   /* The count-up, driven here rather than through animateCounter. It runs on the bar's own clock (the
-     fill transition's start time), so the number and the bar stay in step even when the page is busy;
-     progress is clamped, so never a negative number; the text is written only when the value changes;
-     no stat-pulse reflow; and a repaint mid-count steers the running count instead of fighting it.
-     Same 1600 ms cubic ease-out as before. While it runs, window.rlGoalBusy lets the events render
-     wait for it. */
+     fill transition's start time; if that has not started within 60 frames, about 1 s, the count starts
+     on its own clock), so the number and the bar stay in step even when the page is busy; progress is
+     clamped, so never a negative number; the text is written only when the value changes; no stat-pulse
+     reflow; and a repaint mid-count steers the running count instead of fighting it. Same 1600 ms cubic
+     ease-out as before. While it runs, window.rlGoalBusy lets the events render wait for it. */
   function countUp(target){
     const c=count={target:target};
     let t0=null,last=null,bar=null,wait=0;
@@ -4878,58 +4880,66 @@ const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goa
       const v=p<1?Math.floor(c.target*(1-Math.pow(1-p,3))):c.target;
       if(v!==last){nowEl.textContent=v;last=v;}
       if(p<1){requestAnimationFrame(step);return;}
-      count=null;nowEl.style.width='';
+      count=null;release();
       window.rlGoalBusy=null;c.done();
     };
     requestAnimationFrame(step);
   }
-  function paint(animate){
-    const lives=livesNow();
-    const pct=Math.min(100,Math.round(lives/RL_GOAL*100));
-    const w=pct+'%',was=fill.style.width;
-    if(was!==w){
-      /* a later change of the number (an admin edit) glides from the old width, still on the compositor */
-      if(painted&&!filling&&!reduce.matches&&parseFloat(was)>0&&pct>0){
-        fill.style.transition='none';fill.style.transform='scaleX('+(parseFloat(was)/pct)+')';fill.style.width=w;
-        void getComputedStyle(fill).transform;
-        fill.style.transition='';
-      }else fill.style.width=w;
+  /* The fill's length. The first paint slides it in from the left (the CSS transition). A later change of
+     the number (an admin edit) glides from the old length, still on the compositor: while it slides the
+     fill keeps the longer of the two widths and the track clips the rest. */
+  function setFill(pct){
+    const w=pct+'%',was=fill.style.width,a=parseFloat(was)||0;
+    shrinkTo=null;
+    if(!(painted&&!filling&&!reduce.matches&&a>0&&pct>0&&a!==pct)){
+      if(was!==w)fill.style.width=w;
+      fill.style.transform='none';
+      return;
     }
-    fill.style.transform='none';
-    document.getElementById('goal-pct').textContent=pct+'% of goal';
+    fill.style.transition='none';
+    if(pct>a){fill.style.width=w;fill.style.transform='translateX('+(-(pct-a)/pct*100)+'%)';}
+    else fill.style.transform='none';
+    void getComputedStyle(fill).transform;
+    fill.style.transition='';
+    if(pct>a)fill.style.transform='none';
+    else{fill.style.transform='translateX('+(-(a-pct)/a*100)+'%)';shrinkTo=w;}
+  }
+  fill.addEventListener('transitionend',e=>{
+    if(e.target!==fill||e.propertyName!=='transform')return;
+    filling=false;
+    if(shrinkTo){ /* a shrink has slid home: lay the fill at its new width, no visible change */
+      fill.style.transition='none';fill.style.width=shrinkTo;fill.style.transform='none';shrinkTo=null;
+      void getComputedStyle(fill).transform;fill.style.transition='';
+    }
+  });
+  function paint(animate){
+    const lives=livesNow(),pct=pctOf(lives);
+    setFill(pct);
+    pctEl.textContent=pct+'% of goal';
     if(count){count.target=lives;return;}
     if(animate&&!reduce.matches){reserve(lives);countUp(lives);}
-    else{nowEl.style.width='';nowEl.textContent=lives;}
-  }
-  fill.addEventListener('transitionend',e=>{if(e.target===fill&&e.propertyName==='transform')filling=false;});
-  /* The bar and the count start once the card's own scroll reveal has finished, not mid-slide. */
-  function afterReveal(cb){
-    let anims=[];
-    try{anims=card.getAnimations?card.getAnimations():[];}catch(e){}
-    if(!anims.length){cb();return;}
-    Promise.all(anims.map(a=>a.finished.catch(()=>{}))).then(cb);
+    else{release();nowEl.textContent=lives;}
   }
   const io=new IntersectionObserver(es=>{
     es.forEach(en=>{
       if(!en.isIntersecting||armed)return;
       io.disconnect();
-      armed=true;
-      afterReveal(()=>{painted=true;filling=!reduce.matches;paint(true);});
+      armed=true;painted=true;filling=!reduce.matches;
+      paint(true);
     });
   },{threshold:0.4});
   io.observe(card);
-  /* The head takes its final layout a screen before the card arrives, so nothing moves on screen. */
-  const near=new IntersectionObserver(es=>{
-    if(!es.some(e=>e.isIntersecting))return;
-    near.disconnect();
-    if(!painted)reserve(livesNow());
-  },{rootMargin:'0px 0px 100% 0px'});
-  near.observe(card);
-  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!painted&&nowEl.style.width)reserve(livesNow());});
+  /* The hold: taken when rlApplyStats() first sets the number (rlRefreshGoal, below, right after this
+     block), on the next frame if that has not happened, again when the web fonts arrive, and again if
+     the width changes before the count has run. */
+  requestAnimationFrame(()=>{if(!painted&&!nowEl.style.width)reserve(livesNow());});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!painted)reserve(livesNow());});
+  let holdW=window.innerWidth;
+  window.addEventListener('resize',()=>{if(painted||window.innerWidth===holdW)return;holdW=window.innerWidth;reserve(livesNow());},{passive:true});
   /* The shimmer runs only while the card is on screen. */
   new IntersectionObserver(es=>{es.forEach(e=>card.classList.toggle('goal-live',e.isIntersecting));}).observe(card);
-  /* Re-paint (no count-up) when the numbers change under it. */
-  window.rlRefreshGoal=function(){if(painted)paint(false);};
+  /* Re-paint (no count-up) when the numbers change under it; before the count, re-take the hold. */
+  window.rlRefreshGoal=function(){if(painted)paint(false);else reserve(livesNow());};
 })();
 
 /* Publish the numbers from RL_IMPACT. Must run AFTER the definitions above —
@@ -4946,7 +4956,9 @@ function _rlEventsByMonth(){
   ((typeof allEvents!=='undefined'&&allEvents)||[]).forEach(e=>{
     if(e&&e.event_date){const k=String(e.event_date).slice(0,7);(map[k]=map[k]||[]).push(e);}
   });
-  Object.values(map).forEach(a=>a.sort((x,y)=>String(x.event_date).localeCompare(String(y.event_date))));
+  /* plain comparison of the ISO "yyyy-mm-dd" dates, the same order as localeCompare without paying for
+     Intl's collator inside the events-response task (18 Oct 2026) */
+  Object.values(map).forEach(a=>a.sort((x,y)=>{const p=String(x.event_date),q=String(y.event_date);return p<q?-1:p>q?1:0;}));
   return map;
 }
 /* Momentum — the next 18 months as blocks; a month lights up if it holds dated events. */
@@ -5063,6 +5075,10 @@ function renderCalendar(){
 function renderManage(){
   const list=document.getElementById('manage-list');
   if(!list)return;
+  /* The panel is admin-only (hidden for visitors), so it is built only while signed in, and on sign-in
+     (the observer below); a visitor's events load no longer pays for it (18 Oct 2026). */
+  if(!document.body.classList.contains('admin')){list._rlStale=true;return;}
+  list._rlStale=false;
   const evs=(((typeof allEvents!=='undefined'&&allEvents)||[]).slice())
     .sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
   if(!evs.length){list.innerHTML='<div class="manage-empty">No events yet — upload one above.</div>';return;}
@@ -5112,6 +5128,8 @@ async function setEventName(id,val){
 (function(){
   const prev=window.rlOnEventsLoaded;
   window.rlOnEventsLoaded=function(){if(prev)prev();renderCalendar();renderManage();};
+  new MutationObserver(()=>{const l=document.getElementById('manage-list');if(l&&l._rlStale&&document.body.classList.contains('admin'))renderManage();})
+    .observe(document.body,{attributes:true,attributeFilter:['class']});
   const stepMonth=delta=>{window._rlCalTouched=true;calView=calView||{y:new Date().getFullYear(),m:new Date().getMonth()};
     let mm=calView.m+delta,yy=calView.y;
     if(mm<0){mm=11;yy--;}else if(mm>11){mm=0;yy++;}
