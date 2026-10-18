@@ -3837,6 +3837,9 @@ const _GLB_MAX=60;              /* the snapshot's own cap */
 const _GLB_PINS=30;             /* at most this many pins on the globe, the most urgent first: style work per
                                    frame grows with the pins, and the list (and the fly-to) still covers every alert */
 const _GLB_STALE=14*864e5;      /* a snapshot whose generatedAt is older than this says it may be out of date */
+const _GLB_ACTIVE=8*864e5;      /* the status strip says "Feed active" only while generatedAt is younger than this: a
+                                   working feed rewrites it at least weekly (heartbeat), so 8 days catches a stopped
+                                   feed a week sooner than the 14-day line (Joe 18 Oct 2026) */
 const _GLB_FEW=4;               /* below 960px the list shows four, then "Show all N alerts" (= the rows of
                                    loading room the CSS holds, .glb-res: change both together) */
 const _GLB_TZ='Europe/London';
@@ -4236,10 +4239,10 @@ function _glbStale(){return !_glb.gen||Date.now()-_glb.gen.getTime()>_GLB_STALE;
 /* the status strip. Accuracy (Joe repeats this to funders): the file is a snapshot whose generatedAt moves
    only when the alerts change (or a weekly heartbeat), and the scheduled checks can land hours after their
    slot, so the strip gives when the DATA was last updated and "checked every 6 hours": never "synced", never
-   a next-check time, never "real time". "Feed active" = a usable file no older than the 14-day stale guard */
+   a next-check time, never "real time". "Feed active" = a usable file under 8 days old (_GLB_ACTIVE) */
 function _glbBar(st){
   const b=_glb.bar;if(!b)return;
-  const have=st==='ready'||st==='empty',stale=have&&_glbStale();
+  const have=st==='ready'||st==='empty',stale=have&&(!_glb.gen||Date.now()-_glb.gen.getTime()>_GLB_ACTIVE);
   b.el.classList.toggle('glb-bar-ok',have&&!stale);
   b.state.textContent=st==='error'?'Feed unavailable':!have?'Loading feed':stale?'Feed may be out of date':'Feed active';
   b.upd.textContent='Updated '+(have&&_glb.gen?_glbStamp(_glb.gen):'--'); /* '--' like the counts while loading */
