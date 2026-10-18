@@ -2,14 +2,14 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-10-18T09:39:45Z",
+  "generatedAt": "2026-10-18T14:36:41Z",
   "count": 3,
   "dropped": 0,
   "events": [
     {
       "id": "TC-1001338",
-      "lat": 13.1,
-      "lng": 142.3,
+      "lat": 13.5,
+      "lng": 141.4,
       "title": "Tropical Cyclone CHAMPI-26",
       "priority": 2,
       "description": "Red is the highest of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
@@ -20,8 +20,8 @@
       "country": "Guam, Northern Mariana Islands",
       "place": "CHAMPI-26",
       "from": "2026-10-14T12:00:00Z",
-      "to": "2026-10-18T06:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=16&eventtype=TC"
+      "to": "2026-10-18T12:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=17&eventtype=TC"
     },
     {
       "id": "TC-1001335",
