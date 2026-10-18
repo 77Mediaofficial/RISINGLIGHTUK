@@ -5193,7 +5193,12 @@ const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goa
      block), on the next frame if that has not happened, again when the web fonts arrive, and again if
      the width changes before the count has run. */
   requestAnimationFrame(()=>{if(!painted&&!nowEl.style.width)reserve(livesNow());});
-  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!painted)reserve(livesNow());});
+  /* fonts: re-take the hold whenever a web font lands, even mid-count (a first visit on a slow line can get
+     Cinzel after the count has started; the fallback font's width was too narrow) - reserve() puts back
+     the text on screen, so it is safe while counting */
+  const rehold=()=>{if(!painted)reserve(livesNow());else if(count)reserve(count.target);};
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(rehold);
+  if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',rehold);
   let holdW=window.innerWidth;
   window.addEventListener('resize',()=>{if(painted||window.innerWidth===holdW)return;holdW=window.innerWidth;reserve(livesNow());},{passive:true});
   /* The shimmer runs only while the card is on screen. */
