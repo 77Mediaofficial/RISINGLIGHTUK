@@ -245,7 +245,7 @@ body.dark .title-logo{filter:none}
 @media(max-width:480px){
   .badge{width:92px}
   .badge-medal{width:70px;height:70px}
-  .badge-wall{gap:20px 18px}
+  .badge-wall{gap:20px 18px;max-width:calc(2 * 92px + 18px + 40px)} /* two badges a row on phones (2 x 2 for four, no lone badge; Joe 18 Oct 2026) */
 }
 
 /* ── FUNDS USED — one figure in the same ledger language as the stats above:
@@ -4612,7 +4612,6 @@ let rlStatsOverride={...RL_IMPACT};
 const RL_BADGES=[
   {id:'first',  glyph:'flame', name:'First Mission',  sub:'The work begins',      done:true},
   {id:'school', glyph:'book',  name:'School Aid',     sub:'Learning supported',   done:true},
-  {id:'ghana',  glyph:'pin',   name:'Ghana Aid',      sub:'First international',  done:false}, /* in progress until the trip (dated 20 Aug 2027) happens — Joe 13 Oct 2026 */
   {id:'ally',   glyph:'rings', name:'Alliance',       sub:'Charlie&rsquo;s Promise',   done:true},
   {id:'snowdon',glyph:'peak',  name:'Yr Wyddfa',      sub:'Snowdon · Summited',   done:true}
 ];
