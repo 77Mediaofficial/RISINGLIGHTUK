@@ -2,7 +2,7 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-10-18T14:36:41Z",
+  "generatedAt": "2026-10-18T19:26:39Z",
   "count": 3,
   "dropped": 0,
   "events": [
@@ -21,7 +21,9 @@
       "place": "CHAMPI-26",
       "from": "2026-10-14T12:00:00Z",
       "to": "2026-10-18T12:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=17&eventtype=TC"
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=17&eventtype=TC",
+      "agency": "JTWC",
+      "episode": 17
     },
     {
       "id": "TC-1001335",
@@ -38,7 +40,9 @@
       "place": "SIMON-26",
       "from": "2026-10-07T15:00:00Z",
       "to": "2026-10-16T21:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001335&episodeid=38&eventtype=TC"
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001335&episodeid=38&eventtype=TC",
+      "agency": "NOAA",
+      "episode": 38
     },
     {
       "id": "DR-1018332",
@@ -55,7 +59,9 @@
       "place": "Europe-2026",
       "from": "2025-12-21T00:00:00Z",
       "to": "2026-10-16T00:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1018332&episodeid=24&eventtype=DR"
+      "url": "https://www.gdacs.org/report.aspx?eventid=1018332&episodeid=24&eventtype=DR",
+      "agency": "GDO",
+      "episode": 24
     }
   ]
 }
