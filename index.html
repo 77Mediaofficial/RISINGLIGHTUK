@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
 <title>Rising Light UK — Compassion Has No Borders</title>
 <meta name="description" content="Rising Light UK — Compassion Has No Borders. A grassroots humanitarian initiative helping people and animals across borders, with projects in the UK, Arizona (USA) and Guatemala. Volunteer, partner, or follow our work.">
 <meta name="author" content="Rising Light UK">
@@ -32,6 +33,11 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"NGO","name":"Rising Light UK","alternateName":"Rising Light","url":"https://77mediaofficial.github.io/RISINGLIGHTUK/","logo":"https://77mediaofficial.github.io/RISINGLIGHTUK/og-cover.jpg","image":"https://77mediaofficial.github.io/RISINGLIGHTUK/og-cover.jpg","description":"Rising Light UK is a grassroots humanitarian initiative helping people and animals across borders, with projects in the UK, Arizona (USA) and Guatemala.","email":"svn-77mediaofficial@outlook.com","slogan":"Compassion Has No Borders","foundingLocation":{"@type":"Place","name":"London, United Kingdom"},"areaServed":[{"@type":"Country","name":"United Kingdom"},{"@type":"Country","name":"United States"},{"@type":"Country","name":"Guatemala"}],"sameAs":["https://www.instagram.com/risinglightuk/"]}
 </script>
+<!-- Theme boot, part 1 (21 Oct 2026): runs before any stylesheet can hold the parser. 'rl-boot' switches every
+     transition off until the body's boot script has picked the theme, so nothing fades from the markup's dark
+     default to a visitor's chosen light (or back). The root colour scheme is set here so the canvas starts right. -->
+<script>(function(){var d=document.documentElement;d.classList.add('rl-boot');try{if(localStorage.getItem('rl_theme')==='light'){d.classList.add('rl-pre-light');d.style.colorScheme='light';var m=document.querySelector('meta[name="color-scheme"]');if(m)m.setAttribute('content','light');}}catch(e){}})();</script>
+<style>html.rl-boot *,html.rl-boot *::before,html.rl-boot *::after{transition:none!important}html.rl-pre-light body{background:#FFFFFF!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -82,11 +88,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 ::-webkit-scrollbar-thumb:hover{background:#C3C2BC}
 body.dark ::-webkit-scrollbar-thumb{background:#2B2B2A}
 body.dark ::-webkit-scrollbar-thumb:hover{background:#383837}
-/* color-scheme lives on the ROOT and is driven by the theme JS — declaring it
+/* color-scheme lives on the ROOT and is driven by the theme JS (dark by default since 19 Oct 2026) — declaring it
    on body.dark alone makes html/body schemes disagree, which stops Chromium
    propagating the body background to the canvas (page ground goes white). */
-html{scrollbar-width:thin;scrollbar-color:#D2D1CC var(--bg);color-scheme:light}
+html{scrollbar-width:thin;scrollbar-color:#D2D1CC var(--bg);color-scheme:dark}
 body.dark{scrollbar-color:#2B2B2A #000000}
+/* the window scrollbar takes its colours from <html>, where --bg stays light: follow the theme (21 Oct 2026) */
+html:has(> body.dark){scrollbar-color:#2B2B2A #000000}
 .container{max-width:1200px;margin:0 auto;padding:60px 20px}
 
 /* ── CHAPTER BANDS — every other chapter sits on a full-bleed surface band,
@@ -1669,24 +1677,26 @@ body.admin .admin-only{display:inline-flex}
   .cal-month{min-width:140px}
 }
 </style>
-<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiI0ZGRkZGRiIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <!-- Single theme-color meta, driven by the in-page toggle (not the OS scheme)
      so the browser chrome always matches what's actually on screen -->
-<meta name="theme-color" content="#FFFFFF" />
+<meta name="theme-color" content="#000000" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Rising Light" />
 </head>
-<body>
+<body class="dark">
 <!-- Pre-paint boot (parser-blocking, runs before first paint):
-     1. apply stored theme  → returning dark visitors get no light flash
+     1. theme: DARK by default (19 Oct 2026); a visitor who chose light on the toggle gets light, before first paint
      2. scrollRestoration=manual + scroll-to-top → the page ALWAYS opens at the top
      3. arm the hero (hidden) and reveal it only once the display font is ready,
         so the big Cinzel headline never flickers from a fallback serif — one
         clean top-down fade, guaranteed to reveal via a hard timeout. -->
 <script>try{
   var _b=document.body;
-  if(localStorage.getItem('rl_theme')==='dark'){_b.classList.add('dark');document.documentElement.style.colorScheme='dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content','#000000');}
+  var _lt=false;try{_lt=localStorage.getItem('rl_theme')==='light';}catch(e){}
+  _b.classList.toggle('dark',!_lt);document.documentElement.style.colorScheme=_lt?'light':'dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content',_lt?'#FFFFFF':'#000000');
+  void getComputedStyle(_b).backgroundColor;document.documentElement.classList.remove('rl-boot','rl-pre-light'); /* settle the theme with transitions off, then allow them */
   if('scrollRestoration' in history){history.scrollRestoration='manual';}
   _b.classList.add('hero-armed');
   var _shown=false,_reveal=function(){if(_shown)return;_shown=true;_b.classList.add('hero-in');};
@@ -1747,7 +1757,7 @@ body.admin .admin-only{display:inline-flex}
     </nav>
     <div class="mast-end">
     <a class="mast-join" id="mast-join" href="#get-involved">Join us</a>
-    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" aria-label="Toggle dark mode">
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" aria-label="Toggle dark mode" aria-pressed="true">
       <svg class="tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
     </button>
@@ -3452,22 +3462,24 @@ function _rlSyncThemeMeta(isDark){
   // Root-level color-scheme keeps native scrollbars/pickers/autofill in step
   // (must live on <html>, matching body — see the comment in the stylesheet).
   document.documentElement.style.colorScheme=isDark?'dark':'light';
+  const cs=document.querySelector('meta[name="color-scheme"]');
+  if(cs)cs.setAttribute('content',isDark?'dark':'light');
   const btn=document.getElementById('theme-toggle');
   if(btn)btn.setAttribute('aria-pressed',isDark?'true':'false');
 }
 function toggleTheme(){
   const isDark=document.body.classList.toggle('dark');
-  localStorage.setItem('rl_theme',isDark?'dark':'light');
+  try{localStorage.setItem('rl_theme',isDark?'dark':'light');}catch(e){} /* blocked site data: still switch, just not remembered */
   _rlSyncThemeMeta(isDark);
 }
 
 function applyStoredTheme(){
-  const stored=localStorage.getItem('rl_theme');
-  // Default to LIGHT mode. Only go dark if the user explicitly chose it before.
-  // (Previously this fell back to the OS preference, so dark-mode visitors saw
-  //  a dark site by default — now light is the guaranteed default.)
-  const useDark=stored==='dark';
-  if(useDark)document.body.classList.add('dark');
+  let stored=null;try{stored=localStorage.getItem('rl_theme');}catch(e){} /* blocked site data must not stop the boot */
+  // Default to DARK mode (Joe, 19 Oct 2026). Only go light if the visitor chose it
+  // with the toggle (toggleTheme is the only writer of rl_theme). The OS preference
+  // is still ignored: the site's own toggle decides.
+  const useDark=stored!=='light';
+  document.body.classList.toggle('dark',useDark);
   _rlSyncThemeMeta(useDark);
 }
 
