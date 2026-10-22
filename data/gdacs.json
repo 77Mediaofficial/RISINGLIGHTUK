@@ -2,14 +2,33 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-10-22T10:14:01Z",
-  "count": 1,
+  "generatedAt": "2026-10-22T20:34:24Z",
+  "count": 2,
   "dropped": 0,
   "events": [
     {
+      "id": "EQ-1573141",
+      "lat": 32.3805,
+      "lng": 93.7797,
+      "title": "Earthquake in China",
+      "priority": 2,
+      "description": "Red is the highest of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
+      "type": "EQ",
+      "typeLabel": "Earthquake",
+      "alert": "Red",
+      "severityText": "Magnitude 7.0",
+      "country": "China",
+      "place": "China",
+      "from": "2026-10-22T14:33:40Z",
+      "to": "2026-10-22T14:33:40Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1573141&episodeid=1741837&eventtype=EQ",
+      "agency": "NEIC",
+      "episode": 1741837
+    },
+    {
       "id": "TC-1001338",
-      "lat": 20.9,
-      "lng": 125.4,
+      "lat": 21.2,
+      "lng": 124.9,
       "title": "Tropical Cyclone CHAMPI-26",
       "priority": 2,
       "description": "Red is the highest of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
@@ -20,10 +39,10 @@
       "country": "Philippines and 3 more countries",
       "place": "CHAMPI-26",
       "from": "2026-10-14T12:00:00Z",
-      "to": "2026-10-22T06:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=32&eventtype=TC",
+      "to": "2026-10-22T12:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=33&eventtype=TC",
       "agency": "JTWC",
-      "episode": 32
+      "episode": 33
     }
   ]
 }
