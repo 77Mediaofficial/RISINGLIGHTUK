@@ -2,14 +2,14 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-10-22T01:33:05Z",
+  "generatedAt": "2026-10-22T10:14:01Z",
   "count": 1,
   "dropped": 0,
   "events": [
     {
       "id": "TC-1001338",
-      "lat": 19.9,
-      "lng": 126.9,
+      "lat": 20.9,
+      "lng": 125.4,
       "title": "Tropical Cyclone CHAMPI-26",
       "priority": 2,
       "description": "Red is the highest of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
@@ -20,10 +20,10 @@
       "country": "Philippines and 3 more countries",
       "place": "CHAMPI-26",
       "from": "2026-10-14T12:00:00Z",
-      "to": "2026-10-21T18:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=30&eventtype=TC",
+      "to": "2026-10-22T06:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001338&episodeid=32&eventtype=TC",
       "agency": "JTWC",
-      "episode": 30
+      "episode": 32
     }
   ]
 }
