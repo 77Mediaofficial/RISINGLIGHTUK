@@ -1,0 +1,20 @@
+<!-- Admin page (22 Oct 2026). Not linked from any page, not in the sitemap, noindex. The lock
+     button, the Daily Brief button and the single-key shortcuts used to sit on every public page;
+     they now appear only after signing in here. Signing in stores the session (rl_token) in this
+     browser, so the admin tools then show on the Events and About pages as before. Every write is
+     still checked by the database's own rules; hiding the buttons is presentation only. -->
+<section class="chapter admin-page" id="admin" aria-labelledby="admin-title">
+  <div class="sect-head">
+    <span class="sect-eyebrow">Admin</span>
+    <div class="sect-title" id="admin-title">Admin</div>
+    <p class="sect-sub admin-out">Sign in to manage events and the published numbers.</p>
+    <p class="sect-sub admin-in">You're signed in. The admin tools now show on these pages.</p>
+  </div>
+  <div class="admin-actions">
+    <button class="give-btn admin-out" type="button" onclick="promptAdmin()">Sign in</button>
+    <a class="give-btn admin-in" href="events.html#events">Upload and manage events</a>
+    <a class="give-btn admin-in" href="about.html#impact">Edit the impact numbers</a>
+    <button class="give-btn admin-in" type="button" onclick="openBrief()">Daily brief</button>
+    <button class="give-btn admin-in admin-signout" type="button" onclick="exitAdmin()">Sign out</button>
+  </div>
+</section>

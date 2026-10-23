@@ -1,0 +1,43 @@
+  <!-- CH. 05 — Around the World: current Orange and Red disaster alerts from GDACS
+       (Global Disaster Awareness and Coordination System) on a 3D globe. These are
+       places where help is needed, NOT Rising Light projects (Joe, 15 Oct 2026: Rising
+       Light's own places stay on the CH.01 Reach map). The data is data/gdacs.json, a
+       snapshot .github/workflows/gdacs-snapshot.yml refreshes every six hours; a
+       visitor's browser never calls GDACS. The JSON loads when the chapter is 2000px
+       away and cobe (vendor/cobe-2.0.1.esm.js, MIT) when the stage is 600px away; the
+       stage keeps its square from the first paint and the alert column holds four rows'
+       room while the JSON loads, so its arrival moves little or nothing. The status line,
+       list, card and credit are filled by the CH.05 globe script and work without
+       WebGL. Not inside a band: paper ground, like Quiet Battles. -->
+  <section class="chapter rl-globe" id="globe" aria-labelledby="globe-title">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 05 — Around the World</span>
+      <div class="sect-title" id="globe-title">Where Help Is Needed</div>
+      <p class="sect-sub" id="globe-sub">Alerts from the Global Disaster Awareness and Coordination System (GDACS): places where help is needed, not Rising Light projects.</p>
+    </div>
+    <div class="glb-wrap">
+      <div class="glb-stage" id="glb-stage">
+        <div class="glb-hit" id="glb-hit" aria-hidden="true"></div>
+        <div class="glb-hud" aria-hidden="true">
+          <span class="glb-hud-c glb-hud-tl"></span><span class="glb-hud-c glb-hud-tr"></span><span class="glb-hud-c glb-hud-bl"></span><span class="glb-hud-c glb-hud-br"></span>
+          <span class="glb-hud-x"></span>
+          <span class="glb-hud-read"><span class="glb-hud-k">View centre</span><span class="glb-hud-v"><span class="glb-hud-lat" id="glb-hud-lat"></span><span class="glb-hud-sep">·</span><span class="glb-hud-lng" id="glb-hud-lng"></span></span></span>
+          <svg class="glb-hud-compass" viewBox="0 0 34 48" focusable="false"><circle cx="17" cy="31" r="11" stroke-width="1"/><circle cx="17" cy="31" r="6.05" stroke-width="0.8"/><line x1="0" y1="31" x2="34" y2="31" stroke-width="0.8"/><line x1="17" y1="14" x2="17" y2="48" stroke-width="0.8"/><line x1="17" y1="31" x2="17" y2="22.2" stroke-width="1.8"/><circle class="mc-dot" cx="17" cy="31" r="2"/><text x="17" y="10" text-anchor="middle">N</text></svg>
+        </div>
+        <div class="glb-pins" id="glb-pins" aria-hidden="true"></div>
+      </div>
+      <div class="glb-side glb-res">
+        <div class="glb-bar" id="glb-bar" aria-hidden="true"><div class="glb-bar-in">
+          <span class="glb-bar-feed"><span class="glb-bar-dot"></span><span class="glb-bar-src">GDACS</span><span class="glb-bar-state" id="glb-bar-state">Loading feed</span></span>
+          <span class="glb-bar-count"><span class="glb-bar-n glb-red"><span class="glb-bar-pin"></span>Red <span class="glb-bar-v" id="glb-bar-red">--</span></span><span class="glb-bar-n"><span class="glb-bar-pin"></span>Orange <span class="glb-bar-v" id="glb-bar-orange">--</span></span></span>
+          <span class="glb-bar-upd" id="glb-bar-upd">Updated --</span>
+          <span class="glb-bar-cad">Checked every 6 hours</span>
+        </div></div>
+        <p class="glb-status" id="glb-status" role="status" aria-live="polite">Loading the latest disaster alerts…</p>
+        <ul class="glb-list" id="glb-list" aria-label="Current disaster alerts"></ul>
+        <button type="button" class="map-card-link glb-more" id="glb-more" aria-controls="glb-list" aria-expanded="false" hidden>Show all alerts</button>
+        <div class="glb-card" id="glb-card" aria-live="polite"></div>
+        <p class="glb-credit" id="glb-credit">Data: <a href="https://www.gdacs.org/" target="_blank" rel="noopener noreferrer">GDACS<span class="glb-sr"> (opens in a new tab)</span></a>, checked every six hours, filtered to current Orange and Red alerts and simplified. GDACS alerts are automated estimates: for safety, follow official local authorities.<span class="glb-updated" id="glb-updated"></span></p>
+      </div>
+    </div>
+  </section>

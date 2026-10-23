@@ -1,0 +1,175 @@
+<!-- Admin login modal — replaces the old prompt() + hardcoded password -->
+<!-- Impact Numbers editor — opened by the "Edit numbers" button on CH.01.
+     Blank field = that stat calculates itself from the events list. -->
+<div class="modal" id="impact-modal">
+  <div class="modal-content" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title" style="font-family:var(--cinzel)">Impact Numbers</div>
+      <button class="modal-close" onclick="closeImpactModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:26px 28px 28px">
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:22px">
+        Change a number and press <strong>Apply</strong> to see it on the page. Leave a field
+        blank to let it work itself out from your events.
+      </p>
+      <div class="manage-row">
+        <label class="stat-edit-lbl" for="rl-stat-countries">Countries</label>
+        <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-countries" placeholder="Auto">
+      </div>
+      <div class="manage-row">
+        <label class="stat-edit-lbl" for="rl-stat-events">Total Events</label>
+        <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-events" placeholder="Auto">
+      </div>
+      <div class="manage-row">
+        <label class="stat-edit-lbl" for="rl-stat-lives">Lives Touched</label>
+        <input type="number" min="0" step="1" inputmode="numeric" class="manage-name" id="rl-stat-lives" placeholder="Auto">
+      </div>
+      <div class="manage-row stat-edit-actions">
+        <button class="btn" id="rl-stats-revert" type="button" onclick="rlRevertStats()">Revert</button>
+        <button class="btn" id="rl-stats-clear" type="button" onclick="rlClearStats()">Clear all</button>
+        <button class="btn" id="rl-stats-save" type="button" onclick="rlApplyAndCopy()">Apply</button>
+      </div>
+      <div class="stat-edit-hint" id="rl-stats-hint"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="admin-login-modal">
+  <div class="modal-content" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title" style="font-family:var(--cinzel)">Admin Sign In</div>
+      <button class="modal-close" onclick="closeAdminModal()" aria-label="Close">×</button>
+    </div>
+    <div style="padding:28px">
+      <div id="admin-login-err" style="display:none;background:#FEF2F2;color:#DC2626;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:500"></div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;color:var(--text2)">Email</label>
+        <input type="email" id="admin-email" placeholder="admin@risinglight.org.uk"
+          style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--text)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')document.getElementById('admin-pw').focus()">
+      </div>
+      <div style="margin-bottom:22px">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;color:var(--text2)">Password</label>
+        <input type="password" id="admin-pw" placeholder="••••••••"
+          style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s"
+          onfocus="this.style.borderColor='var(--text)'" onblur="this.style.borderColor='var(--border)'"
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <button id="admin-login-btn" onclick="doAdminLogin()"
+        style="width:100%;padding:13px;background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--cinzel);letter-spacing:0.5px;transition:opacity .2s">
+        Sign In
+      </button>
+      <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;line-height:1.5">Admin access only.<br>Contact your administrator to set up credentials.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="pdf-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Event Details</div>
+      <button class="modal-close" onclick="closeViewer()">×</button>
+    </div>
+    <div class="pdf-controls">
+      <button id="pdf-prev" onclick="changePDFPage(-1)">◀ Prev</button>
+      <span class="pdf-page-info"><span id="pdf-page-num">1</span> / <span id="pdf-page-count">1</span></span>
+      <button id="pdf-next" onclick="changePDFPage(1)">Next ▶</button>
+      <button onclick="downloadPDF()" style="margin-left:auto">Download</button>
+    </div>
+    <div class="pdf-sliderbar" id="pdf-sliderbar">
+      <span class="pdf-sliderbar-icon">◀</span>
+      <input type="range" id="pdf-slider" class="pdf-slider" min="1" max="1" value="1" step="1" oninput="goToPage(+this.value)" aria-label="Slide through PDF pages">
+      <span class="pdf-sliderbar-icon">▶</span>
+    </div>
+    <div class="modal-body">
+      <div class="pdf-container" id="pdf-container"></div>
+    </div>
+  </div>
+</div>
+
+<!-- v5: Daily Brief overlay -->
+<div class="brief-overlay" id="brief-overlay" onclick="if(event.target===this)closeBrief()">
+  <div class="brief-panel" style="position:relative">
+    <button class="brief-close" onclick="closeBrief()" aria-label="Close">×</button>
+    <div class="brief-date" id="brief-date">— Loading —</div>
+    <h2 class="brief-greeting" id="brief-greeting">Good day.</h2>
+    <p style="color:var(--text2); margin-bottom:24px; font-size:14px; line-height:1.6;" id="brief-summary">Loading today's overview...</p>
+
+    <div class="brief-section">
+      <h3>Mission overview</h3>
+      <div class="brief-stat-row">
+        <div class="brief-stat">
+          <div class="brief-stat-num" id="brief-events">0</div>
+          <div class="brief-stat-lbl">Events</div>
+        </div>
+        <div class="brief-stat">
+          <div class="brief-stat-num" id="brief-countries">0</div>
+          <div class="brief-stat-lbl">Countries</div>
+        </div>
+        <div class="brief-stat">
+          <div class="brief-stat-num" id="brief-lives">0</div>
+          <div class="brief-stat-lbl">Lives Touched</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brief-section">
+      <h3>Recent events</h3>
+      <div id="brief-recent"></div>
+    </div>
+
+    <div class="brief-section">
+      <h3>By country</h3>
+      <div id="brief-by-country"></div>
+    </div>
+
+    <div style="text-align:right; margin-top:8px;">
+      <button class="brief-print" onclick="window.print()">Print Brief</button>
+      <button class="brief-print" style="background:var(--card); color:var(--text); border:1px solid var(--border)" onclick="closeBrief()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- v5: Quick capture FAB (admin only) -->
+<button class="qc-fab" id="qc-fab" onclick="toggleQC()" title="Quick note (Cmd+N)" aria-label="Quick capture">+</button>
+<div class="qc-panel" id="qc-panel">
+  <div class="qc-title">Quick capture</div>
+  <textarea class="qc-textarea" id="qc-text" placeholder="Drop a quick note or thought about an event..."></textarea>
+  <div class="qc-actions">
+    <span class="qc-hint">Cmd+⏎ to save</span>
+    <button class="qc-save" onclick="saveQC()">Save</button>
+  </div>
+  <div class="qc-recent" id="qc-recent"></div>
+</div>
+
+<!-- v5: Keyboard help -->
+<div class="kbd-help-overlay" id="kbd-help-overlay" onclick="if(event.target===this)closeKbdHelp()">
+  <div class="kbd-help-panel">
+    <div class="kbd-help-title">Keyboard shortcuts</div>
+    <div class="kbd-help-sub">Press <kbd>Esc</kbd> to close</div>
+    <div class="kbd-row"><span>Toggle dark/light theme</span><kbd>T</kbd></div>
+    <div class="kbd-row"><span>Open Daily Brief</span><kbd>B</kbd></div>
+    <div class="kbd-row"><span>Quick capture (admin)</span><kbd>Cmd</kbd><kbd>N</kbd></div>
+    <div class="kbd-row"><span>Show this help</span><kbd>?</kbd></div>
+    <div class="kbd-row"><span>Close any modal</span><kbd>Esc</kbd></div>
+    <div class="kbd-row"><span>All events filter</span><kbd>A</kbd></div>
+    <div class="kbd-row"><span>Recent events filter</span><kbd>R</kbd></div>
+  </div>
+</div>
+
+<!-- v5: Confetti container -->
+<div class="confetti-overlay" id="confetti-overlay"></div>
+
+<!-- v5: Daily Brief button (added to header area) -->
+<button class="brief-fab" onclick="openBrief()" style="position:fixed; top:24px; left:24px; background:transparent; border:1px solid var(--border); padding:10px 16px; border-radius:8px; font-family:var(--font); font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--text2); cursor:pointer; z-index:50; transition: all 0.2s;" title="Daily Brief (B)" aria-label="Open Daily Brief" onmouseover="this.style.background='var(--card)';this.style.color='var(--text)'" onmouseout="this.style.background='transparent';this.style.color='var(--text2)'">📋<span class="brief-label"> Brief</span></button>
+
+
+
+<!-- ════════════════════════════════════════════════════════════════════
+     v7 — TOASTS · SCROLL PROGRESS · BACK-TO-TOP · SKELETONS · REVEAL ·
+     SPOTLIGHT · IMPACT TRACKER · GLOBE INTERACTIVITY (arcs, spin, tips)
+     ════════════════════════════════════════════════════════════════════ -->
+<div class="scroll-progress" id="scroll-progress"></div>
+<button class="back-top" id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+<div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>

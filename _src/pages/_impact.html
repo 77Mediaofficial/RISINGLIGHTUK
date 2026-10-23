@@ -1,0 +1,45 @@
+    <!-- CH. 02 — Impact ledger: three numbers on hairlines -->
+<div class="ch-band"><!-- band: impact -->
+  <section class="chapter" id="impact" aria-label="Impact in numbers">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 02 — Impact</span>
+      <div class="sect-title">The Story in Numbers</div>
+      <!-- Admin-only: opens the Impact Numbers editor right where the numbers are -->
+      <button class="btn stat-edit-btn admin-only" type="button" onclick="openImpactModal()">Edit numbers</button>
+    </div>
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-ix">N&deg;01</div>
+        <div class="stat-number" data-target="3">0</div>
+        <div class="stat-label">Countries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ix">N&deg;02</div>
+        <div class="stat-number" id="total-events" data-target="2">0</div>
+        <div class="stat-label">Total Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ix">N&deg;03</div>
+        <div class="stat-number" data-target="320">0</div>
+        <div class="stat-label">Lives Touched</div>
+      </div>
+    </div>
+    <!-- When any figure in RL_IMPACT (assets/js/v7.js) changes, update this month in the same commit, then py _src/build.py. -->
+    <p class="stats-asof">Figures as of October 2026</p>
+    <!-- Milestone badges — expedition-patch roundels for what's been completed.
+         Rendered by renderBadges() from the RL_BADGES list in
+         assets/js/v7.js; a badge with done:false shows as a dashed "in progress" ring. -->
+    <h3 class="badge-head" id="badge-head">Milestones</h3>
+    <ul class="badge-wall" id="badge-wall" aria-labelledby="badge-head"></ul>
+    <!-- Funds used — the running total spent on Rising Light's operations.
+         ★ This IS the published figure: to update it, edit the amount and the
+         month below, run py _src/build.py, then commit and push. ★ -->
+    <h3 class="badge-head" id="funds-head">Funds Used</h3>
+    <div class="funds-ledger" role="group" aria-labelledby="funds-head">
+      <div class="funds-amount">£550</div>
+      <div class="stat-label">Spent on our operations so far</div>
+      <div class="funds-note">Estimated total · October 2026</div>
+      <span class="funds-tag">Self-funded</span>
+    </div>
+  </section>
+</div><!-- /band: impact -->

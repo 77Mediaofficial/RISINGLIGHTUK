@@ -1,0 +1,28 @@
+  <section class="give-section" id="get-involved">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 09 — Join Us</span>
+      <div class="sect-title">Get Involved</div>
+      <p class="sect-sub">Volunteer with us or send a message. We'd love to hear from you.</p>
+    </div>
+    <div class="give-grid">
+      <form class="give-card" onsubmit="return rlGiveSubmit(event,'volunteer')">
+        <h2 class="give-card-title">Volunteer / Partner</h2>
+        <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
+        <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
+        <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" maxlength="500" placeholder="e.g. events, fundraising, skills"></label>
+        <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="give-btn" type="submit">Send</button>
+        <p class="give-privacy">We only use what you send to reply and arrange volunteering. <a href="privacy.html">How we handle your details</a></p>
+      </form>
+      <form class="give-card" id="contact" onsubmit="return rlGiveSubmit(event,'contact')">
+        <h2 class="give-card-title">Contact Us</h2>
+        <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
+        <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
+        <label class="give-field"><span>Message</span><textarea name="message" rows="3" required maxlength="4000" placeholder="How can we help?"></textarea></label>
+        <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="give-btn" type="submit">Send</button>
+        <p class="give-privacy">We only use what you send to reply to you. <a href="privacy.html">How we handle your details</a></p>
+        <p class="give-privacy give-urgent">This inbox isn't watched around the clock. If you need help now, use the numbers in <a href="quiet-battles.html#help">Quiet Battles</a>.</p>
+      </form>
+    </div>
+  </section>

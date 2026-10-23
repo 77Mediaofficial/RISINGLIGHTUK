@@ -1,0 +1,63 @@
+<body class="dark">
+<!-- Pre-paint boot (parser-blocking, runs before first paint):
+     1. theme: DARK by default (19 Oct 2026); a visitor who chose light on the toggle gets light, before first paint
+     2. scroll-to-top on a fresh visit or reload (not on Back/Forward, not when the address has a #section)
+     3. arm the hero (hidden) and reveal it only once the display font is ready,
+        so the big Cinzel headline never flickers from a fallback serif — one
+        clean top-down fade, guaranteed to reveal via a hard timeout. -->
+<script>try{
+  var _b=document.body;
+  var _lt=false;try{_lt=localStorage.getItem('rl_theme')==='light';}catch(e){}
+  _b.classList.toggle('dark',!_lt);document.documentElement.style.colorScheme=_lt?'light':'dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content',_lt?'#FFFFFF':'#000000');
+  void getComputedStyle(_b).backgroundColor;document.documentElement.classList.remove('rl-boot','rl-pre-light'); /* settle the theme with transitions off, then allow them */
+  /* Back/Forward keeps the reader's place (the browser restores it); a fresh visit or a reload opens at the top.
+     scrollRestoration stays 'auto': 'manual' is remembered per history entry and would break Back later. */
+  var _nav='';try{var _ne=performance.getEntriesByType('navigation')[0];_nav=_ne?_ne.type:'';}catch(e){}
+  _b.classList.add('hero-armed');
+  var _shown=false,_reveal=function(){if(_shown)return;_shown=true;_b.classList.add('hero-in');};
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(_reveal);}
+  setTimeout(_reveal,900);
+  /* back to the top on load, as before, but never under a reader who has already started scrolling
+     (on a phone load can land seconds late, mid-scroll), and as a jump, not a smooth glide (16 Oct 2026) */
+  var _rlHeld=false,_rlHold=function(){_rlHeld=true;};
+  ['touchstart','wheel','keydown','mousedown'].forEach(function(t){window.addEventListener(t,_rlHold,{passive:true,capture:true});});
+  var _rlTop=function(){if(_rlHeld||location.hash||_nav==='back_forward')return;var _h=document.documentElement,_sb=_h.style.scrollBehavior;_h.style.scrollBehavior='auto';window.scrollTo(0,0);_h.style.scrollBehavior=_sb;};
+  window.addEventListener('load',function(){_reveal();_rlTop();});
+  window.addEventListener('pageshow',function(e){if(e&&e.persisted)return;_rlTop();}); /* a page restored from the back/forward cache keeps its place */
+}catch(e){document.body.classList.add('hero-in');}</script>
+
+<!-- Scroll ink reveal on the hero mission line. Words are wrapped in spans at
+     boot (aria-label keeps the full sentence for screen readers); a passive
+     scroll listener maps the first half-viewport of scroll onto word count.
+
+<!-- Search Spotlight Overlay (Upgrade 8) -->
+<div id="search-spotlight"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- Masthead — sticky editorial nav (wordmark · section links · theme toggle) -->
+<header class="masthead" id="masthead">
+  <div class="masthead-in">
+    <a class="mast-brand" href="./" aria-label="Rising Light UK — home">Rising Light</a>
+    <nav class="mast-nav" aria-label="Pages">
+<!--MAST_NAV-->
+    </nav>
+    <div class="mast-end">
+    <a class="mast-join" id="mast-join" href="get-involved.html">Join us</a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle" aria-label="Toggle dark mode" aria-pressed="true">
+      <svg class="tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+    </button>
+    </div>
+  </div>
+</header>
+
+<!-- Phone page bar — fixed bottom pill nav; the build marks the current page (aria-current) -->
+<nav class="chapter-bar show" id="chapter-bar" aria-label="Pages">
+<!--PHONE_NAV-->
+</nav>
+
+<!-- Admin status bar (only visible when in admin mode) -->
+<div class="admin-bar" id="admin-bar">
+  <span>● ADMIN MODE</span>
+  <button onclick="exitAdmin()">Exit</button>
+</div>

@@ -1,0 +1,40 @@
+<!-- CH. 04 — Events: chapter head, then the live ticker bound to its chapter -->
+<div class="ch-band"><!-- band: events -->
+  <div class="events-header" id="events">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 04 — On the Ground</span>
+      <div class="sect-title">Events</div>
+      <div class="events-count" id="event-count">0 events</div>
+      <button type="button" class="filter-clear" id="filter-clear" onclick="filterByCountry('all')">Show all events ×</button>
+    </div>
+  </div>
+
+  <!-- Recent activity ticker -->
+  <div class="ticker-wrap" style="display:none">
+    <div class="ticker-label">LIVE</div>
+    <div class="ticker-content"><div class="ticker-track" id="ticker-track">Loading recent activity...</div></div>
+  </div>
+  <div class="events-grid" id="events-grid">
+    <div class="loading">Loading events...</div>
+  </div>
+  <div class="upload-section admin-section">
+    <div class="upload-header">
+      <h2>Upload New Event</h2>
+      <p>Share your event details with the community</p>
+    </div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📄</div>
+      <div class="upload-title">Click to Upload PDF</div>
+      <div class="upload-hint">or drag and drop your event PDF here</div>
+      <input type="file" id="file-input" accept=".pdf" multiple>
+    </div>
+    <div class="upload-status" id="upload-status"></div>
+  </div>
+  <div class="manage-section admin-section">
+    <div class="upload-header">
+      <h2>Manage Events</h2>
+      <p>Rename, set a date, replace the PDF, or remove any event</p>
+    </div>
+    <div id="manage-list"></div>
+  </div>
+</div><!-- /band: events -->

@@ -1,0 +1,37 @@
+  <!-- CH. 03 — Momentum: goal thermometer + events calendar, two-up on desktop -->
+  <section class="chapter" id="momentum" aria-label="Goal and calendar">
+    <div class="sect-head">
+      <span class="sect-eyebrow">CH. 03 — Momentum</span>
+      <div class="sect-title">The Work in Motion</div>
+    </div>
+    <div class="ledger-grid">
+      <!-- v7: Impact tracker — goal thermometer + 12-month activity heatmap -->
+      <div class="goal-card" id="goal-card">
+        <div class="goal-head">
+          <div class="goal-title">2026 Goal · Lives Touched</div>
+          <div class="goal-nums"><span id="goal-now">0</span> <span class="goal-of">/ <span id="goal-target">500</span></span></div>
+        </div>
+        <div class="goal-track"><div class="goal-fill" id="goal-fill"></div></div>
+        <div class="goal-foot"><span>Every event lifts this bar</span><span class="goal-pct" id="goal-pct">0%</span></div>
+        <div class="heat-wrap">
+          <div class="heat-title">Momentum · Events per month</div>
+          <div class="mom-grid" id="mom-grid"></div>
+          <div class="cal-detail" id="mom-detail"></div>
+        </div>
+      </div>
+
+      <!-- Events calendar — dates set per PDF event sync here -->
+      <div class="cal-card" id="cal-card">
+        <div class="cal-head">
+          <div class="cal-title">Calendar</div>
+          <div class="cal-nav">
+            <button class="cal-btn" id="cal-prev" type="button" aria-label="Previous month">&lsaquo;</button>
+            <div class="cal-month" id="cal-month"></div>
+            <button class="cal-btn" id="cal-next" type="button" aria-label="Next month">&rsaquo;</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-detail" id="cal-detail"></div>
+      </div>
+    </div>
+  </section>
