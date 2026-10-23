@@ -2022,3 +2022,6 @@ body:not(.admin) .brief-fab{display:none!important}
 #main > .map-section:first-child::before{display:none}
 /* the events grid's empty and loading blocks span every column, so they sit centred (review, 23 Oct 2026) */
 .events-grid > .empty,.events-grid > .loading{grid-column:1/-1}
+/* Events page while no events are listed (Joe, 23 Oct 2026): the goal stays; the month grid and the calendar
+   wait for real events (main.js loadEvents removes .mom-empty when rows arrive) */
+#momentum.mom-empty .heat-wrap,#momentum.mom-empty #cal-card{display:none}

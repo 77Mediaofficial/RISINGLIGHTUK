@@ -11,8 +11,10 @@
   _b.classList.toggle('dark',!_lt);document.documentElement.style.colorScheme=_lt?'light':'dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content',_lt?'#FFFFFF':'#000000');
   void getComputedStyle(_b).backgroundColor;document.documentElement.classList.remove('rl-boot','rl-pre-light'); /* settle the theme with transitions off, then allow them */
   /* Back/Forward keeps the reader's place (the browser restores it); a fresh visit or a reload opens at the top.
-     scrollRestoration stays 'auto': 'manual' is remembered per history entry and would break Back later. */
+     Restoration is manual on a fresh visit or reload (so a reload never shows the old position and then jumps)
+     and automatic on Back/Forward. */
   var _nav='';try{var _ne=performance.getEntriesByType('navigation')[0];_nav=_ne?_ne.type:'';}catch(e){}
+  if('scrollRestoration' in history){history.scrollRestoration=_nav==='back_forward'?'auto':'manual';}
   _b.classList.add('hero-armed');
   var _shown=false,_reveal=function(){if(_shown)return;_shown=true;_b.classList.add('hero-in');};
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(_reveal);}

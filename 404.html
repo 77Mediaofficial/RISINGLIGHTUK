@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=0d4e9caa0d">
+<link rel="stylesheet" href="assets/css/site.css?v=ff5ec4664a">
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <meta name="theme-color" content="#000000" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -49,8 +49,10 @@
   _b.classList.toggle('dark',!_lt);document.documentElement.style.colorScheme=_lt?'light':'dark';var _m=document.querySelector('meta[name="theme-color"]');if(_m)_m.setAttribute('content',_lt?'#FFFFFF':'#000000');
   void getComputedStyle(_b).backgroundColor;document.documentElement.classList.remove('rl-boot','rl-pre-light'); /* settle the theme with transitions off, then allow them */
   /* Back/Forward keeps the reader's place (the browser restores it); a fresh visit or a reload opens at the top.
-     scrollRestoration stays 'auto': 'manual' is remembered per history entry and would break Back later. */
+     Restoration is manual on a fresh visit or reload (so a reload never shows the old position and then jumps)
+     and automatic on Back/Forward. */
   var _nav='';try{var _ne=performance.getEntriesByType('navigation')[0];_nav=_ne?_ne.type:'';}catch(e){}
+  if('scrollRestoration' in history){history.scrollRestoration=_nav==='back_forward'?'auto':'manual';}
   _b.classList.add('hero-armed');
   var _shown=false,_reveal=function(){if(_shown)return;_shown=true;_b.classList.add('hero-in');};
   if(document.fonts&&document.fonts.ready){document.fonts.ready.then(_reveal);}
@@ -310,7 +312,7 @@
 <script src="assets/js/ink.js?v=0f883d03fc"></script>
 <script src="assets/js/forms.js?v=13a4bb775b"></script>
 <script src="assets/js/v5.js?v=e78b794507"></script>
-<script src="assets/js/main.js?v=7fd4fab1af"></script>
+<script src="assets/js/main.js?v=423470b231"></script>
 <script src="assets/js/kit.js?v=075e363c55"></script>
 <script src="assets/js/v7.js?v=60b05f02f7"></script>
 <script src="assets/js/ig.js?v=d4d7e823cf"></script>

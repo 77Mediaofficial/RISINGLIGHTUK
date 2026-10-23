@@ -223,6 +223,8 @@ async function loadEvents(){
   }
   window._rlEventsSettled=true; /* the calendar may now paint a real month (see renderCalendar) */
   window._rlEventsOk=true;      /* the headline event count may now count the real list (rlAutoStats) */
+  /* Events page: the month grid and the calendar show only once there are events (Joe, 23 Oct 2026) */
+  {const mom=document.getElementById('momentum');if(mom)mom.classList.toggle('mom-empty',!allEvents.length);}
 
   /* Rendering is isolated from the network try/catch so a rendering exception
      can't masquerade as a "failed to load" message — it surfaces in the console
