@@ -78,8 +78,12 @@ def read(*p):
         return f.read()
 
 
+CRLF, LF = bytes([13, 10]), bytes([10])
+
+
 def ver(rel):
-    return hashlib.sha256(open(os.path.join(ROOT, rel), 'rb').read()).hexdigest()[:10]
+    # line endings normalised, so a Windows checkout (CRLF) stamps the same version as the repository (LF)
+    return hashlib.sha256(open(os.path.join(ROOT, rel), 'rb').read().replace(CRLF, LF)).hexdigest()[:10]
 
 
 def fragment(name):
