@@ -195,7 +195,7 @@ async function handleFiles(e){
 
 async function loadEvents(){
   const grid=document.getElementById('events-grid');
-  const fail=msg=>{if(grid)grid.innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Unable to load events</div><div style="font-size:14px;margin-top:8px;color:var(--text3)">${msg}</div></div>`;
+  const fail=msg=>{if(grid){grid.classList.remove('is-loading');grid.innerHTML=`<div class="empty"><div class="empty-title">Unable to load events</div><div class="empty-sub">${msg}</div></div>`;}
     /* the request has settled (badly): the calendar leaves its skeleton and shows this month */
     window._rlEventsSettled=true;if(typeof renderCalendar==='function')renderCalendar();};
 
@@ -271,6 +271,7 @@ function filterEvents(filter){
 function renderEvents(){
   const grid=document.getElementById('events-grid');
   if(!grid)return; /* the list lives on the Events page only */
+  grid.classList.remove('is-loading');
   const count=document.getElementById('event-count');
 
   let filtered=allEvents.filter(e=>{

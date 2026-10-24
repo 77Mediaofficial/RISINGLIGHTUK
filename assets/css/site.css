@@ -2025,3 +2025,6 @@ body:not(.admin) .brief-fab{display:none!important}
 /* Events page while no events are listed (Joe, 23 Oct 2026): the goal stays; the month grid and the calendar
    wait for real events (main.js loadEvents removes .mom-empty when rows arrive) */
 #momentum.mom-empty .heat-wrap,#momentum.mom-empty #cal-card{display:none}
+/* Events loading block holds the empty state's height (24 Oct 2026): no jump when the list or the empty message lands */
+.events-grid.is-loading{min-height:262px;align-content:start}
+@media(max-width:600px){.events-grid.is-loading{min-height:285px}}

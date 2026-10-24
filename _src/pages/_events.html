@@ -4,7 +4,7 @@
     <div class="sect-head">
       <span class="sect-eyebrow">CH. 04 — On the Ground</span>
       <div class="sect-title">Events</div>
-      <div class="events-count" id="event-count">0 events</div>
+      <div class="events-count" id="event-count" style="display:none"></div>
       <button type="button" class="filter-clear" id="filter-clear" onclick="filterByCountry('all')">Show all events ×</button>
     </div>
   </div>
@@ -14,7 +14,7 @@
     <div class="ticker-label">LIVE</div>
     <div class="ticker-content"><div class="ticker-track" id="ticker-track">Loading recent activity...</div></div>
   </div>
-  <div class="events-grid" id="events-grid">
+  <div class="events-grid is-loading" id="events-grid">
     <div class="loading">Loading events...</div>
   </div>
   <div class="upload-section admin-section">

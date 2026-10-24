@@ -77,7 +77,11 @@ window.showToast=function(msg){
 (function(){
   const grid=document.getElementById('events-grid');
   if(grid&&grid.querySelector('.loading')){
-    grid.innerHTML=Array.from({length:3},()=>`
+    /* one row of placeholders (as many as the grid has columns), held at the empty state's height by
+       .is-loading, so whatever arrives (the list or "No events listed right now") barely moves the page */
+    const cols=Math.max(1,getComputedStyle(grid).gridTemplateColumns.split(' ').length);
+    grid.classList.add('is-loading');
+    grid.innerHTML=Array.from({length:cols},()=>`
       <div class="skel-card">
         <div class="skel skel-line medium" style="height:18px;margin-bottom:14px"></div>
         <div class="skel skel-line short" style="margin-bottom:24px"></div>
