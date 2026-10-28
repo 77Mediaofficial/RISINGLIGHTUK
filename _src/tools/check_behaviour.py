@@ -23,6 +23,7 @@ with sync_playwright() as p:
 
     # database reads only where events are shown
     for path, want in (('', False), ('quiet-battles.html', False), ('get-involved.html', False), ('privacy.html', False),
+                       ('safeguarding.html', False), ('accessibility.html', False),
                        ('events.html', True), ('about.html', True), ('work.html', True)):
         sb.clear()
         pg.goto(BASE + path, wait_until='networkidle')

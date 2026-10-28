@@ -65,11 +65,11 @@
   </div>
 </div>
 
-<div class="modal" id="pdf-modal">
+<div class="modal" id="pdf-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-content">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">Event Details</div>
-      <button class="modal-close" onclick="closeViewer()">×</button>
+      <button class="modal-close" onclick="closeViewer()" aria-label="Close">×</button>
     </div>
     <div class="pdf-controls">
       <button id="pdf-prev" onclick="changePDFPage(-1)">◀ Prev</button>

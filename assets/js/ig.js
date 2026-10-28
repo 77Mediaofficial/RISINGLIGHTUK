@@ -33,11 +33,11 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function card(img,link,cap,alt,fr,noScrim){
     cap=cap||''; var short=cap.slice(0,110); alt=alt||short||'Rising Light UK on Instagram';
-    return '<a class="rl-ig-card" role="listitem" href="'+esc(link||IG)+'" target="_blank" rel="noopener noreferrer" aria-label="'+(cap?'Instagram post: '+esc(short):'View Instagram post')+'">'
+    return '<span role="listitem" class="rl-ig-li"><a class="rl-ig-card" href="'+esc(link||IG)+'" target="_blank" rel="noopener noreferrer" aria-label="'+(cap?'Instagram post: '+esc(short):'View Instagram post')+' (opens Instagram in a new tab)">'
       +'<img loading="lazy" decoding="async" src="'+esc(img)+'" alt="'+esc(alt)+'">'+BADGE
       +(fr?'<span class="rl-ig-fr" aria-hidden="true">'+esc(fr)+'</span>':'')
       +(cap&&!noScrim?'<span class="rl-ig-ov"><span class="rl-ig-cap">'+esc(cap)+'</span></span>':'')
-      +'</a>';
+      +'</a></span>';
   }
   function show(html){ if(!html){section.hidden=true;return;} grid.innerHTML=html; section.hidden=false; }
 

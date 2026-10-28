@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=4c2a753467">
+<link rel="stylesheet" href="assets/css/site.css?v=eae9036eb1">
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <meta name="theme-color" content="#000000" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -112,7 +112,7 @@
       <p class="sect-sub">Volunteer with us or send a message. We'd love to hear from you.</p>
     </div>
     <div class="give-grid">
-      <form class="give-card" onsubmit="return rlGiveSubmit(event,'volunteer')">
+      <form class="give-card" method="post" action="get-involved.html" onsubmit="return rlGiveSubmit(event,'volunteer')">
         <h2 class="give-card-title">Volunteer / Partner</h2>
         <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
         <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
@@ -121,7 +121,7 @@
         <button class="give-btn" type="submit">Send</button>
         <p class="give-privacy">We only use what you send to reply and arrange volunteering. <a href="privacy.html">How we handle your details</a></p>
       </form>
-      <form class="give-card" id="contact" onsubmit="return rlGiveSubmit(event,'contact')">
+      <form class="give-card" id="contact" method="post" action="get-involved.html" onsubmit="return rlGiveSubmit(event,'contact')">
         <h2 class="give-card-title">Contact Us</h2>
         <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
         <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
@@ -158,7 +158,7 @@
       </details>
       <details class="faq-item">
         <summary class="faq-q">Are you a registered charity?<span class="faq-ico" aria-hidden="true"></span></summary>
-        <div class="faq-a">Rising Light UK operates as a grassroots charitable initiative. For our current registration status or governance details, please <a href="#get-involved">get in touch</a> and we'll be glad to share.</div>
+        <div class="faq-a">No, not at the moment. Rising Light UK is a volunteer initiative, not a registered charity. If that changes, we will show our charity number here.</div>
       </details>
       <details class="faq-item">
         <summary class="faq-q">How do I contact you?<span class="faq-ico" aria-hidden="true"></span></summary>
@@ -172,7 +172,7 @@
   {"@type":"Question","name":"Where do you work?","acceptedAnswer":{"@type":"Answer","text":"We are currently active in the United Kingdom (London), the United States (Arizona) and Guatemala, and we grow into new places as projects take shape."}},
   {"@type":"Question","name":"How can I get involved?","acceptedAnswer":{"@type":"Answer","text":"Volunteer your time, partner with us, lend a skill such as translation, media or logistics, or help spread the word via the Get Involved form."}},
   {"@type":"Question","name":"Do I need to give money to help?","acceptedAnswer":{"@type":"Answer","text":"No. Some of the most valuable support is time, skills and reach — volunteering, partnerships, and sharing our work with people who might be able to help."}},
-  {"@type":"Question","name":"Are you a registered charity?","acceptedAnswer":{"@type":"Answer","text":"Rising Light UK operates as a grassroots charitable initiative. For current registration status or governance details, please get in touch."}},
+  {"@type":"Question","name":"Are you a registered charity?","acceptedAnswer":{"@type":"Answer","text":"No, not at the moment. Rising Light UK is a volunteer initiative, not a registered charity. If that changes, we will show our charity number here."}},
   {"@type":"Question","name":"How do I contact you?","acceptedAnswer":{"@type":"Answer","text":"Email svn-77mediaofficial@outlook.com, use the Get Involved form, or follow @risinglightuk on Instagram."}}
   ]}
   </script>
@@ -185,7 +185,7 @@
       <div class="credits-row"><dt>Email</dt><dd><a href="mailto:svn-77mediaofficial@outlook.com">svn-77mediaofficial@outlook.com</a></dd></div>
       <div class="credits-row"><dt>Follow</dt><dd><a href="https://www.instagram.com/risinglightuk/" target="_blank" rel="noopener noreferrer">@risinglightuk on Instagram</a></dd></div>
       <div class="credits-row"><dt>Need help now</dt><dd><a href="quiet-battles.html#help">Crisis numbers on Quiet Battles</a></dd></div>
-      <div class="credits-row"><dt>Privacy</dt><dd><a href="privacy.html">How we handle your details</a></dd></div>
+      <div class="credits-row"><dt>Policies</dt><dd><a href="privacy.html">Privacy</a> · <a href="safeguarding.html">Safeguarding</a> · <a href="accessibility.html">Accessibility</a></dd></div>
       <div class="credits-row"><dt>Site by</dt><dd><a href="https://77mediaofficial.net" target="_blank" rel="noopener noreferrer">77 Media</a></dd></div>
     </dl>
     <nav class="footer-pages" aria-label="All pages">
@@ -197,7 +197,10 @@
       <a href="get-involved.html" aria-current="page">Get Involved</a>
       <a href="get-involved.html#contact">Contact</a>
       <a href="privacy.html">Privacy</a>
+      <a href="safeguarding.html">Safeguarding</a>
+      <a href="accessibility.html">Accessibility</a>
     </nav>
+        <p class="footer-status">Rising Light UK is a volunteer-run community initiative founded in London. It is not a registered charity.</p>
     <div class="credits-end">RL·UK — MMXXVI — Compassion Has No Borders</div>
   </footer>
 
@@ -266,11 +269,11 @@
   </div>
 </div>
 
-<div class="modal" id="pdf-modal">
+<div class="modal" id="pdf-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="modal-content">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">Event Details</div>
-      <button class="modal-close" onclick="closeViewer()">×</button>
+      <button class="modal-close" onclick="closeViewer()" aria-label="Close">×</button>
     </div>
     <div class="pdf-controls">
       <button id="pdf-prev" onclick="changePDFPage(-1)">◀ Prev</button>
@@ -366,12 +369,12 @@
 <button class="back-top" id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
 <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
 
-<script src="assets/js/ink.js?v=0f883d03fc"></script>
+<script src="assets/js/ink.js?v=ad5968f315"></script>
 <script src="assets/js/forms.js?v=13a4bb775b"></script>
-<script src="assets/js/v5.js?v=e78b794507"></script>
+<script src="assets/js/v5.js?v=c5293cecc2"></script>
 <script src="assets/js/main.js?v=2fc1ad2019"></script>
 <script src="assets/js/kit.js?v=075e363c55"></script>
 <script src="assets/js/v7.js?v=85bee2af2c"></script>
-<script src="assets/js/ig.js?v=d4d7e823cf"></script>
+<script src="assets/js/ig.js?v=4df2a3fd61"></script>
 </body>
 </html>

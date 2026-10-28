@@ -821,12 +821,12 @@ body.dark .qc-fab:hover { box-shadow: 0 12px 32px rgba(255,255,255,0.15); }
   z-index: 91;
   box-shadow: 0 16px 40px rgba(0,0,0,0.2);
   transform: translateY(12px) scale(0.96); opacity: 0;
-  pointer-events: none;
+  pointer-events: none; visibility: hidden; /* closed: not focusable, not read out (a11y audit 28 Oct 2026) */
   transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 .qc-panel.open {
   transform: translateY(0) scale(1); opacity: 1;
-  pointer-events: auto;
+  pointer-events: auto; visibility: visible;
 }
 .qc-title {
   font-family: var(--cinzel); font-size: 15px;
@@ -1712,6 +1712,9 @@ body.admin .admin-only{display:inline-flex}
   @media (prefers-reduced-motion:reduce){.faq-item[open] .faq-a{animation:none}}
   .faq-q{list-style:none;cursor:pointer;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-weight:600;font-size:16px;color:var(--text)}
   .faq-q::-webkit-details-marker{display:none}
+  .faq-q:focus-visible{outline-offset:-3px} /* inside the clipped card, so the ring shows (a11y audit 28 Oct 2026) */
+  .rl-vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0} /* visually hidden; NOT .rl-sr, which is the scroll-reveal class */
+  .rl-ig-li{display:contents}
   .faq-q:hover{background:var(--hover-bg)}
   .faq-ico{flex:0 0 auto;width:22px;height:22px;position:relative}
   .faq-ico::before,.faq-ico::after{content:"";position:absolute;background:var(--text2);border-radius:2px}
@@ -2005,6 +2008,10 @@ body:not(.dark) .goal-card,body:not(.dark) .cal-card{--text3:#5F5C4C}
 /* Privacy page: the footer note's own styles, at reading size */
 .privacy-page .privacy-body{max-width:640px;margin:0 auto;text-align:left}
 .privacy-page .privacy-body p{font-size:14.5px;line-height:1.7;margin-bottom:14px}
+/* 28 Oct 2026: the founder's name on About, and the one status line in the footer (official-pages-kit Branch D).
+   Existing tokens and sizes only: strong = .privacy-body strong; the status line = .credits-row dd (13px, --text-dim). */
+.about-copy strong{color:var(--text);font-weight:600}
+.footer-status{max-width:640px;margin:22px auto 14px;font-size:13px;line-height:1.6;color:var(--text-dim);text-align:center}
 /* Admin page: signed-out and signed-in states (body.admin is set by checkAdmin) */
 .admin-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:640px;margin:0 auto}
 .admin-actions .give-btn{display:inline-flex;align-items:center;justify-content:center;padding:13px 20px;text-decoration:none;margin-top:0;line-height:1.2;min-height:46px;min-width:240px}

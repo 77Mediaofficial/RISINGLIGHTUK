@@ -154,6 +154,7 @@ function updateAdminFeatures() {
 function fireConfetti(x, y) {
   const overlay = document.getElementById('confetti-overlay');
   if (!overlay) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; // a11y audit 28 Oct 2026
   x = x || window.innerWidth / 2;
   y = y || window.innerHeight / 3;
   const colors = ['#15140F', '#6B685E', '#9A9589'];

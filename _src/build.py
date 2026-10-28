@@ -40,8 +40,14 @@ PAGES = [
          desc='Volunteer, partner with or contact Rising Light UK, and answers to common questions.',
          parts=['_give', '_faq']),
     dict(file='privacy.html', key='privacy', title='Privacy — ' + BRAND,
-         desc='How Rising Light UK handles the details you send through its forms.',
+         desc='How Rising Light UK handles the details you send through its forms and Clothes Run bookings.',
          parts=['privacy']),
+    dict(file='safeguarding.html', key='safeguarding', title='Safeguarding — ' + BRAND,
+         desc='How Rising Light UK keeps people safe at its events, on its projects and through Quiet Battles, and who to contact with a concern.',
+         parts=['safeguarding']),
+    dict(file='accessibility.html', key='accessibility', title='Accessibility — ' + BRAND,
+         desc='How accessible the Rising Light UK website is, what does not work yet, and how to report a problem.',
+         parts=['accessibility']),
     dict(file='404.html', key='404', title='Page not found — ' + BRAND, desc='This page could not be found.',
          parts=['404'], robots='noindex,follow', sitemap=False, base=True),
     dict(file='admin.html', key='admin', title='Admin — ' + BRAND, desc='Admin sign-in for Rising Light UK.',
@@ -60,7 +66,8 @@ NAV = [
 FOOTER_NAV = [('home', './', 'Home'), ('about', 'about.html', 'About'), ('work', 'work.html', 'Our Work'),
               ('events', 'events.html', 'Events'), ('qb', 'quiet-battles.html', 'Quiet Battles'),
               ('join', 'get-involved.html', 'Get Involved'), ('contact', 'get-involved.html#contact', 'Contact'),
-              ('privacy', 'privacy.html', 'Privacy')]
+              ('privacy', 'privacy.html', 'Privacy'), ('safeguarding', 'safeguarding.html', 'Safeguarding'),
+              ('accessibility', 'accessibility.html', 'Accessibility')]
 
 # Shared scripts, in the order the old single page ran them; each is its own classic <script>
 # so a throw in one cannot stop the next. 'globe' only loads where its chapter is.

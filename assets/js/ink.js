@@ -4,8 +4,7 @@ try{
   if(_mp){
     var _full=_mp.textContent.replace(/\s+/g,' ').trim();
     var _esc=function(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')};
-    _mp.setAttribute('aria-label',_full);
-    _mp.innerHTML='<span aria-hidden="true">'+_full.split(' ').map(function(w){return '<span class="rw">'+_esc(w)+'</span>'}).join(' ')+'</span>';
+    _mp.innerHTML='<span class="rl-vh">'+_esc(_full)+'</span><span aria-hidden="true">'+_full.split(' ').map(function(w){return '<span class="rw">'+_esc(w)+'</span>'}).join(' ')+'</span>';
     var _sp=_mp.querySelectorAll('.rw');
     var _rm=window.matchMedia('(prefers-reduced-motion: reduce)');
     var _ink=function(){

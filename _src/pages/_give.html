@@ -5,7 +5,7 @@
       <p class="sect-sub">Volunteer with us or send a message. We'd love to hear from you.</p>
     </div>
     <div class="give-grid">
-      <form class="give-card" onsubmit="return rlGiveSubmit(event,'volunteer')">
+      <form class="give-card" method="post" action="get-involved.html" onsubmit="return rlGiveSubmit(event,'volunteer')">
         <h2 class="give-card-title">Volunteer / Partner</h2>
         <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
         <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
@@ -14,7 +14,7 @@
         <button class="give-btn" type="submit">Send</button>
         <p class="give-privacy">We only use what you send to reply and arrange volunteering. <a href="privacy.html">How we handle your details</a></p>
       </form>
-      <form class="give-card" id="contact" onsubmit="return rlGiveSubmit(event,'contact')">
+      <form class="give-card" id="contact" method="post" action="get-involved.html" onsubmit="return rlGiveSubmit(event,'contact')">
         <h2 class="give-card-title">Contact Us</h2>
         <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
         <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
