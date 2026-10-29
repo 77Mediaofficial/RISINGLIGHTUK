@@ -4,25 +4,49 @@
       <div class="sect-title">Get Involved</div>
       <p class="sect-sub">Volunteer with us or send a message. We'd love to hear from you.</p>
     </div>
+    <!-- 29 Oct 2026 (UI upgrade surface D): each form is named by its own heading (aria-labelledby). Each required field
+         has an error line (.give-err, aria-live polite) linked by aria-describedby and filled by the inline validation in
+         assets/js/forms.js (on leaving a field you typed in, and on Send). The browser's required attributes stay;
+         forms.js turns the browser's own bubbles off (noValidate) only once it is running. A new required field needs
+         its own .give-row with an error line and an entry in forms.js MSG. CSS: site.css block D. -->
     <div class="give-grid">
-      <form class="give-card" method="post" action="get-involved.html" onsubmit="return rlGiveSubmit(event,'volunteer')">
-        <h2 class="give-card-title">Volunteer / Partner</h2>
-        <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
-        <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
-        <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" maxlength="500" placeholder="e.g. events, fundraising, skills"></label>
+      <form class="give-card" method="post" action="get-involved.html" aria-labelledby="give-v-title" onsubmit="return rlGiveSubmit(event,'volunteer')">
+        <h2 class="give-card-title" id="give-v-title">Volunteer / Partner</h2>
+        <div class="give-row">
+          <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name" aria-describedby="give-v-name-err"></label>
+          <p class="give-err" id="give-v-name-err" aria-live="polite"></p>
+        </div>
+        <div class="give-row">
+          <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email" aria-describedby="give-v-email-err"></label>
+          <p class="give-err" id="give-v-email-err" aria-live="polite"></p>
+        </div>
+        <label class="give-field"><span>How you'd like to help</span><input type="text" name="interest" maxlength="500" placeholder="e.g. events, skills"></label>
         <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="give-btn" type="submit">Send</button>
         <p class="give-privacy">We only use what you send to reply and arrange volunteering. <a href="privacy.html">How we handle your details</a></p>
       </form>
-      <form class="give-card" id="contact" method="post" action="get-involved.html" onsubmit="return rlGiveSubmit(event,'contact')">
-        <h2 class="give-card-title">Contact Us</h2>
-        <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name"></label>
-        <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email"></label>
-        <label class="give-field"><span>Message</span><textarea name="message" rows="3" required maxlength="4000" placeholder="How can we help?"></textarea></label>
+      <form class="give-card" id="contact" method="post" action="get-involved.html" aria-labelledby="give-c-title" onsubmit="return rlGiveSubmit(event,'contact')">
+        <h2 class="give-card-title" id="give-c-title">Contact Us</h2>
+        <div class="give-row">
+          <label class="give-field"><span>Name</span><input type="text" name="name" required maxlength="200" placeholder="Your name" autocomplete="name" aria-describedby="give-c-name-err"></label>
+          <p class="give-err" id="give-c-name-err" aria-live="polite"></p>
+        </div>
+        <div class="give-row">
+          <label class="give-field"><span>Email</span><input type="email" name="email" required maxlength="320" placeholder="you@example.com" autocomplete="email" aria-describedby="give-c-email-err"></label>
+          <p class="give-err" id="give-c-email-err" aria-live="polite"></p>
+        </div>
+        <div class="give-row">
+          <label class="give-field"><span>Message</span><textarea name="message" rows="3" required maxlength="4000" placeholder="How can we help?" aria-describedby="give-c-message-err"></textarea></label>
+          <p class="give-err" id="give-c-message-err" aria-live="polite"></p>
+        </div>
         <input class="give-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button class="give-btn" type="submit">Send</button>
         <p class="give-privacy">We only use what you send to reply to you. <a href="privacy.html">How we handle your details</a></p>
         <p class="give-privacy give-urgent">This inbox isn't watched around the clock. If you need help now, use the numbers in <a href="quiet-battles.html#help">Quiet Battles</a>.</p>
       </form>
     </div>
+    <!-- 29 Oct 2026 (UI upgrade surface F): the Initiatives page link. Facts from Joe's brief: free, London and Surrey.
+         It sits after the forms, not in the heading block, so the heading leads straight into the main call to action
+         (PRODUCT.md: the forms are the one thing a visitor should do). -->
+    <p class="sect-sub rl-give-init">Clothes and shoes you no longer wear? <a href="initiatives.html#clothes-run">The Clothes Run</a> collects them for free in London and Surrey.</p>
   </section>

@@ -1,0 +1,24 @@
+<!-- PARTNERS STRIP (About, after the timeline). UI upgrade surface G, 29 Oct 2026. Built, HIDDEN and EMPTY on purpose.
+     Joe's rule (28 Oct 2026): this strip names NO ONE until that organisation has agreed IN WRITING. The message to send
+     and who to ask first are in -APPS\RLUK\drafts\partners-strip-permission.md; Joe sends it himself and keeps the reply.
+     Text names only, no logos (none exist), in grey, under the heading below (the wording the permission message uses).
+     TO ADD A PARTNER, only once their written yes is in hand:
+       1. Put one line per partner inside the <ul> below, with their name and their own web address (the address they
+          gave or approved):
+            <li class="rl-pt"><a href="https://THEIR-SITE/" target="_blank" rel="noopener noreferrer">THEIR NAME<span class="rl-vh"> (opens in a new tab)</span></a></li>
+          No web address? <li class="rl-pt">THEIR NAME</li>
+          On the line above it, add an HTML comment of its own recording the yes: who agreed, how, and the date
+          ("agreed in writing DD Month YYYY, by NAME, by email / Instagram message"). Comments stay in _src/; the build leaves
+          them out of the published page.
+       2. To show the strip, delete the word hidden from the <section> tag below. While the list holds no names the CSS
+          keeps the strip out of sight even unhidden, so it can never show as an empty box.
+       3. py _src/build.py, then py _src/build.py --check, look at About in both themes and at phone width, and show
+          Joe before it ships. Never call Rising Light a charity or registered, here or in the message. -->
+<section class="chapter rl-partners" id="partners" aria-labelledby="partners-title" hidden>
+  <div class="sect-head">
+    <span class="sect-eyebrow">Partners</span>
+    <div class="sect-title" id="partners-title">Organisations We’ve Worked With</div>
+  </div>
+  <ul class="rl-pt-list">
+  </ul>
+</section>

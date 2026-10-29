@@ -22,7 +22,7 @@ with sync_playwright() as p:
     pg.on('request', lambda r: 'supabase.co' in r.url and sb.append(r.url))
 
     # database reads only where events are shown
-    for path, want in (('', False), ('quiet-battles.html', False), ('get-involved.html', False), ('privacy.html', False),
+    for path, want in (('', False), ('quiet-battles.html', False), ('initiatives.html', False), ('get-involved.html', False), ('privacy.html', False),
                        ('safeguarding.html', False), ('accessibility.html', False),
                        ('events.html', True), ('about.html', True), ('work.html', True)):
         sb.clear()

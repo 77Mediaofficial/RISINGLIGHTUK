@@ -33,11 +33,12 @@
 </script>
 <script>(function(){var d=document.documentElement;d.classList.add('rl-boot');try{if(localStorage.getItem('rl_theme')==='light'){d.classList.add('rl-pre-light');d.style.colorScheme='light';var m=document.querySelector('meta[name="color-scheme"]');if(m)m.setAttribute('content','light');}}catch(e){}})();</script>
 <style>html.rl-boot *,html.rl-boot *::before,html.rl-boot *::after{transition:none!important}html.rl-pre-light body{background:#FFFFFF!important}</style>
+<script>(function(d){d.classList.add('js');if(!('CSSViewTransitionRule' in window))d.classList.add('rl-nvt');setTimeout(function(){if(!d.classList.contains('rl-sr-live'))d.classList.add('rl-sr-off');},3000);})(document.documentElement);</script>
 <script>(function(){var m={"reach":"work.html","impact":"about.html#impact","momentum":"events.html#momentum","events":"events.html","globe":"work.html#globe","quiet-battles":"quiet-battles.html","faq":"get-involved.html#faq","get-involved":"get-involved.html","privacy":"privacy.html"};var h=location.hash.slice(1);if(m.hasOwnProperty(h))location.replace(m[h]);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=eae9036eb1">
+<link rel="stylesheet" href="assets/css/site.css?v=04b76e39c7">
 <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUmlzaW5nIExpZ2h0IFVLIiwic2hvcnRfbmFtZSI6IlJpc2luZyBMaWdodCIsImRlc2NyaXB0aW9uIjoiQ29tcGFzc2lvbiBIYXMgTm8gQm9yZGVycyAtIEhlbHBpbmcgaHVtYW5pdHkgYW5kIGFuaW1hbHMgYWNyb3NzIGJvcmRlcnMiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsIm9yaWVudGF0aW9uIjoiYW55In0=" />
 <meta name="theme-color" content="#000000" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -111,13 +112,35 @@
 <main id="main" tabindex="-1">
   <div class="header">
     <img class="title-logo" src="rl-crest.png" width="600" height="454" alt="Rising Light"/>
-    <h1 class="hero-h1"><span class="w">Compassion</span><br><span class="w">Has</span> <span class="w">No</span> <span class="w">Borders</span></h1>
+    <h1 class="hero-h1"><span class="rl-vh">Compassion Has No Borders</span><span class="hero-words" aria-hidden="true"><span class="w" style="--w:0">Compassion</span><br><span class="w" style="--w:1">Has</span> <span class="w" style="--w:2">No</span> <span class="w" style="--w:3">Borders</span></span></h1>
     <div class="overview">
       <p>Help that arrives in person — for the people and animals the world overlooks.</p>
       <p id="mission-reveal">Rising Light UK is a grassroots initiative born in London, running hands-on humanitarian and animal-welfare projects across the UK, the United States and Guatemala — and growing wherever the need leads.</p>
     </div>
     <a class="hero-cta" href="get-involved.html">Volunteer with us <span aria-hidden="true">&rarr;</span></a>
     <div class="hero-cue" aria-hidden="true">Our Work</div>
+    <div class="rl-impact" id="rl-impact" role="group" aria-label="Impact in numbers">
+      <dl class="rl-imp-list">
+        <div class="rl-imp rl-sr">
+          <dt class="rl-imp-k">Countries</dt>
+          <dd class="rl-imp-n"><data value="3" data-rl="countries"><span class="rl-vh">3</span><span class="rl-imp-fig" aria-hidden="true" data-final="3"><span class="rl-imp-v">3</span></span></data></dd>
+        </div>
+        <div class="rl-imp rl-sr">
+          <dt class="rl-imp-k">Total Events</dt>
+          <dd class="rl-imp-n"><data value="4" data-rl="total_events"><span class="rl-vh">4</span><span class="rl-imp-fig" aria-hidden="true" data-final="4"><span class="rl-imp-v">4</span></span></data></dd>
+        </div>
+        <div class="rl-imp rl-sr">
+          <dt class="rl-imp-k">Lives Touched</dt>
+          <dd class="rl-imp-n"><data value="320" data-rl="lives_touched"><span class="rl-vh">320</span><span class="rl-imp-fig" aria-hidden="true" data-final="320"><span class="rl-imp-v">320</span></span></data></dd>
+        </div>
+        <div class="rl-imp rl-imp-funds rl-sr">
+          <dt class="rl-imp-k">Spent So Far</dt>
+          <dd class="rl-imp-n"><data value="550" data-rl-fmt="gbp"><span class="rl-vh">£550</span><span class="rl-imp-fig" aria-hidden="true" data-final="£550"><span class="rl-imp-v">£550</span></span></data></dd>
+          <dd class="rl-imp-src">Estimated · self-funded</dd>
+        </div>
+      </dl>
+      <p class="stats-asof rl-sr">Figures as of October 2026</p>
+    </div>
   </div>
 <section class="chapter rl-explore-sec" id="explore" aria-labelledby="explore-title">
   <div class="sect-head">
@@ -125,29 +148,35 @@
     <h2 class="sect-title" id="explore-title">Find Your Way</h2>
   </div>
   <ul class="rl-explore" role="list">
-    <li><a class="rl-ex" href="about.html">
+    <li class="rl-sr"><a class="rl-ex" href="about.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;01</span>
       <span class="rl-ex-title">About</span>
       <span class="rl-ex-text">Who we are, the story in numbers, our milestones and the funds used so far.</span>
       <span class="rl-ex-go" aria-hidden="true">About &rarr;</span>
     </a></li>
-    <li><a class="rl-ex" href="work.html">
+    <li class="rl-sr"><a class="rl-ex" href="work.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;02</span>
       <span class="rl-ex-title">Our Work</span>
       <span class="rl-ex-text">Where we work: London, Arizona and Guatemala. Also the world’s current disaster alerts: places where help is needed, not Rising Light projects.</span>
       <span class="rl-ex-go" aria-hidden="true">Our work &rarr;</span>
     </a></li>
-    <li><a class="rl-ex" href="events.html">
+    <li class="rl-sr"><a class="rl-ex" href="events.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;03</span>
       <span class="rl-ex-title">Events</span>
       <span class="rl-ex-text">The work in motion: our events, the 2026 goal and the calendar.</span>
       <span class="rl-ex-go" aria-hidden="true">Events &rarr;</span>
     </a></li>
-    <li><a class="rl-ex" href="quiet-battles.html">
+    <li class="rl-sr"><a class="rl-ex" href="quiet-battles.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;04</span>
       <span class="rl-ex-title">Quiet Battles</span>
       <span class="rl-ex-text">Our mental health and suicide prevention work, running alongside everything else we do.</span>
       <span class="rl-ex-go" aria-hidden="true">Quiet Battles &rarr;</span>
+    </a></li>
+    <li class="rl-sr rl-ex-wide"><a class="rl-ex" href="initiatives.html">
+      <span class="rl-ex-ix" aria-hidden="true">N&deg;05</span>
+      <span class="rl-ex-title">Initiatives</span>
+      <span class="rl-ex-text">The Clothes Run: free collections of the clothes and shoes you no longer wear, in London and Surrey.</span>
+      <span class="rl-ex-go" aria-hidden="true">Initiatives &rarr;</span>
     </a></li>
   </ul>
 </section>
@@ -177,6 +206,7 @@
       <a href="work.html">Our Work</a>
       <a href="events.html">Events</a>
       <a href="quiet-battles.html">Quiet Battles</a>
+      <a href="initiatives.html">Initiatives</a>
       <a href="get-involved.html">Get Involved</a>
       <a href="get-involved.html#contact">Contact</a>
       <a href="privacy.html">Privacy</a>
@@ -349,15 +379,16 @@
 
 
 <div class="scroll-progress" id="scroll-progress"></div>
-<button class="back-top" id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+<button class="back-top" id="back-top" onclick="window.scrollTo({top:0})" aria-label="Back to top">↑</button>
 <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
 
-<script src="assets/js/ink.js?v=ad5968f315"></script>
-<script src="assets/js/forms.js?v=13a4bb775b"></script>
+<script src="assets/js/motion.js?v=c31fc9be39"></script>
+<script src="assets/js/ink.js?v=694995fe49"></script>
+<script src="assets/js/forms.js?v=f85809c888"></script>
 <script src="assets/js/v5.js?v=c5293cecc2"></script>
-<script src="assets/js/main.js?v=2fc1ad2019"></script>
+<script src="assets/js/main.js?v=31dcbfa1e2"></script>
 <script src="assets/js/kit.js?v=075e363c55"></script>
-<script src="assets/js/v7.js?v=85bee2af2c"></script>
+<script src="assets/js/v7.js?v=958ffe3ffe"></script>
 <script src="assets/js/ig.js?v=4df2a3fd61"></script>
 </body>
 </html>

@@ -209,10 +209,19 @@ body.dark .title-logo{filter:none}
 }
 /* not-yet-earned: dashed ring, dimmed — the ring dash is set in the SVG */
 .badge.pending .badge-medal{opacity:.48} /* dim the roundel only: dimming the whole badge put its name under AA (13 Oct 2026) */
+/* Phones: no lone badge (Joe, 18 Oct 2026). Since one badge came off (Joe, 29 Oct 2026) there are three, so all
+   three sit on ONE centred row at every width from 320px: 92px badges with 70px medals, 16px apart and no side
+   padding (308px) up to 480px, stepping down at ≤374px (the globe's breakpoint) to 80px badges with 64px medals
+   (272px, inside a 320px phone's 284px). Names and subs still break only between words. A fourth badge would
+   wrap alone again: change this rule with the list (RL_BADGES in assets/js/v7.js). */
 @media(max-width:480px){
   .badge{width:92px}
   .badge-medal{width:70px;height:70px}
-  .badge-wall{gap:20px 18px;max-width:calc(2 * 92px + 18px + 40px)} /* two badges a row on phones (2 x 2 for four, no lone badge; Joe 18 Oct 2026) */
+  .badge-wall{gap:20px 16px;padding:0}
+}
+@media(max-width:374px){
+  .badge{width:80px}
+  .badge-medal{width:64px;height:64px}
 }
 
 /* ── FUNDS USED — one figure in the same ledger language as the stats above:
@@ -293,7 +302,7 @@ body.dark .title-logo{filter:none}
 .upload-status.error{color:#DC2626;background:#FEF2F2}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(16px);transition:opacity 0.4s cubic-bezier(0.22,1,0.36,1)}
 .modal.active{display:flex}
-.modal-content{background:rgba(250,249,246,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:20px;width:100%;max-width:950px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,0.25),0 0 0 1px rgba(255,255,255,0.5) inset,0 2px 0 rgba(255,255,255,0.7) inset;border:1px solid rgba(255,255,255,0.3);transform:translateY(0);transition:transform 0.4s cubic-bezier(0.22,1,0.36,1)}
+.modal-content{background:rgba(250,249,246,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:20px;width:100%;max-width:950px;max-height:92vh;max-height:92svh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,0.25),0 0 0 1px rgba(255,255,255,0.5) inset,0 2px 0 rgba(255,255,255,0.7) inset;border:1px solid rgba(255,255,255,0.3);transform:translateY(0);transition:transform 0.4s cubic-bezier(0.22,1,0.36,1)}
 .modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .modal-title{font-size:20px;font-weight:700}
 .modal-close{background:var(--card);border:none;width:36px;height:36px;border-radius:8px;font-size:20px;cursor:pointer;color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center}
@@ -479,7 +488,7 @@ body.dark .title-logo{filter:none}
 }
 body.dark .masthead.scrolled{background:rgba(16,15,11,0.82)}
 .masthead-in{
-  max-width:1200px;margin:0 auto;height:56px;padding:0 20px;
+  max-width:1200px;margin:0 auto;height:var(--rl-mast-h);padding:0 20px; /* 56px, 52px at ≤768: block 7 */
   display:flex;align-items:center;justify-content:space-between;gap:18px;
 }
 .mast-brand{
@@ -492,7 +501,7 @@ body.dark .masthead.scrolled{background:rgba(16,15,11,0.82)}
   color:var(--text2);text-decoration:none;transition:color .25s;
 }
 .mast-nav a:hover{color:var(--text)}
-@media(max-width:768px){.mast-nav{display:none}.masthead-in{height:52px}}
+@media(max-width:768px){.mast-nav{display:none}}
 /* ── JOIN US — the one ask, always in reach on desktop (owner call 12 Oct 2026). An ink
    pill like the hero CTA; it steps aside (.away) while Get Involved or Quiet Battles is on
    screen. Phones use the chapter bar's Join, which now shows from the first screen. ── */
@@ -510,7 +519,8 @@ body.dark .masthead.scrolled{background:rgba(16,15,11,0.82)}
    the pill would push the theme toggle off-screen, so tablets keep the nav's Get Involved */
 @media(max-width:1023px){.mast-join{display:none}}
 @media(prefers-reduced-motion:reduce){.mast-join{transition:none}}
-[id]{scroll-margin-top:72px}
+/* #anchors still land 72px below the top: html scroll-padding-top (block 7: masthead + 9px) + this margin */
+[id]{scroll-margin-top:calc(63px - var(--rl-mast-h))}
 
 /* ── THEME TOGGLE — monochrome SVG sun/moon, lives in the masthead ── */
 .theme-toggle{
@@ -1163,9 +1173,7 @@ body.dark .goal-fill::after{
 .brief-cbar-fill{height:100%;width:0;background:var(--text);border-radius:99px;transition:width .9s cubic-bezier(0.22,1,0.36,1)}
 .brief-cbar-n{font-family:var(--cinzel);font-weight:700;font-size:14px;min-width:20px;text-align:right}
 
-/* v7.8 Scroll reveal */
-.rl-sr{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(0.22,1,0.36,1),transform .8s cubic-bezier(0.22,1,0.36,1)}
-.rl-sr.rl-sr-in{opacity:1;transform:none}
+/* v7.8 Scroll reveal: moved to block 7 (motion foundation, end of file) on 29 Oct 2026 */
 
 /* v7.10 Scroll progress + back-to-top (bottom-left; quick-capture FAB owns bottom-right)
    Compositor-only: full-width bar scaled on X, not width-animated (no layout). */
@@ -1648,7 +1656,7 @@ body.admin .admin-only{display:inline-flex}
   .give-card-title{font-family:var(--cinzel);font-size:18px;font-weight:700;letter-spacing:.5px;margin:0 0 4px}
   .give-field{display:flex;flex-direction:column;gap:6px}
   .give-field>span{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
-  .give-field input,.give-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:16px;font-family:var(--font);background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;resize:vertical}
+  .give-field input,.give-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--text3);border-radius:10px;font-size:16px;font-family:var(--font);background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;resize:vertical}
   .give-field input:focus,.give-field textarea:focus{border-color:var(--text)}
   .give-btn{margin-top:6px;background:var(--text);color:var(--bg);border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-family:var(--font);transition:transform .2s,opacity .2s;-webkit-tap-highlight-color:transparent}
   .give-btn:disabled{opacity:.55;cursor:default}
@@ -1864,11 +1872,21 @@ body.dark .rl-ig-card:hover img,body.dark .rl-ig-card:focus-visible img{filter:b
 @media(max-width:600px){
   .rl-ig{padding-bottom:0}
   .rl-ig-grid{
-    display:flex;overflow-x:auto;gap:12px;padding:2px 2px 10px;
+    display:flex;overflow-x:auto;gap:12px;padding:4px 8px 10px;
     scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
     scrollbar-width:none;
   }
   .rl-ig-grid::-webkit-scrollbar{display:none}
+  /* Keyboard focus (29 Oct 2026). Chrome scrolls a focused card into the strip only when the card is wholly
+     outside the scrollport, so Tab to card 2, which shows a sliver at the edge (35px at 390), left it there. While
+     a card has keyboard focus the scrollport is narrowed by 16vw a side (the pick's value; 189px of the 314px
+     strip at 390), the sliver counts as hidden and the card is scrolled to the centre, whole. Only while focused:
+     at all times it made the snapport narrower than a card, and a swipe then came to rest up to 38px off centre.
+     The strip's padding is 4px on the top and 8px at the sides (was 2px): it clips at its padding edge and the
+     focus ring (2px, 2px out) needs 4px, so every card's top keeps the whole ring; the sides keep 4px spare, as
+     scroll positions are whole pixels and 68vw cards are not (at 4px, the last card's ring lost 0.4px at 360 and
+     480). Browsers without :has() keep the old behaviour. */
+  .rl-ig-grid:has(.rl-ig-card:focus-visible){scroll-padding-inline:16vw}
   .rl-ig-card,.rl-ig-skel{flex:0 0 68vw;scroll-snap-align:center}
 }
 /* Touch: the caption is hover-locked on desktop — surface it for thumbs */
@@ -2035,3 +2053,399 @@ body:not(.admin) .brief-fab{display:none!important}
 /* Events loading block holds the empty state's height (24 Oct 2026): no jump when the list or the empty message lands */
 .events-grid.is-loading{min-height:262px;align-content:start}
 @media(max-width:600px){.events-grid.is-loading{min-height:285px}}
+
+/* ── block 7: site-wide motion foundation (29 Oct 2026, UI upgrade surface B) ──────────────────────────────
+   READ BEFORE ADDING MOTION. Everything here is opt-in: the default stylesheet is static, and every moving
+   rule sits inside @media (prefers-reduced-motion:no-preference). House easing var(--rl-ease).
+   1. html.js: set by the motion-boot script in _src/partials/head.html before this file loads. Gate every
+      hidden START state on it (html.js …) so nothing waits at opacity 0 without JavaScript. html.rl-sr-off
+      is added by the same script when assets/js/motion.js has not started 3s later (a script failed or is
+      still crawling in): every .rl-sr is then simply shown.
+   2. Scroll reveal .rl-sr / .rl-sr-in, the site's one reveal (code and notes: assets/js/motion.js). Put
+      class="rl-sr" on an element in the markup, or call window.rlReveal(el|list) for content added later.
+      Nothing already on the first screen is ever hidden (pack 7.3), and the screen a #fragment will land on
+      counts as the first screen: motion.js takes .rl-sr off those markup items (and off any that hold the
+      #fragment's target), and never adds it there from script, before it adds html.rl-sr-live, which the hidden
+      state waits for. The one exception is the Home hero's impact row, hidden from the first paint on html.js and
+      held for the hero entrance: the cells on the first screen play in after the call to action, the rest come
+      in on scroll (motion.js, HERO).
+      It starts 16px low (--rl-sr-y) and transparent, and comes in ONCE, 0.6s, when 15% of it is above the
+      bottom 10% of the screen, and at the end of any scroll, whatever is on screen. Items that come in together
+      step 60ms apart in reading order, capped at 5 steps (300ms); style="--i:n" fixes an item's step. Once
+      played, .rl-sr is removed (.rl-sr-in stays as a marker), so the element's own transitions, hovers and
+      transforms are untouched afterwards. The name means scroll reveal only; .rl-vh is the visually-hidden helper.
+   3. Page cross-fade: cross-document View Transitions, 0.25s on the root. Browsers without them get
+      html.rl-nvt (head script) and a 0.25s opacity fade-in of .container (main + footer) on load instead;
+      the masthead and the phone bar never fade.
+   4. Reduced motion: each component still ships its own reduce rule (pack §10 rule 6); the catch-all at the
+      end of this block stops anything that forgets. Scripts never force behavior:'smooth': they leave it to
+      html{scroll-behavior}, which is smooth only under no-preference.
+   5. Sticky chrome vs keyboard focus: html scroll-padding-top = the masthead (--rl-mast-h, plus its 1px
+      bottom border) + 8px (2px ring + 2px offset + 4px air), so Shift+Tab never parks a focused item under
+      the masthead. The phone bar's room is html scroll-padding-bottom (block 1, ≤768px: bar 46px tall,
+      14px up, plus 12px); wider screens keep 8px at the bottom for the ring. [id] scroll-margin-top
+      (block 1) keeps every #anchor landing 72px down, as before.
+   6. Heights: never size layout with 100vh (a phone's address bar covers part of it). Write the vh line
+      first as the fallback, then the same value in svh (fits with the bar showing) or dvh (follows it).
+   Smooth by construction: transforms and opacity only; scroll/resize/pointer handlers rAF-coalesced with no
+   layout reads inside them; no backdrop-filter on sticky or fixed elements; no will-change. ── */
+:root{--rl-ease:cubic-bezier(0.22,1,0.36,1);--rl-mast-h:56px}
+@media(max-width:768px){:root{--rl-mast-h:52px}}
+html{scroll-padding-top:calc(var(--rl-mast-h) + 9px)}
+@media(min-width:769px){html{scroll-padding-bottom:8px}} /* ring room at the bottom edge; phones: the bar's room (block 1) */
+@media screen and (prefers-reduced-motion:no-preference){
+  /* the transition sits on the way-in state only, so adding .rl-sr hides at once and only the reveal animates.
+     The hidden state waits for html.rl-sr-live (note 2), except in the Home hero, which keeps html.js. */
+  html.rl-sr-live:not(.rl-sr-off) .rl-sr:not(.rl-sr-in),html.js:not(.rl-sr-off) .header .rl-sr:not(.rl-sr-in){opacity:0;transform:translateY(var(--rl-sr-y,16px))}
+  html.js:not(.rl-sr-off) .rl-sr.rl-sr-in{transition:opacity .6s var(--rl-ease),transform .6s var(--rl-ease);transition-delay:calc(min(var(--i,0),5) * 60ms)}
+  @view-transition{navigation:auto}
+  ::view-transition-group(root){animation-duration:.25s;animation-timing-function:cubic-bezier(0.22,1,0.36,1)}
+  @keyframes rl-page-in{from{opacity:0}}
+  html.rl-nvt .container{animation:rl-page-in .25s var(--rl-ease)}
+}
+/* reduced-motion catch-all (belt and braces): whatever a component forgot plays its end state at once */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;transition-delay:0s!important;scroll-behavior:auto!important}
+}
+
+/* ── block 8: Home first screen (29 Oct 2026, UI upgrade surface A; markup _src/pages/_hero.html and
+   home-explore.html; motion primitives in block 7). Pure mono tokens, borders not shadows, no new colours.
+   Every moving rule sits inside prefers-reduced-motion:no-preference; nothing here is hidden without JavaScript.
+   1. Headline: each word rises in on its own (Kinetic Text Reveal pattern, no blur): 0.6s house easing, starting
+      0.14s after the hero entrance and 75ms apart (--w = 0…3 in the markup), so the last word lands at 0.965s.
+      It replaces the headline's single heroRise fade; the h1 is still held hidden until body.hero-in (block 4).
+      Screen readers read the .rl-vh copy, never the split words. */
+.hero-words .w{display:inline-block}
+@keyframes rl-word{from{opacity:0;transform:translateY(.3em)}}
+@media screen and (prefers-reduced-motion:no-preference){
+  body.hero-in .hero-h1{animation:none}
+  body.hero-in .hero-words .w{animation:rl-word .6s var(--rl-ease) calc(.14s + var(--w,0) * 75ms) both}
+}
+/* 2. Backdrop: a static dot matrix in place of the hairline grid: 2.5px dots of the ink at 12% (color-mix of --text,
+      so it follows the theme), 23px apart (17px at ≤768, half the old grid cells), in the old box. The functional
+      mask is the old ellipse with a solid centre (to 20%), so the dots read behind the crest and headline and fade
+      out before the lede. Browsers without color-mix keep the hairline grid (block 1). */
+@supports (color:color-mix(in srgb,#000 12%,transparent)){
+  .header::before{background-image:radial-gradient(circle,color-mix(in srgb,var(--text) 12%,transparent) 1.25px,transparent 1.75px);
+    background-size:23px 23px;background-position:center top;
+    -webkit-mask-image:radial-gradient(ellipse 56% 58% at 50% 42%,#000 20%,transparent 72%);
+    mask-image:radial-gradient(ellipse 56% 58% at 50% 42%,#000 20%,transparent 72%)}
+  @media(max-width:768px){.header::before{background-size:17px 17px}}
+}
+/* 3. Impact row: About's figures (the build writes them; v7.js counts them up). A hairline ledger like About's
+      stat strip: label above, Cinzel figure, 1px --border rules, no boxes; the £ cell (.rl-imp-funds) adds its own
+      one-line source below ("Estimated · self-funded"), and one shared "Figures as of" line sits under the whole row
+      in About's own .stats-asof (Joe's picks W1 + W4, 29 Oct 2026; it was one source line per cell). Each cell
+      carries its own rules, so the ledger draws in cell by cell with the scroll reveal and shows nothing early.
+      4 across from 1024px, 2 x 2 below, and on phones (≤560) one ruled row per figure, the figure on the right.
+      In the 2 x 2 (561–1023) the two rows are equal (grid-auto-rows:1fr): only the £ cell has a source line, and
+      without it the top row sat 23px shorter than the bottom one (29 Oct 2026).
+      Cinzel has no tabular figures, so the figure's box is the FINAL figure's width (the hidden ::before alone sets
+      it) and the counting value is pinned to its right edge (position:absolute): the box never changes size while
+      the count runs, nothing around it moves, and the last digit stays put. An in-between value wider than the final
+      one (Cinzel's 0 and 2 are wider than 3 and 5) spills up to 5px to the left, into the cell padding or the 16px
+      column gap. From 1024px the cells' side padding is 8px and the source line tracks 1px (12px and 1.2px below),
+      so the £ cell's source fits its one line; when the funds month differs from the shared line's, the build adds
+      it ("Estimated · self-funded · September 2026") and text-wrap:balance splits the two lines evenly. */
+.rl-impact{max-width:860px;margin:48px auto 0}
+.rl-imp-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.rl-imp{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px 18px;text-align:center;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-left:1px solid var(--border)}
+.rl-imp:first-child{border-left:0}
+.rl-imp-k{font-size:12px;font-weight:600;line-height:1.6;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2)}
+.rl-imp-n{font-family:var(--cinzel);font-size:clamp(24px,3vw,30px);font-weight:700;line-height:1.2;letter-spacing:1px;
+  color:var(--text);font-variant-numeric:lining-nums tabular-nums}
+.rl-imp-fig{display:inline-block;position:relative}
+.rl-imp-fig::before{content:attr(data-final);visibility:hidden}
+.rl-imp-v{position:absolute;top:0;right:0;white-space:nowrap}
+.rl-imp-src{font-family:var(--mono);font-size:10px;line-height:1.6;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);text-wrap:balance}
+@media(min-width:1024px){.rl-imp{padding:20px 8px 18px}.rl-imp-src{letter-spacing:1px}}
+@media(max-width:1023px){
+  .rl-imp-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rl-imp:nth-child(3){border-left:0}
+  .rl-imp:nth-child(n+3){border-top:0}
+}
+@media(min-width:561px) and (max-width:1023px){.rl-imp-list{grid-auto-rows:1fr}}   /* equal rows in the 2 x 2 (W4) */
+@media(max-width:768px){.rl-impact{margin-top:40px}}
+@media(max-width:560px){
+  .rl-imp-list{grid-template-columns:minmax(0,1fr)}
+  .rl-imp{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'k n';align-items:center;
+    column-gap:16px;row-gap:2px;padding:14px 4px;text-align:left;border-left:0}
+  .rl-imp-funds{grid-template-areas:'k n' 's n'}   /* the one cell with a source line */
+  .rl-imp:nth-child(n+2){border-top:0}
+  .rl-imp-k{grid-area:k}
+  .rl-imp-n{grid-area:n}
+  .rl-imp-src{grid-area:s}
+}
+/* 4. Explore cards: hover AND keyboard focus (:focus-visible, as .glb-item: a mouse press that ends off the card
+      leaves it at rest) shift the border to --text2 (block 6) and lift the card 2px, no shadow (Joe's brief,
+      28 Oct 2026; pack rule 4 said "no new lifts" before it). The lift is hover-capable screens only for the
+      pointer, every screen for focus. N°05 (Initiatives) spans the whole row at every width; from 1024px its parts
+      sit on the four cards' own columns (4 tracks, 62px apart = the 16px grid gap plus both 22px card paddings and
+      both 1px borders), so its text starts where card 2's does. */
+.rl-ex:focus-visible{border-color:var(--text2)}
+@media screen and (prefers-reduced-motion:no-preference){
+  .rl-ex{transition:border-color .25s var(--rl-ease),transform .25s var(--rl-ease)}
+  .rl-ex:focus-visible{transform:translateY(-2px)}
+  @media(hover:hover){.rl-ex:hover{transform:translateY(-2px)}}
+}
+.rl-ex-wide{grid-column:1/-1}
+@media(min-width:1024px){
+  .rl-ex-wide .rl-ex{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:62px;row-gap:10px;align-items:start}
+  .rl-ex-wide .rl-ex-ix{grid-area:1/1}
+  .rl-ex-wide .rl-ex-title{grid-area:2/1}
+  .rl-ex-wide .rl-ex-text{grid-area:2/2/3/4}
+  .rl-ex-wide .rl-ex-go{grid-area:2/4;align-self:center;margin-top:0;padding-top:0}
+}
+
+/* ── block E+G: About story timeline and partners strip (29 Oct 2026, UI upgrade surfaces E and G; markup
+   _src/pages/_story.html and _partners.html, on about.html after the intro). Pure mono tokens, borders not shadows,
+   no new colours. Static by default; the motion is opt-in, under block 7's rules.
+   E. TIMELINE (the Milestone Timeline pattern, rebuilt): a plain <ol>, 640 wide and centred like the About copy.
+      Each item draws its own piece of the rail: a 1px --border hairline from its marker down to the next marker
+      (--rl-tl-y into the next item: the middle of the date's first line, 9px on phones, 13px from 769px), so nothing
+      is measured. The marker is the site's 7px diamond (.sect-head::before): ink-filled for what has happened,
+      hollow for the planned item (.rl-tl-next), whose piece of rail is dashed (pending, as the badge wall's dashed
+      ring) and which says "Coming up" in a label, so the state is never colour alone. From 769px the date sits in a
+      176px column beside the text. The planned item keeps "120 hat-and-glove" on one line (.rl-tl-nw, the
+      .rl-give-init a device), so the number never parts from what it counts.
+      Motion (no-preference only): each item's text comes in with the .rl-sr reveal (on .rl-tl-body, never the li,
+      whose rail must not move), and its marker fades in with it (opacity only, so the rail never moves; no bare
+      marker waits in the bottom band), and an ink line draws down each finished piece of rail as the reading
+      position passes it: a CSS scroll-driven animation on the piece itself (animation-timeline:view()), running
+      from its top marker at mid-screen to the next marker at mid-screen, so the pieces join into one line. No
+      JavaScript and nothing on the main thread; transform only. Without scroll-driven animations (or :has) the
+      hairline rail stays as it is: that is the static fallback, and the no-JavaScript and reduced-motion state.
+   G. PARTNERS STRIP: <section hidden> until a partner agrees in writing (its source comment says how to add one). A
+      bordered row of text names, no logos: Inter 600 13px uppercase in --text2 inside 1px --border cells that share
+      their edges, centred, 860 wide. It stays out of sight while the list holds no names, even unhidden. ── */
+.rl-tl-list{list-style:none;max-width:640px;margin:0 auto;padding:0;text-align:left;--rl-tl-y:9px}
+.rl-tl{position:relative;padding:0 0 var(--gap-minor) 32px}
+.rl-tl:last-child{padding-bottom:0}
+.rl-tl::before{content:'';position:absolute;left:4px;top:var(--rl-tl-y);bottom:calc(-1 * var(--rl-tl-y));border-left:1px solid var(--border)}
+.rl-tl:last-child::before{content:none}
+.rl-tl:has(+ .rl-tl-next)::before{border-left-style:dashed}
+.rl-tl-dot{position:absolute;z-index:1;left:1px;top:calc(var(--rl-tl-y) - 3.5px);width:7px;height:7px;background:var(--text);border:1px solid var(--text);transform:rotate(45deg)}
+.rl-tl-next .rl-tl-dot{background:var(--bg)}
+.rl-tl-when{font-family:var(--mono);font-size:11px;font-weight:500;line-height:18px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
+.rl-tl-what{margin-top:4px;font-size:15px;line-height:26px;color:var(--text-dim);text-wrap:pretty}
+.rl-tl-next .rl-tl-when{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.rl-tl-tag{font-size:10px;font-weight:600;line-height:12px;color:var(--text);padding:2px 6px;border:1px solid var(--text);border-radius:4px}
+.rl-tl-nw{white-space:nowrap}
+@media(min-width:769px){
+  .rl-tl-list{--rl-tl-y:13px}
+  .rl-tl-body{display:grid;grid-template-columns:176px minmax(0,1fr);column-gap:24px;align-items:start}
+  .rl-tl-when{line-height:26px}
+  .rl-tl-what{margin-top:0}
+}
+@media(forced-colors:active){
+  .rl-tl-dot{forced-color-adjust:none;background:CanvasText;border-color:CanvasText}
+  .rl-tl-next .rl-tl-dot{background:Canvas}
+}
+@keyframes rl-tl-fill{from{transform:scaleY(0)}to{transform:none}}
+@media screen and (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()) and selector(:has(+ *)){
+    .rl-tl::after{content:'';position:absolute;left:4px;top:var(--rl-tl-y);bottom:calc(-1 * var(--rl-tl-y));border-left:1px solid var(--text);
+      transform-origin:50% 0;animation:rl-tl-fill linear both;animation-timeline:view();animation-range:entry 50vh entry calc(100% + 50vh)}
+    .rl-tl:last-child::after,.rl-tl:has(+ .rl-tl-next)::after{content:none}
+  }
+}
+@media screen and (prefers-reduced-motion:no-preference){
+  html.rl-sr-live:not(.rl-sr-off) .rl-tl:has(> .rl-tl-body.rl-sr:not(.rl-sr-in)) > .rl-tl-dot{opacity:0}
+  html.js:not(.rl-sr-off) .rl-tl:has(> .rl-tl-body.rl-sr-in) > .rl-tl-dot{transition:opacity .6s var(--rl-ease)}
+}
+.rl-partners[hidden]{display:none}
+.rl-partners:not(:has(.rl-pt)){display:none}
+.rl-pt-list{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;max-width:860px;margin:0 auto;padding:0 1px 1px 0}
+.rl-pt{flex:0 1 280px;display:flex;align-items:center;justify-content:center;min-height:72px;margin:0 -1px -1px 0;padding:16px 20px;
+  border:1px solid var(--border);text-align:center;font-size:13px;font-weight:600;line-height:1.5;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
+.rl-pt a{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--border);text-underline-offset:5px}
+.rl-pt a:hover{color:var(--text);text-decoration-color:var(--text2)}
+@media(max-width:480px){.rl-pt{flex-grow:1}}
+@media screen and (prefers-reduced-motion:no-preference){
+  .rl-pt a{transition:color .25s var(--rl-ease),text-decoration-color .25s var(--rl-ease)}
+}
+
+/* ── block F: Initiatives page (29 Oct 2026, UI upgrade surface F; markup _src/pages/initiatives.html). Pure mono
+   tokens, borders not shadows, no new colours; every size is one the pack already uses (named beside it). Static by
+   default: the only motion is block 7's scroll reveal on the wrappers, and the CTA's colour shift.
+   - Each initiative is its own <article class="rl-init"> inside .rl-init-list (860 wide, as About's stat strip and
+     Home's impact row). A second one is parted from the first by a hairline and the chapter gap.
+   - Head centred like the About copy: N°01 (Explore index), Cinzel 600 title, About-lead sentence. Facts: a hairline
+     ledger like Home's impact row (label above value, 1px --border rules), one ruled row per fact on phones.
+   - How it works: the Vertical How It Works pattern, rebuilt: a plain <ol>, numbers by CSS counters ("01", empty alt
+     text so a screen reader says "1 of 3" once), a 32px ring of ink on the page ground per step and a 1px --border
+     rail from each ring down to the next. No JavaScript.
+   - Part headings (h3) in the form-card title's type (Cinzel 700 18px), not one more tracked mono label (/impeccable
+     critique, 29 Oct 2026). What the banks ask for: hairline rows with the site's 7px diamond mark. Sources and the
+     new-tab note in the globe credit's type.
+   - The call to action is an ink pill (the hero call-to-action's box in the View Details button's type, so no Mono
+     700, pack gap 8); hover shifts the fill to --accent-hover, no lift. A transparent border shows in forced colours.
+   - Two columns (steps | banks) from 960px; below that one column, its parts (and the facts strip) 640 wide. ── */
+.rl-init-list{max-width:860px;margin:0 auto}
+.rl-init + .rl-init{margin-top:var(--gap-major);padding-top:var(--gap-major);border-top:1px solid var(--border)}
+.rl-init-head{max-width:640px;margin:0 auto;text-align:center}
+.rl-init-ix{font-family:var(--mono);font-size:10px;letter-spacing:2.5px;color:var(--text2)}
+.rl-init-title{margin-top:10px;font-family:var(--cinzel);font-size:24px;font-weight:600;letter-spacing:1px;line-height:1.3;color:var(--text);text-wrap:balance}
+.rl-init-lead{margin-top:14px;font-size:clamp(17px,2.1vw,21px);font-weight:300;line-height:1.65;color:var(--text);text-wrap:balance}
+.rl-init-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:40px 0 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rl-init-fact{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px 18px;text-align:center}
+.rl-init-fact + .rl-init-fact{border-left:1px solid var(--border)}
+.rl-init-fact dt{font-size:12px;font-weight:600;line-height:1.6;letter-spacing:2.5px;text-transform:uppercase;color:var(--text2)}
+.rl-init-fact dd{margin:0;font-size:15px;line-height:1.6;color:var(--text);text-wrap:pretty}
+.rl-init-cols{display:grid;grid-template-columns:minmax(0,1fr);gap:40px;margin-top:48px}
+.rl-init-h{margin-bottom:20px;padding-bottom:9px;border-bottom:1px solid var(--border);font-family:var(--cinzel);font-size:18px;font-weight:700;
+  line-height:1.6;letter-spacing:.5px;color:var(--text)}
+.rl-steps{list-style:none;margin:0;padding:0;counter-reset:rl-step}
+.rl-step{position:relative;counter-increment:rl-step;min-height:32px;padding:0 0 24px 52px}
+.rl-step:last-child{padding-bottom:0}
+.rl-step::before{content:counter(rl-step,decimal-leading-zero);content:counter(rl-step,decimal-leading-zero) / '';
+  position:absolute;z-index:1;left:0;top:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;
+  border:1px solid var(--text);border-radius:50%;background:var(--bg);font-family:var(--mono);font-size:12px;font-weight:600;
+  line-height:1;color:var(--text);font-variant-numeric:tabular-nums}
+.rl-step::after{content:'';position:absolute;left:15.5px;top:32px;bottom:0;border-left:1px solid var(--border)}
+.rl-step:last-child::after{content:none}
+.rl-step-t{font-size:16px;font-weight:600;line-height:32px;color:var(--text)}
+.rl-step-d{font-size:15px;line-height:1.7;color:var(--text-dim);text-wrap:pretty}
+.rl-step-d a{color:var(--text);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.rl-rules{list-style:none;margin:0;padding:0}
+.rl-rules li{display:flex;align-items:baseline;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);font-size:15px;line-height:1.55;color:var(--text)}
+.rl-rules li:first-child{padding-top:0}
+.rl-rules li::before{content:'';flex:none;width:7px;height:7px;border:1px solid var(--text);transform:rotate(45deg)}
+.rl-init-note{margin-top:16px;font-size:14.5px;line-height:1.7;color:var(--text2)}
+.rl-init-src{margin-top:6px;font-size:12.5px;line-height:1.6;color:var(--text3)}
+.rl-init-why{margin-top:48px}
+.rl-why{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:28px;align-items:baseline}
+.rl-why-n{font-family:var(--cinzel);font-size:46px;font-weight:700;line-height:1.2;letter-spacing:1px;color:var(--text);font-variant-numeric:lining-nums}
+.rl-why-t{font-size:clamp(17px,2.1vw,21px);font-weight:300;line-height:1.65;color:var(--text);text-wrap:pretty}
+.rl-init-act{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:56px;text-align:center}
+.rl-init-cta{display:inline-flex;align-items:center;gap:8px;padding:15px 28px;border:1px solid transparent;border-radius:999px;
+  background:var(--text);color:var(--bg);font-size:14px;font-weight:600;line-height:1.4;text-decoration:none}
+.rl-init-cta:hover{background:var(--accent-hover)}
+.rl-init-tab{font-size:12.5px;line-height:1.6;color:var(--text3)}
+.rl-init-privacy{margin-top:4px;font-size:14px;line-height:1.6}
+.rl-init-privacy a,.rl-give-init a{color:var(--text);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.rl-give-init a{white-space:nowrap} /* the name never breaks in two */
+.rl-give-init{margin-top:24px;text-align:center} /* Get Involved: after the forms, so the heading leads straight into them */
+@media(hover:none){.rl-init-privacy a{display:inline-flex;align-items:center;min-height:44px}.rl-init-privacy{margin-top:0}} /* a standalone link: the 44px touch rule of .map-card-link */
+@media(min-width:960px){.rl-init-cols{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:56px}}
+@media(max-width:959px){.rl-init-facts,.rl-init-cols,.rl-init-why{max-width:640px;margin-left:auto;margin-right:auto}}
+@media(max-width:768px){
+  .rl-init-title{font-size:20px}
+  .rl-init-facts{margin-top:28px}
+  .rl-init-cols,.rl-init-why{margin-top:40px}
+  .rl-init-act{margin-top:48px}
+  .rl-why{column-gap:20px}
+  .rl-why-n{font-size:28px}
+}
+@media(max-width:560px){
+  .rl-init-facts{grid-template-columns:minmax(0,1fr)}
+  .rl-init-fact{display:grid;grid-template-columns:72px minmax(0,1fr);column-gap:16px;align-items:baseline;padding:12px 4px;text-align:left}
+  .rl-init-fact + .rl-init-fact{border-left:0;border-top:1px solid var(--border)}
+}
+@media screen and (prefers-reduced-motion:no-preference){
+  .rl-init-cta{transition:background-color .2s var(--rl-ease)}
+}
+
+/* ── block C: Our Work (29 Oct 2026, UI upgrade surface C; markup _src/pages/_reach.html and _globe.html; the place
+   list is written by reach_places() in _src/build.py from the Reach map's own data in assets/js/main.js). Pure mono
+   tokens, borders not shadows, no new colours, no motion of its own: the places come in with block 7's scroll reveal
+   (.rl-sr on each <li>), the globe chapter with the same reveal from motion.js's chapter list. The Reach map and the
+   CH.05 globe are untouched (pack §10): only what sits around them, so every keyboard route stays as it was (map nodes
+   are buttons with aria-expanded, alert rows buttons with aria-pressed).
+   1. Places: one bordered panel cut into three cells under the map, in the Explore card's values (--card, 1px --border,
+      radius 16 on the panel's outer corners, padding 24 22 22, gap 10; Cinzel 20/600 name; text 14/1.6). The text is
+      --text-dim, not the Explore card's --text2: it is the content here, not a teaser, and --text2 on --card is only
+      4.71:1 in light (--text-dim 9.93:1 light, 12.33:1 dark; /impeccable critique, 29 Oct 2026). The coordinates are
+      the map card's (Mono 10.5, +1.2px) in --text2 (4.71:1 / 7.32:1), because --text3 on --card is under AA in light
+      (4.44:1, pack 2.4). Each cell draws all four of its own edges (neighbours overlap by 1px), so a cell can come in on
+      its own with the reveal and the panel never shows an edge early. The mark is the map node's own, drawn still (a
+      6px ink dot inside a 20px ring at .55), so a cell reads as the key to its marker above. Three across from 769px;
+      one column below (561–768: name and coordinates beside the text).
+   2. Alert rows: keyboard focus gets the hover's ink border (hover and focus alike, as the Explore cards), on every
+      screen, beside the global ring; the type code ("TC") steps down to --text2 so the title is the one ink line under
+      the kicker (5.57:1 light, 8.42:1 dark; a chosen row still inverts it). Row geometry is untouched, so the 89px rows
+      and the loading room (pack 5.1, 6.3) hold.
+   3. Outlined links (.map-card-link: the Reach card's events link, the globe card's report link, "Show all"): keyboard
+      focus gets the hover's ink border too.
+   4. The map's dot canvas holds its box from the first paint (pack §10 rule 10): the ratio of the map's view,
+      360° of longitude by 140° of latitude (_mapView() in main.js: −56 to 84; change both together). Until renderMap()
+      ran, the canvas sat at its default 2:1 and the place list under it jumped 37px on a phone (Our Work's layout
+      shift at 390: 0.051 with the list, 0.030 with this; 0.034 before the list). renderMap() still sets the same height
+      in pixels, so the map itself is unchanged. What is left is the title re-wrapping when Cinzel arrives. ── */
+.map-dots{aspect-ratio:360/140}
+.rl-places{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:40px 0 0;padding:0;text-align:left}
+.rl-place{display:flex;flex-direction:column;gap:10px;min-width:0;margin:0;padding:24px 22px 22px;background:var(--card);border:1px solid var(--border)}
+.rl-place + .rl-place{margin-left:-1px}
+.rl-place:first-child{border-radius:16px 0 0 16px}
+.rl-place:last-child{border-radius:0 16px 16px 0}
+.rl-place:only-child{border-radius:16px}
+.rl-place-name{grid-area:name;display:flex;align-items:center;gap:12px;margin:0;font-family:var(--cinzel);font-size:20px;font-weight:600;letter-spacing:1px;line-height:1.3;color:var(--text)}
+.rl-place-mark{position:relative;flex:none;width:20px;height:20px}
+.rl-place-mark::before,.rl-place-mark::after{content:'';position:absolute;border-radius:50%}
+.rl-place-mark::before{inset:7px;background:var(--text)}
+.rl-place-mark::after{inset:0;border:1px solid var(--text);opacity:.55}
+.rl-place-co{grid-area:co;margin:0;font-family:var(--mono);font-size:10.5px;line-height:1.6;letter-spacing:1.2px;color:var(--text2);font-variant-numeric:tabular-nums}
+.rl-place-text{grid-area:text;margin:0;font-size:14px;line-height:1.6;color:var(--text-dim);text-wrap:pretty}
+@media(max-width:768px){
+  .rl-places{grid-template-columns:minmax(0,1fr);margin-top:28px}
+  .rl-place + .rl-place{margin:-1px 0 0}
+  .rl-place:first-child{border-radius:16px 16px 0 0}
+  .rl-place:last-child{border-radius:0 0 16px 16px}
+  .rl-place:only-child{border-radius:16px}
+}
+@media(min-width:561px) and (max-width:768px){
+  .rl-place{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);grid-template-areas:'name text' 'co text';column-gap:24px;row-gap:6px;align-content:start}
+}
+@media(max-width:560px){.rl-place{padding:20px 18px}}
+@media(forced-colors:active){.rl-place-mark::before{forced-color-adjust:none;background:CanvasText}}
+.glb-item:focus-visible{border-color:var(--text)}
+.glb-item-code{color:var(--text2)}
+.map-card-link:focus-visible{border-color:var(--accent-2)}
+
+/* ── block D: Get Involved forms and FAQ (29 Oct 2026, UI upgrade surface D; markup _src/pages/_give.html and
+   _faq.html, script assets/js/forms.js). Pure mono tokens, borders not shadows, no new colours.
+   1. Field outlines: 1.5px var(--text3) (the rule in block 2), was var(--border): 1.24:1 dark and 1.34:1 light against
+      the card, under the 3:1 WCAG 1.4.11 asks of a control's edge. Now 4.44:1 light / 4.55:1 dark against the card
+      (--card) and 5.26:1 / 5.23:1 against the field's own --bg. Focus: the border turns --text (block 2) and the global
+      2px ink ring (block 5) sits 2px outside it, so the focused field reads as a double ink line on the card.
+      Placeholders keep the browser's #757575: 4.61:1 light, 4.56:1 dark, on the field's --bg.
+   2. Inline validation (forms.js): a field with a problem gets aria-invalid="true" and the --text border; its error line
+      (.give-err, aria-live polite, named in the field's aria-describedby) says what to do in one plain sentence ("Enter
+      your name."), with an .rl-vh "Error: " in front for screen readers. Ink, Inter 500 13/1.5, 6px under the field
+      (the label-to-field gap); an empty line takes no room. The words carry the error, never colour. With motion, the
+      line fades in over 0.2s (opacity only).
+   3. Send while sending: disabled + aria-busy="true" (rlGiveSubmit in forms.js). It keeps full strength (the .55 dim of
+      a disabled button would take "Sending…" under 4.5:1 in light), shows cursor progress, drops the hover lift, press
+      and hover fill, and puts a quiet spinner before the word: a 12px ring of 1.5px currentColor with one quarter open,
+      one turn a second, linear, on the compositor (transform only). The spinner exists only under
+      prefers-reduced-motion:no-preference; with reduced motion "Sending…" says it alone. Restored when the send ends.
+   4. Windows high contrast (forced-colors:active): Send is border:none, so it showed as plain text; it gets a 1px
+      ButtonText border (GrayText while disabled). Checked in Chrome's forced-colours emulation, light and dark palettes
+      (the FAQ plus/minus already shows there, so it needs nothing).
+   5. FAQ: native <details>/<summary>, unchanged; the question keeps its inset ring (block 3) and gets the card's own
+      corner radius, so the ring is not clipped at the rounded corners. ── */
+.give-row{display:flex;flex-direction:column}
+.give-err{margin:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--text);text-wrap:pretty}
+.give-err:not(:empty){margin-top:6px}
+.give-field input[aria-invalid="true"],.give-field textarea[aria-invalid="true"]{border-color:var(--text)}
+.give-btn:disabled{transform:none}
+.give-btn[aria-busy="true"]{opacity:1;cursor:progress}
+body .give-btn:disabled:hover{background:var(--accent-2)}
+.faq-q{border-radius:13px}                          /* the card's 14px less its 1px border */
+.faq-item[open] .faq-q{border-radius:13px 13px 0 0}
+@keyframes rl-spin{to{transform:rotate(1turn)}}
+@keyframes rl-err-in{from{opacity:0}}
+@media screen and (prefers-reduced-motion:no-preference){
+  .give-err:not(:empty){animation:rl-err-in .2s var(--rl-ease)}
+  .give-btn[aria-busy="true"]::before{content:'';display:inline-block;width:12px;height:12px;margin-right:8px;vertical-align:-1px;
+    border:1.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rl-spin 1s linear infinite}
+}
+@media(forced-colors:active){
+  .give-btn{border:1px solid ButtonText}
+  .give-btn:disabled{border-color:GrayText}
+}
+/* 6. Touch screens: Send is at least 44px tall (WCAG 2.5.5 target size; the .rl-init-privacy a / .map-card-link
+      touch rule). A <button> centres its label in the extra height (29 Oct 2026). */
+@media(hover:none){.give-btn{min-height:44px}}

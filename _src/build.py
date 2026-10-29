@@ -25,7 +25,7 @@ PAGES = [
          parts=['_hero', 'home-explore', '_ig'], jsonld=True),
     dict(file='about.html', key='about', title='About — ' + BRAND,
          desc='Who Rising Light UK is: a grassroots humanitarian initiative born in London, what it has done so far and how its work is funded.',
-         parts=['about-intro', '_impact']),
+         parts=['about-intro', '_story', '_partners', '_impact']),   # _story: the timeline; _partners: hidden until partners agree
     dict(file='work.html', key='work', title='Our Work — ' + BRAND,
          desc='Where Rising Light UK works (London, Arizona and Guatemala) and the world’s current Orange and Red disaster alerts '
               'from the Global Disaster Awareness and Coordination System (GDACS).',
@@ -36,6 +36,11 @@ PAGES = [
     dict(file='quiet-battles.html', key='qb', title='Quiet Battles — ' + BRAND,
          desc='Quiet Battles: Rising Light UK’s mental health and suicide prevention work, with UK crisis numbers on the page.',
          parts=['_qb']),
+    # Initiatives (29 Oct 2026, UI upgrade surface F): footer link only, never the masthead or the phone bar (Joe's brief)
+    dict(file='initiatives.html', key='initiatives', title='Initiatives — ' + BRAND,
+         desc='The Clothes Run: Rising Light UK collects the clothes and shoes you no longer wear, free, in London and Surrey, '
+              'and takes them to a charity clothing bank. How to book, what the banks ask for, and why.',
+         parts=['initiatives']),
     dict(file='get-involved.html', key='join', title='Get Involved — ' + BRAND,
          desc='Volunteer, partner with or contact Rising Light UK, and answers to common questions.',
          parts=['_give', '_faq']),
@@ -65,13 +70,15 @@ NAV = [
 ]
 FOOTER_NAV = [('home', './', 'Home'), ('about', 'about.html', 'About'), ('work', 'work.html', 'Our Work'),
               ('events', 'events.html', 'Events'), ('qb', 'quiet-battles.html', 'Quiet Battles'),
+              ('initiatives', 'initiatives.html', 'Initiatives'),
               ('join', 'get-involved.html', 'Get Involved'), ('contact', 'get-involved.html#contact', 'Contact'),
               ('privacy', 'privacy.html', 'Privacy'), ('safeguarding', 'safeguarding.html', 'Safeguarding'),
               ('accessibility', 'accessibility.html', 'Accessibility')]
 
 # Shared scripts, in the order the old single page ran them; each is its own classic <script>
-# so a throw in one cannot stop the next. 'globe' only loads where its chapter is.
-SCRIPTS = ['ink', 'forms', 'v5', 'main', 'globe', 'kit', 'v7', 'ig']
+# so a throw in one cannot stop the next. 'globe' only loads where its chapter is. 'motion' (the scroll
+# reveal, 29 Oct 2026) runs first, so no other script's failure can leave revealed content hidden.
+SCRIPTS = ['motion', 'ink', 'forms', 'v5', 'main', 'globe', 'kit', 'v7', 'ig']
 
 # An HTML comment plus the rest of its line: editor notes, kept in _src/ and left out of the built pages.
 COMMENT = r'<!--.*?-->[ \t]*\n?'
@@ -126,13 +133,105 @@ def headings(body):
     return re.sub(r'<div class="sect-title([^"]*)"([^>]*)>(.*?)</div>', rep, body)
 
 
+def impact_figures():
+    """The Home impact row's figures, read from the SAME places as About's (29 Oct 2026, UI upgrade surface A), so
+    the two pages can never disagree: the three counters from RL_IMPACT in assets/js/v7.js, and the funds figure
+    and both dates from About's own markup in _src/pages/_impact.html. Countries and total events must stay pinned
+    in RL_IMPACT: Home loads no events list, so a null would put v7.js's placeholder (RL_*_FALLBACK) on Home while
+    About shows the real count, and the build stops instead. A null lives_touched falls back to RL_LIVES_FALLBACK,
+    which both pages show. Change a figure THERE, never on Home.
+    The figures are written into the page as <data value>, so they show without JavaScript; v7.js keeps them in
+    step with rlEffectiveStats() and counts them up. A source that no longer parses stops the build.
+    The £ cell's own source line (29 Oct 2026, Joe's picks W1 + W4) says "Estimated · self-funded", as About's
+    "Estimated total", and adds the funds month only when it differs from the month in the shared "Figures as of"
+    line under the row ({{IMPACT_FUNDS_SRC}}); both forms are escaped here."""
+    js = re.sub(r'/\*.*?\*/', '', read(ROOT, 'assets', 'js', 'v7.js'), flags=re.S)
+    block = re.search(r'const RL_IMPACT=\{(.*?)\};', js, re.S)
+    if not block:
+        sys.exit('build: RL_IMPACT not found in assets/js/v7.js (the Home impact row reads it)')
+    pinned = dict(re.findall(r'(\w+)\s*:\s*(null|\d+)', block.group(1)))
+    vals = {}
+    for key, fb in (('countries', 'RL_COUNTRIES_FALLBACK'), ('total_events', 'RL_EVENTS_FALLBACK'),
+                    ('lives_touched', 'RL_LIVES_FALLBACK')):
+        v = pinned.get(key)
+        if v in (None, 'null') and key != 'lives_touched':
+            sys.exit('build: RL_IMPACT.%s is null, but Home cannot count events, so it would show the placeholder '
+                     'while About shows the real count; pin the figure in RL_IMPACT (assets/js/v7.js)' % key)
+        if v in (None, 'null'):
+            m = re.search(r'const %s=(\d+);' % fb, js)
+            if not m:
+                sys.exit('build: %s is not pinned in RL_IMPACT and %s is missing (assets/js/v7.js)' % (key, fb))
+            v = m.group(1)
+        vals[key] = int(v)
+    about = read(SRC, 'pages', '_impact.html')
+    funds = re.search(r'<div class="funds-amount">£([\d,]+)</div>', about)
+    asof = re.search(r'<p class="stats-asof">([^<]+)</p>', about)
+    note = re.search(r'<div class="funds-note">[^<]*·\s*([^<]+?)\s*</div>', about)
+    if not (funds and asof and note):
+        sys.exit('build: the funds figure, "Figures as of" line or funds note moved in _src/pages/_impact.html '
+                 '(the Home impact row reads them)')
+    gbp = int(funds.group(1).replace(',', ''))
+    # the source text is HTML: unescape it before it is escaped again below, so an entity (&amp;, &nbsp;) shows as
+    # its character on Home, not as literal text, and a &nbsp; between month and year still matches (\s takes U+00A0)
+    asof_text, funds_month = html.unescape(asof.group(1)).strip(), html.unescape(note.group(1)).strip()
+    if not funds_month:
+        sys.exit('build: the funds note in _src/pages/_impact.html names no month after the ·')
+    month_re = (r'\b(January|February|March|April|May|June|July|August|September|October|November|December)'
+                r'\s+(\d{4})\b')
+    def month(s):   # ('october', '2026'), or None when the text names no month
+        m = re.search(month_re, s, re.I)
+        return (m.group(1).lower(), m.group(2)) if m else None
+    same = month(asof_text) is not None and month(asof_text) == month(funds_month)   # no month found: show it
+    funds_src = 'Estimated · self-funded' + ('' if same else ' · ' + funds_month)
+    t = {'{{IMPACT_ASOF}}': html.escape(asof_text), '{{IMPACT_FUNDS_MONTH}}': html.escape(funds_month),
+         '{{IMPACT_FUNDS_SRC}}': html.escape(funds_src),
+         '{{IMPACT_FUNDS}}': str(gbp), '{{IMPACT_FUNDS_TEXT}}': '£{:,}'.format(gbp)}
+    for key, tok in (('countries', 'COUNTRIES'), ('total_events', 'EVENTS'), ('lives_touched', 'LIVES')):
+        t['{{IMPACT_%s}}' % tok] = str(vals[key])
+        t['{{IMPACT_%s_TEXT}}' % tok] = '{:,}'.format(vals[key])   # the same grouping as Intl.NumberFormat('en-GB')
+    return t
+
+
+def fill_impact(text, figures):
+    for k, v in figures.items():
+        text = text.replace(k, v)
+    if '{{IMPACT_' in text:
+        sys.exit('build: unknown impact token %s' % re.search(r'\{\{IMPACT_\w*\}\}', text).group(0))
+    return text
+
+
+def reach_places():
+    """Our Work's list of places under the Reach map (29 Oct 2026, UI upgrade surface C), written from the SAME data
+    as the map's node buttons and card, so the two can never disagree: each place's name from LOCATIONS (label) and
+    its coordinates and card text from MAP_INFO (co, body) in assets/js/main.js, in that order. Change a place THERE,
+    then build. Plain text only (escaped here). A source that no longer parses stops the build."""
+    js = read(ROOT, 'assets', 'js', 'main.js')
+    locs = re.search(r'const LOCATIONS=\[(.*?)\];', js, re.S)
+    info = re.search(r'const MAP_INFO=\[(.*?)\];', js, re.S)
+    labels = re.findall(r"label:'([^'\\]*)'", locs.group(1)) if locs else []
+    rows = re.findall(r"\{co:'([^'\\]*)',\s*tag:'[^'\\]*',\s*body:'([^'\\]*)'\}", info.group(1)) if info else []
+    if not labels or len(labels) != len(rows):
+        sys.exit('build: LOCATIONS / MAP_INFO in assets/js/main.js no longer parse into matching places '
+                 '(the Our Work place list reads them)')
+    items = []
+    for label, (co, body) in zip(labels, rows):
+        items.append('      <li class="rl-place rl-sr">\n'
+                     '        <p class="rl-place-name"><span class="rl-place-mark" aria-hidden="true"></span>%s</p>\n'
+                     '        <p class="rl-place-co">%s</p>\n'
+                     '        <p class="rl-place-text">%s</p>\n'
+                     '      </li>' % (html.escape(label), html.escape(co), html.escape(body)))
+    return '\n' + '\n'.join(items) + '\n    '
+
+
 def build():
     head_t, top_t = read(SRC, 'partials', 'head.html'), read(SRC, 'partials', 'top.html')
     foot_t, chrome = read(SRC, 'partials', 'footer.html'), read(SRC, 'partials', 'chrome.html')
 
     bodies = {}
+    figures = impact_figures()
+    places = reach_places()
     for p in PAGES:
-        b = '\n'.join(fragment(n) for n in p['parts'])
+        b = fill_impact('\n'.join(fragment(n) for n in p['parts']), figures).replace('{{REACH_PLACES}}', places)
         b = re.sub(r'(<span class="sect-eyebrow">)CH\. \d\d — ', r'\1', b)   # chapter numbers meant one long page
         bodies[p['file']] = headings(b)
 

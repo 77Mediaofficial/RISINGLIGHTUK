@@ -1,10 +1,46 @@
+<!-- Home first screen (UI upgrade surface A, 29 Oct 2026; CSS: site.css block 8; motion notes: site.css block 7).
+     Headline: the words rise in one at a time (Kinetic Text Reveal pattern, no blur, under 1.2 s). Screen readers
+     read the sentence once, from the .rl-vh copy; the split copy is aria-hidden. Keep the two in step.
+     Impact row: every figure is written by the build from the SAME source as About's counters (RL_IMPACT in
+     assets/js/v7.js for the three counts; About's own funds figure, funds month and "Figures as of" line in
+     _src/pages/_impact.html for the rest), so Home can never show different numbers: change a figure THERE, then
+     py _src/build.py. The {{IMPACT_…}} tokens are filled by impact_figures() in _src/build.py; v7.js counts the
+     figures up once as the row comes in (never under reduced motion). The row's .rl-sr is the site's scroll reveal:
+     inside the hero it waits for the hero entrance (assets/js/motion.js).
+     29 Oct 2026 (Joe's picks W1 + W4): one shared "Figures as of" line under the whole row, About's own .stats-asof
+     (after the </dl>, so each cell stays a dt + dd), in place of the same line under each count. The £ cell keeps its
+     own source line, "Estimated · self-funded" to match About's "Estimated total", with the funds month added only
+     when it differs from the month in the shared line ({{IMPACT_FUNDS_SRC}}, built in impact_figures()). The shared
+     line carries .rl-sr like the cells, so it comes in with them (or on scroll, if it is below the screen). -->
   <div class="header">
     <img class="title-logo" src="rl-crest.png" width="600" height="454" alt="Rising Light"/>
-    <h1 class="hero-h1"><span class="w">Compassion</span><br><span class="w">Has</span> <span class="w">No</span> <span class="w">Borders</span></h1>
+    <h1 class="hero-h1"><span class="rl-vh">Compassion Has No Borders</span><span class="hero-words" aria-hidden="true"><span class="w" style="--w:0">Compassion</span><br><span class="w" style="--w:1">Has</span> <span class="w" style="--w:2">No</span> <span class="w" style="--w:3">Borders</span></span></h1>
     <div class="overview">
       <p>Help that arrives in person — for the people and animals the world overlooks.</p>
       <p id="mission-reveal">Rising Light UK is a grassroots initiative born in London, running hands-on humanitarian and animal-welfare projects across the UK, the United States and Guatemala — and growing wherever the need leads.</p>
     </div>
     <a class="hero-cta" href="#get-involved">Volunteer with us <span aria-hidden="true">&rarr;</span></a>
     <div class="hero-cue" aria-hidden="true">Our Work</div>
+    <div class="rl-impact" id="rl-impact" role="group" aria-label="Impact in numbers">
+      <dl class="rl-imp-list">
+        <div class="rl-imp rl-sr">
+          <dt class="rl-imp-k">Countries</dt>
+          <dd class="rl-imp-n"><data value="{{IMPACT_COUNTRIES}}" data-rl="countries"><span class="rl-vh">{{IMPACT_COUNTRIES_TEXT}}</span><span class="rl-imp-fig" aria-hidden="true" data-final="{{IMPACT_COUNTRIES_TEXT}}"><span class="rl-imp-v">{{IMPACT_COUNTRIES_TEXT}}</span></span></data></dd>
+        </div>
+        <div class="rl-imp rl-sr">
+          <dt class="rl-imp-k">Total Events</dt>
+          <dd class="rl-imp-n"><data value="{{IMPACT_EVENTS}}" data-rl="total_events"><span class="rl-vh">{{IMPACT_EVENTS_TEXT}}</span><span class="rl-imp-fig" aria-hidden="true" data-final="{{IMPACT_EVENTS_TEXT}}"><span class="rl-imp-v">{{IMPACT_EVENTS_TEXT}}</span></span></data></dd>
+        </div>
+        <div class="rl-imp rl-sr">
+          <dt class="rl-imp-k">Lives Touched</dt>
+          <dd class="rl-imp-n"><data value="{{IMPACT_LIVES}}" data-rl="lives_touched"><span class="rl-vh">{{IMPACT_LIVES_TEXT}}</span><span class="rl-imp-fig" aria-hidden="true" data-final="{{IMPACT_LIVES_TEXT}}"><span class="rl-imp-v">{{IMPACT_LIVES_TEXT}}</span></span></data></dd>
+        </div>
+        <div class="rl-imp rl-imp-funds rl-sr">
+          <dt class="rl-imp-k">Spent So Far</dt>
+          <dd class="rl-imp-n"><data value="{{IMPACT_FUNDS}}" data-rl-fmt="gbp"><span class="rl-vh">{{IMPACT_FUNDS_TEXT}}</span><span class="rl-imp-fig" aria-hidden="true" data-final="{{IMPACT_FUNDS_TEXT}}"><span class="rl-imp-v">{{IMPACT_FUNDS_TEXT}}</span></span></data></dd>
+          <dd class="rl-imp-src">{{IMPACT_FUNDS_SRC}}</dd>
+        </div>
+      </dl>
+      <p class="stats-asof rl-sr">{{IMPACT_ASOF}}</p>
+    </div>
   </div>

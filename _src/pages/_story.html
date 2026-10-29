@@ -1,0 +1,69 @@
+<!-- STORY TIMELINE (About, after the intro). UI upgrade surface E, 29 Oct 2026.
+     The facts are Joe's, confirmed 28 Oct 2026 (AskUserQuestion): -APPS\RLUK\drafts\ui-upgrade-brief.md, "Timeline"
+     (the same list as drafts\timeline-confirmed.md). Eight items, in his order, in the brief's draft wording. Add
+     nothing he has not confirmed: he left OFF the Waterloo water hand-out and School Aid.
+     Item 4 ("2026: projects begin in Arizona and Guatemala") stays its own item: Joe gave it no months, and folding it
+     into item 3 would put Arizona under February – April.
+     The last item is the planned one (class rl-tl-next): the words "Coming up" in a label, a hollow marker and a
+     dashed rail into it, never colour. Once it has happened: delete the class rl-tl-next and the label span, and put
+     the next planned item, if Joe gives one, at the end with both.
+     Each date is a <time datetime> (a month, a day or a year). The rail and the markers are CSS (site.css block E+G;
+     the marker span is aria-hidden). Works without JavaScript and at 320 px. Motion, only when the visitor allows it:
+     each item's text comes in with the site's scroll reveal (.rl-sr on .rl-tl-body; never on the li, whose rail must
+     not move), and an ink line draws down the rail with the reading position (a CSS scroll-driven animation). -->
+<section class="chapter rl-story" id="story" aria-labelledby="story-title">
+  <div class="sect-head rl-sr">
+    <span class="sect-eyebrow">Timeline</span>
+    <div class="sect-title" id="story-title">Our Story</div>
+  </div>
+  <ol class="rl-tl-list">
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2025-11">November 2025</time></p>
+        <p class="rl-tl-what">Rising Light UK founded in London by Joe Chapman.</p>
+      </div>
+    </li>
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2025-12-18">18 December 2025</time></p>
+        <p class="rl-tl-what">First mission: joined The Little Things UK’s outreach at Old Street.</p>
+      </div>
+    </li>
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2026-02">February</time><span aria-hidden="true"> – </span><span class="rl-vh"> to </span><time datetime="2026-04">April 2026</time></p>
+        <p class="rl-tl-what">Feeding and caring for stray animals in Guatemala.</p>
+      </div>
+    </li>
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2026">2026</time></p>
+        <p class="rl-tl-what">Projects began in Arizona (USA) and Guatemala.</p>
+      </div>
+    </li>
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2026-07">July 2026</time></p>
+        <p class="rl-tl-what">Climbed Snowdon (Yr Wyddfa) with Charlie’s Promise.</p>
+      </div>
+    </li>
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2026-08-31">31 August 2026</time></p>
+        <p class="rl-tl-what">Quiet Battles launched: our mental health and suicide prevention work.</p>
+      </div>
+    </li>
+    <li class="rl-tl"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2026-10">October 2026</time></p>
+        <p class="rl-tl-what">The Clothes Run launched: free clothes collections in London and Surrey.</p>
+      </div>
+    </li>
+    <li class="rl-tl rl-tl-next"><span class="rl-tl-dot" aria-hidden="true"></span>
+      <div class="rl-tl-body rl-sr">
+        <p class="rl-tl-when"><time datetime="2026-12-09">9 December 2026</time> <span class="rl-tl-tag">Coming up</span></p>
+        <p class="rl-tl-what">With The Little Things UK at Old Street, <span class="rl-tl-nw">120 hat-and-glove</span> sets.</p>
+      </div>
+    </li>
+  </ol>
+</section>

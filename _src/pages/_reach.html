@@ -1,11 +1,17 @@
   <!-- CH. 01 — Reach map. Static blueprint dot-map built from the same LAND
        lat/lon data the old globe used: canvas draws the land dots once, the
        SVG overlay carries the dashed reach arcs + compass, and the location
-       nodes are real buttons that open a small info card. No animation loop. -->
-  <div class="map-section" id="reach">
+       nodes are real buttons that open a small info card. No animation loop.
+       29 Oct 2026 (UI upgrade surface C): a <section> named by its title, and under the map the three places as a
+       bordered list (CSS: site.css block C). The list is written by the build ({{REACH_PLACES}}, reach_places() in
+       _src/build.py) from the map's own data, LOCATIONS and MAP_INFO in assets/js/main.js, so its words are the map
+       card's words: change a place there, never here. Each place comes in with the site's scroll reveal (.rl-sr).
+       29 Oct 2026: each legend button passes its click (event) to _mapCardShow(), so a keyboard opening moves focus
+       into the card and Escape brings it back (main.js); keep the argument if the legend changes. -->
+  <section class="map-section" id="reach" aria-labelledby="reach-title">
     <div class="sect-head">
       <span class="sect-eyebrow">CH. 01 — Our Reach</span>
-      <div class="sect-title">Where Compassion Travels</div>
+      <div class="sect-title" id="reach-title">Where Compassion Travels</div>
     </div>
     <div class="map-stage" id="map-stage">
       <canvas class="map-dots" id="map-dots" aria-hidden="true"></canvas>
@@ -14,5 +20,6 @@
       <div class="map-card" id="map-card" role="region" aria-live="polite" hidden></div>
     </div>
     <!-- phones hide the per-marker text chips — this line says how to get them -->
-    <div class="map-legend"><span class="map-legend-lead">Tap —</span><button type="button" class="map-legend-btn" onclick="_mapCardShow(0)">London</button>·<button type="button" class="map-legend-btn" onclick="_mapCardShow(1)">Arizona</button>·<button type="button" class="map-legend-btn" onclick="_mapCardShow(2)">Guatemala</button></div>
-  </div>
+    <div class="map-legend"><span class="map-legend-lead">Tap —</span><button type="button" class="map-legend-btn" onclick="_mapCardShow(0,event)">London</button>·<button type="button" class="map-legend-btn" onclick="_mapCardShow(1,event)">Arizona</button>·<button type="button" class="map-legend-btn" onclick="_mapCardShow(2,event)">Guatemala</button></div>
+    <ul class="rl-places" role="list">{{REACH_PLACES}}</ul>
+  </section>

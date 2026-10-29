@@ -93,36 +93,7 @@ window.showToast=function(msg){
   }
 })();
 
-/* ── v7.8 SCROLL REVEAL ──────────────────────────────────────────── */
-(function(){
-  const io=new IntersectionObserver(es=>{
-    es.forEach(e=>{
-      if(e.isIntersecting){e.target.classList.add('rl-sr-in');io.unobserve(e.target);}
-    });
-  },{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
-  function attach(el,delay){
-    if(el.classList.contains('rl-sr')||el.classList.contains('rl-sr-in'))return;
-    // Never hide something already in the first viewport — no flash on load
-    if(el.getBoundingClientRect().top<window.innerHeight*0.9)return;
-    el.classList.add('rl-sr');
-    if(delay)el.style.transitionDelay=Math.min(delay,360)+'ms';
-    io.observe(el);
-  }
-  /* CH.03's goal and calendar cards have no scroll reveal (18 Oct 2026). On a phone fling the observer
-     reports them late (it runs on the main thread, the fling does not), so they crossed the screen blank
-     and then faded in under the reader's thumb, however early the reveal was started. They are simply
-     there; the chapter's own motion (the bar, the count, the calendar's first paint) carries it. */
-  document.querySelectorAll('#impact,.map-section,.ticker-wrap,.events-header,.rl-globe,.upload-section,.rl-ig,.faq-section,.give-section,.footer')
-    .forEach(el=>attach(el,0));
-  // Event cards arrive async and re-render on filter — reveal each new batch
-  const grid=document.getElementById('events-grid');
-  if(grid){
-    new MutationObserver(()=>{
-      let i=0;
-      grid.querySelectorAll('.event-card').forEach(c=>attach(c,(i++%6)*60));
-    }).observe(grid,{childList:true});
-  }
-})();
+/* ── v7.8 SCROLL REVEAL: moved to assets/js/motion.js (loads first) on 29 Oct 2026 ── */
 
 /* ── v7.12 CURSOR SPOTLIGHT on cards ─────────────────────────────── */
 /* Desktop only (no listener on touch) + rAF-throttled, so it does at most one
@@ -153,10 +124,14 @@ if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)){
         mode, which previews them and writes this exact block out for you),
      2. commit and push. GitHub Pages redeploys and everyone sees the change.
 
-   null = let that number calculate itself from the events list.          */
+   null = let that number calculate itself from the events list.
+   BUT countries and total_events must stay pinned while the Home impact row
+   shows them: Home has no events list to count, so it would show the
+   placeholder while About shows the real count. The build stops on a null
+   there (_src/build.py, impact_figures).                                  */
 const RL_IMPACT={
   countries:3,         /* pinned 13 Oct 2026 (Joe): UK · USA · Guatemala — matches the map, footer and FAQ; Ghana counts once that trip has happened */
-  total_events:4,      /* pinned 18 Oct 2026 (Joe): "change total events to 4" — no longer counts the events list; set null to count again */
+  total_events:4,      /* pinned 18 Oct 2026 (Joe): "change total events to 4" — no longer counts the events list; keep it pinned (Home cannot count events: the build stops on a null) */
   lives_touched:320    /* confirmed by Joe 13 Oct 2026; no automatic source — publish the figure here */
 };
 /* When you change any figure above, update the month in the "Figures as of" line under the stats. */
@@ -175,10 +150,11 @@ let rlStatsOverride={...RL_IMPACT};
    To award a new badge (or flip one from in-progress to earned):
    edit this array, commit, push. done:false renders as a dashed
    "in progress" ring at reduced opacity.
-   glyph: flame · drop · book · pin · rings · peak                     */
+   glyph: flame · drop · book · pin · rings · peak
+   Three badges since 29 Oct 2026 (one removed by Joe): phones keep them on ONE row (no lone badge,
+   Joe 18 Oct 2026), so a fourth needs the .badge-wall phone rule in assets/css/site.css changed with it. */
 const RL_BADGES=[
   {id:'first',  glyph:'flame', name:'First Mission',  sub:'The work begins',      done:true},
-  {id:'school', glyph:'book',  name:'School Aid',     sub:'Learning supported',   done:true},
   {id:'ally',   glyph:'rings', name:'Alliance',       sub:'Charlie&rsquo;s Promise',   done:true},
   {id:'snowdon',glyph:'peak',  name:'Yr Wyddfa',      sub:'Snowdon · Summited',   done:true}
 ];
@@ -488,6 +464,56 @@ const RL_GOAL=500; /* 2026 target for "Lives Touched" — edit to change the goa
 rlApplyStats();
 rlFillStatsForm();
 
+/* ── HOME IMPACT ROW (29 Oct 2026, UI upgrade surface A; markup _src/pages/_hero.html, CSS site.css block 8) ──
+   The same three figures as About's counters: the build writes them into Home's HTML from RL_IMPACT above
+   (impact_figures in _src/build.py), and here they are checked against rlEffectiveStats(), the one source every
+   display of these numbers reads, so Home and About cannot disagree. £550 and the dates come from About's markup
+   at build time. Each figure counts up once, from 0, as the scroll reveal brings its cell in (motion.js's
+   'rl-sr-in' event): 1400 ms cubic ease-out (the stat count-up's values, pack §7.2), one rAF loop per figure,
+   written through Intl.NumberFormat('en-GB') only when the text changes, no layout reads. Under reduced motion,
+   without JavaScript, or if the reveal never runs (motion.js missing: html.rl-sr-off) the HTML's final figure
+   simply stays. The counting number is aria-hidden; screen readers read the final figure from its .rl-vh copy.
+   Its box is held at the final figure's width (CSS), because Cinzel has no tabular figures. */
+(function(){
+  const row=document.getElementById('rl-impact');
+  if(!row)return;
+  const reduce=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
+  let eff={};try{eff=rlEffectiveStats();}catch(e){}
+  const fmts={};
+  const fmtOf=kind=>fmts[kind]||(fmts[kind]=kind==='gbp'
+    ?new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',minimumFractionDigits:0,maximumFractionDigits:0})
+    :new Intl.NumberFormat('en-GB'));
+  row.querySelectorAll('.rl-imp').forEach(cell=>{
+    const d=cell.querySelector('data'),fig=cell.querySelector('.rl-imp-fig'),v=cell.querySelector('.rl-imp-v'),
+          vh=cell.querySelector('.rl-imp-n .rl-vh');
+    if(!d||!fig||!v)return;
+    const fmt=fmtOf(d.dataset.rlFmt);
+    let target=+d.value;
+    const key=d.dataset.rl,live=key?+eff[key]:NaN;
+    if(key&&isFinite(live)&&live!==target){                 /* never expected: the build read the same block */
+      target=live;const t=fmt.format(live);
+      d.value=String(live);fig.dataset.final=t;v.textContent=t;if(vh)vh.textContent=t;
+    }
+    if(!isFinite(target)||target<=0)return;
+    const final=fmt.format(target);
+    const run=()=>{
+      if(reduce.matches)return;
+      let start=null,last='';
+      const step=now=>{
+        if(start===null)start=now;
+        const p=Math.min(Math.max((now-start)/1400,0),1);
+        const t=p<1?fmt.format(Math.floor(target*(1-Math.pow(1-p,3)))):final;
+        if(t!==last){v.textContent=t;last=t;}
+        if(p<1)requestAnimationFrame(step);
+      };
+      v.textContent=fmt.format(0);
+      requestAnimationFrame(step);
+    };
+    if(cell.classList.contains('rl-sr-in'))run();
+    else cell.addEventListener('rl-sr-in',run,{once:true});
+  });
+})();
+
 const MONTHS_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTHS_LONG=['January','February','March','April','May','June','July','August','September','October','November','December'];
 /* Group events by the month ("yyyy-mm") of their event_date, each list sorted by day. */
@@ -538,7 +564,7 @@ function renderMomentum(){
         const day=ev.event_date?String(ev.event_date).slice(8,10):'';
         return `<button class="cal-detail-ev" onclick="viewEvent(${ev.id})">${day?day+' · ':''}${escapeHtml(ev.name)}</button>`;
       }).join('');
-    det.scrollIntoView({behavior:'smooth',block:'nearest'});
+    det.scrollIntoView({block:'nearest'}); /* html{scroll-behavior} decides: smooth unless reduced motion */
   });
 })();
 renderMomentum();                                  // paint now

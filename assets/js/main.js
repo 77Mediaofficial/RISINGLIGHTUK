@@ -814,7 +814,7 @@ const LOCATIONS=[
 
 /* Per-location card copy + label placement (indexes match LOCATIONS). */
 const MAP_INFO=[
-  {co:'51.5072° N · 0.1276° W',  tag:'',       body:'Home base — outreach, clothing drives and events across London and Surrey.'},
+  {co:'51.5072° N · 0.1276° W',  tag:'',       body:'Home base — outreach, The Clothes Run and events across London and Surrey.'},
   {co:'34.0489° N · 111.0937° W',tag:'tag-up', body:'Our United States arm — community support projects in Arizona.'},
   {co:'15.7835° N · 90.2308° W', tag:'',       body:'International projects — help for families and animals in Guatemala.'}
 ];
@@ -828,7 +828,7 @@ function _mapView(){
 function _mapXY(lat,lon,V,W,H){
   return {x:(lon-V.lon0)/(V.lon1-V.lon0)*W, y:(V.lat1-lat)/(V.lat1-V.lat0)*H};
 }
-let _mapW=0,_mapH=0,_mapOpenIdx=-1;
+let _mapW=0,_mapH=0,_mapOpenIdx=-1,_mapOpener=null;
 
 function renderMap(){
   const stage=document.getElementById('map-stage');
@@ -897,7 +897,15 @@ function renderMap(){
     const p=_mapXY(loc.lat,loc.lon,V,W,H);
     btn.style.left=p.x+'px';btn.style.top=p.y+'px';
   });
+  /* a keyboard user's focus in the card is not dropped when the card goes: back to the button that opened it
+     (or, if that legend button is now hidden, the place's node), without scrolling (29 Oct 2026) */
+  const card=document.getElementById('map-card'),op=_mapOpener,idx=_mapOpenIdx;
+  const back=!!op&&!!card&&card.contains(document.activeElement);
   _mapCardHide(); /* geometry changed — reposition on next open */
+  if(back){
+    const to=op.getClientRects().length?op:stage.querySelector('.map-node[data-idx="'+idx+'"]');
+    if(to)to.focus({preventScroll:true});
+  }
 }
 
 function _mapCardHide(){
@@ -905,7 +913,7 @@ function _mapCardHide(){
   if(card)card.hidden=true;
   document.querySelectorAll('.map-node[aria-expanded="true"]')
     .forEach(function(b){b.setAttribute('aria-expanded','false');});
-  _mapOpenIdx=-1;
+  _mapOpenIdx=-1;_mapOpener=null;
 }
 /* The card's events action: "See N events ↓" when this place has events, else the
    generic "See our events ↓" (which shows the full list), for the Reach card below.
@@ -917,13 +925,18 @@ function _mapEventsLink(i){
   const arrow=document.getElementById('events-grid')?' \u2193':' \u2192'; /* down on the Events page, across from Our Work */
   return n>0?{idx:i,text:'See '+n+' event'+(n===1?'':'s')+arrow}:{idx:-1,text:'See our events'+arrow};
 }
-function _mapCardShow(i){
+/* ev: the click that opened it (a node, from the stage handler below, or a legend button, from its onclick in
+   _src/pages/_reach.html). From the keyboard (Enter or Space on a button fires a click with detail 0) focus moves
+   to the card's title (tabindex -1, the global focus ring), as the globe's card does, and the whole card is
+   brought into view; Escape then closes it and puts focus back on that button. A mouse or touch opening leaves
+   focus where it is (29 Oct 2026). */
+function _mapCardShow(i,ev){
   const card=document.getElementById('map-card');
   const btn=document.querySelector('.map-node[data-idx="'+i+'"]');
   const loc=LOCATIONS[i];
   if(!card||!btn||!loc)return;
   const lk=_mapEventsLink(i);
-  card.innerHTML='<div class="map-card-title">'+loc.label+'</div>'
+  card.innerHTML='<div class="map-card-title" tabindex="-1">'+loc.label+'</div>'
     +'<div class="map-card-co">'+MAP_INFO[i].co+'</div>'
     +'<p class="map-card-body">'+MAP_INFO[i].body+'</p>'
     +'<button type="button" class="map-card-link" onclick="_mapSeeEvents('+lk.idx+')">'+lk.text+'</button>';
@@ -937,6 +950,12 @@ function _mapCardShow(i){
     b.setAttribute('aria-expanded',b===btn?'true':'false');
   });
   _mapOpenIdx=i;
+  const from=ev&&ev.detail===0&&ev.target&&ev.target.closest?ev.target.closest('.map-node,.map-legend-btn'):null;
+  _mapOpener=from;
+  if(from){
+    card.querySelector('.map-card-title').focus({preventScroll:true});
+    card.scrollIntoView({block:'nearest'}); /* moves nothing when it is already in view; html{scroll-behavior} decides */
+  }
 }
 function _mapSeeEvents(i){
   const loc=i>=0?LOCATIONS[i]:null;
@@ -955,7 +974,7 @@ function _mapSeeEvents(i){
     if(window.showToast)showToast('Showing all events');
   }
   const target=document.getElementById('events')||document.getElementById('events-grid');
-  if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+  if(target)target.scrollIntoView({block:'start'}); /* html{scroll-behavior} decides: smooth unless reduced motion */
 }
 /* open on tap/click; toggle; Escape or outside click closes */
 (function(){
@@ -972,15 +991,21 @@ function _mapSeeEvents(i){
     const btn=e.target.closest('.map-node');
     if(btn){
       const i=+btn.dataset.idx;
-      (i===_mapOpenIdx)?_mapCardHide():_mapCardShow(i);
+      (i===_mapOpenIdx)?_mapCardHide():_mapCardShow(i,e);
       e.stopPropagation();
     }
   });
   document.addEventListener('click',function(e){
     if(_mapOpenIdx>=0&&!e.target.closest('.map-node,.map-card,.map-legend-btn'))_mapCardHide();
   });
+  /* Escape closes the card; if a keyboard opened it and focus is still in the card (or was lost with it), focus
+     goes back to the button that opened it. Focus elsewhere (a dialog, another control) is left alone. */
   document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'&&_mapOpenIdx>=0)_mapCardHide();
+    if(e.key!=='Escape'||_mapOpenIdx<0)return;
+    const card=document.getElementById('map-card'),op=_mapOpener,a=document.activeElement;
+    const back=!!op&&document.contains(op)&&(!a||a===document.body||(!!card&&card.contains(a)));
+    _mapCardHide();
+    if(back){op.focus({preventScroll:true});op.scrollIntoView({block:'nearest'});}
   });
   /* re-render on real width changes (debounced) and on theme flips */
   let t=null,lastW=0;

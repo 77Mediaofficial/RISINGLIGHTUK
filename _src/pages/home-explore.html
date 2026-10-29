@@ -1,34 +1,44 @@
 <!-- Home: one bordered card per area of the site (22 Oct 2026, when the single page became pages).
-     Card text reuses the site's own wording; Quiet Battles keeps its approved sub-line word for word. -->
+     Card text reuses the site's own wording; Quiet Battles keeps its approved sub-line word for word.
+     29 Oct 2026 (UI upgrade surface A): each card comes in with the site's scroll reveal (.rl-sr on the <li>, never on
+     the card, which has a hover/focus lift of its own), and N°05 links the Initiatives page. N°05 spans the whole row
+     at every width, so no row is ever left half full: 4 + 1 on desktop, 2 + 2 + 1 on tablets, one column on phones.
+     Its text is from Joe's brief (28 Oct 2026): The Clothes Run, free, clothes and shoes, London and Surrey. -->
 <section class="chapter rl-explore-sec" id="explore" aria-labelledby="explore-title">
   <div class="sect-head">
     <span class="sect-eyebrow">Explore</span>
     <div class="sect-title" id="explore-title">Find Your Way</div>
   </div>
   <ul class="rl-explore" role="list">
-    <li><a class="rl-ex" href="about.html">
+    <li class="rl-sr"><a class="rl-ex" href="about.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;01</span>
       <span class="rl-ex-title">About</span>
       <span class="rl-ex-text">Who we are, the story in numbers, our milestones and the funds used so far.</span>
       <span class="rl-ex-go" aria-hidden="true">About &rarr;</span>
     </a></li>
-    <li><a class="rl-ex" href="work.html">
+    <li class="rl-sr"><a class="rl-ex" href="work.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;02</span>
       <span class="rl-ex-title">Our Work</span>
       <span class="rl-ex-text">Where we work: London, Arizona and Guatemala. Also the world’s current disaster alerts: places where help is needed, not Rising Light projects.</span>
       <span class="rl-ex-go" aria-hidden="true">Our work &rarr;</span>
     </a></li>
-    <li><a class="rl-ex" href="events.html">
+    <li class="rl-sr"><a class="rl-ex" href="events.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;03</span>
       <span class="rl-ex-title">Events</span>
       <span class="rl-ex-text">The work in motion: our events, the 2026 goal and the calendar.</span>
       <span class="rl-ex-go" aria-hidden="true">Events &rarr;</span>
     </a></li>
-    <li><a class="rl-ex" href="quiet-battles.html">
+    <li class="rl-sr"><a class="rl-ex" href="quiet-battles.html">
       <span class="rl-ex-ix" aria-hidden="true">N&deg;04</span>
       <span class="rl-ex-title">Quiet Battles</span>
       <span class="rl-ex-text">Our mental health and suicide prevention work, running alongside everything else we do.</span>
       <span class="rl-ex-go" aria-hidden="true">Quiet Battles &rarr;</span>
+    </a></li>
+    <li class="rl-sr rl-ex-wide"><a class="rl-ex" href="initiatives.html">
+      <span class="rl-ex-ix" aria-hidden="true">N&deg;05</span>
+      <span class="rl-ex-title">Initiatives</span>
+      <span class="rl-ex-text">The Clothes Run: free collections of the clothes and shoes you no longer wear, in London and Surrey.</span>
+      <span class="rl-ex-go" aria-hidden="true">Initiatives &rarr;</span>
     </a></li>
   </ul>
 </section>

@@ -1,0 +1,80 @@
+<!-- INITIATIVES PAGE (initiatives.html). UI upgrade surface F, 29 Oct 2026.
+     Every fact is Joe's, confirmed 28 Oct 2026 (AskUserQuestion): -APPS\RLUK\drafts\ui-upgrade-brief.md, the paragraph
+     "The Clothes Run (Initiatives page)". Use ONLY those facts: what it is, London and Surrey, starting now, free with
+     nothing kept or sold, the three steps, the banks' four rules (council guidance: Islington, Reigate and Banstead,
+     Mole Valley), and WRAP's 2022 figures. Add NO collection days, times, capacity or named charity, and do not mention
+     "The Clothing Bridge" (an older Instagram name for the same service; Joe keeps "The Clothes Run").
+     Booking copy always says "message" / "direct message, not in the comments", never just "send".
+     Rising Light UK is never a charity or registered: "charity" below only ever describes the clothing bank.
+     ADDING AN INITIATIVE (only once Joe gives its facts): copy the whole <article class="rl-init"> below, inside
+     .rl-init-list, after this one; give it its own id and title id, N°02, and its own facts. A hairline and the chapter
+     gap part it from the one above (site.css block F). Then add it to Home's N°05 card text if Joe wants.
+     The steps are a plain <ol>: the numbers and the rail are CSS (counters), so a screen reader hears "1 of 3"
+     once. Motion: each block comes in with the site's scroll reveal (.rl-sr, on wrappers only); a block already on
+     the first screen simply shows (motion.js takes its .rl-sr off, pack 7.3); nothing else moves.
+     The privacy link goes to the Clothes Run paragraph on privacy.html (id="clothes-run-privacy"). -->
+<section class="chapter rl-init-sec" id="initiatives" aria-labelledby="initiatives-title">
+  <div class="sect-head rl-sr">
+    <span class="sect-eyebrow">Initiatives</span>
+    <div class="sect-title" id="initiatives-title">Our Initiatives</div>
+  </div>
+  <div class="rl-init-list">
+    <article class="rl-init" id="clothes-run" aria-labelledby="clothes-run-title">
+      <header class="rl-init-head rl-sr">
+        <p class="rl-init-ix" aria-hidden="true">N&deg;01</p>
+        <h2 class="rl-init-title" id="clothes-run-title">The Clothes Run</h2>
+        <p class="rl-init-lead">We collect the clothes and shoes you no longer wear and take them to a charity clothing bank.</p>
+      </header>
+      <dl class="rl-init-facts rl-sr">
+        <div class="rl-init-fact"><dt>Where</dt><dd>London and Surrey</dd></div>
+        <div class="rl-init-fact"><dt>When</dt><dd>Starting now</dd></div>
+        <div class="rl-init-fact"><dt>Cost</dt><dd>Free. Nothing is kept or sold.</dd></div>
+      </dl>
+      <div class="rl-init-cols">
+        <div class="rl-init-part rl-sr">
+          <h3 class="rl-init-h" id="clothes-run-how">How It Works</h3>
+          <ol class="rl-steps" role="list">
+            <li class="rl-step">
+              <p class="rl-step-t">Book</p>
+              <p class="rl-step-d">Message <a href="https://www.instagram.com/risinglightuk/" target="_blank" rel="noopener noreferrer">@risinglightuk<span class="rl-vh"> (opens Instagram in a new tab)</span></a> your postcode on Instagram, as a direct message, not in the comments.</p>
+            </li>
+            <li class="rl-step">
+              <p class="rl-step-t">Collect</p>
+              <p class="rl-step-d">We reply to agree a day and tell you who’s coming, then collect from your doorstep. We only ask for your full address once a day is agreed.</p>
+            </li>
+            <li class="rl-step">
+              <p class="rl-step-t">Drop off</p>
+              <p class="rl-step-d">We take everything to a charity clothing bank.</p>
+            </li>
+          </ol>
+        </div>
+        <div class="rl-init-part rl-sr">
+          <h3 class="rl-init-h" id="clothes-run-banks">What the Banks Ask For</h3>
+          <ul class="rl-rules" role="list">
+            <li>Clean and dry</li>
+            <li>Shoes in pairs</li>
+            <li>Carrier bags, not bin bags</li>
+            <li>No duvets or pillows</li>
+          </ul>
+          <p class="rl-init-note">Every clothing bank has its own list.</p>
+          <p class="rl-init-src">Source: council guidance from Islington, Reigate and Banstead, and Mole Valley.</p>
+        </div>
+      </div>
+      <div class="rl-init-part rl-init-why rl-sr">
+        <h3 class="rl-init-h" id="clothes-run-why">Why</h3>
+        <div class="rl-why">
+          <p class="rl-why-n" aria-hidden="true">118</p>
+          <div class="rl-why-body">
+            <p class="rl-why-t">The average UK adult has 118 items of clothing, and a quarter haven’t been worn for at least a year.</p>
+            <p class="rl-init-src">Source: WRAP (Waste and Resources Action Programme), 2022.</p>
+          </div>
+        </div>
+      </div>
+      <div class="rl-init-act rl-sr">
+        <a class="rl-init-cta" href="https://www.instagram.com/risinglightuk/" target="_blank" rel="noopener noreferrer">Message @risinglightuk<span class="rl-vh"> (opens Instagram in a new tab)</span><span class="rl-init-cta-ico" aria-hidden="true">&#8599;</span></a>
+        <p class="rl-init-tab" aria-hidden="true">Opens Instagram in a new tab</p>
+        <p class="rl-init-privacy"><a href="privacy.html#clothes-run-privacy">How we handle your Clothes Run details</a></p>
+      </div>
+    </article>
+  </div>
+</section>

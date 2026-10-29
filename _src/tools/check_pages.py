@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:4433/RISINGLIGHTUK/'
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.environ.get('TEMP', '.'), 'rl-pages-check')
 os.makedirs(OUT, exist_ok=True)
-PAGES = ['', 'about.html', 'work.html', 'events.html', 'quiet-battles.html', 'get-involved.html',
+PAGES = ['', 'about.html', 'work.html', 'events.html', 'quiet-battles.html', 'initiatives.html', 'get-involved.html',
          'privacy.html', 'safeguarding.html', 'accessibility.html', 'admin.html', 'no-such-page']
 WIDTHS = [(1440, 900), (390, 844)]
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'

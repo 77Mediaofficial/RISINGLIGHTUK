@@ -34,6 +34,11 @@
      default to a visitor's chosen light (or back). The root colour scheme is set here so the canvas starts right. -->
 <script>(function(){var d=document.documentElement;d.classList.add('rl-boot');try{if(localStorage.getItem('rl_theme')==='light'){d.classList.add('rl-pre-light');d.style.colorScheme='light';var m=document.querySelector('meta[name="color-scheme"]');if(m)m.setAttribute('content','light');}}catch(e){}})();</script>
 <style>html.rl-boot *,html.rl-boot *::before,html.rl-boot *::after{transition:none!important}html.rl-pre-light body{background:#FFFFFF!important}</style>
+<!-- Motion boot (29 Oct 2026; notes: site.css block 7). 'js' gates every hidden start state, so without JavaScript
+     nothing waits at opacity 0. 'rl-nvt': no cross-document View Transitions here, so the CSS load fade stands in for
+     the page cross-fade. 'rl-sr-off': motion.js had not started 3 s on (a script failed or is still loading), so
+     every scroll-reveal item is simply shown. -->
+<script>(function(d){d.classList.add('js');if(!('CSSViewTransitionRule' in window))d.classList.add('rl-nvt');setTimeout(function(){if(!d.classList.contains('rl-sr-live'))d.classList.add('rl-sr-off');},3000);})(document.documentElement);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
