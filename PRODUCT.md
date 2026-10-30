@@ -7,7 +7,7 @@ the design gate (`/impeccable`) can run; it states nothing Joe did not say.
 
 The public website of Rising Light UK, a volunteer-run community initiative founded in London (not a registered
 charity). Nine static pages built from `_src/` by `py _src/build.py`, served by GitHub Pages. It carries the mission
-("Compassion has no borders"), where the work happens (London, Arizona, Guatemala), the events, Quiet Battles (mental
+("Compassion has no borders"), where the work happens (London and Guatemala, plus a past week in Arizona), the events, Quiet Battles (mental
 health and suicide prevention), how to get involved, and the policy pages (privacy, safeguarding, accessibility).
 
 ## Who it is for

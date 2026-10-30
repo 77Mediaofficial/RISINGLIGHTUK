@@ -19,15 +19,15 @@ BRAND = 'Rising Light UK'
 PAGES = [
     dict(file='index.html', key='home', title=BRAND + ' — Compassion Has No Borders',
          desc='Rising Light UK — Compassion Has No Borders. A grassroots humanitarian initiative helping people and animals '
-              'across borders, with projects in the UK, Arizona (USA) and Guatemala. Volunteer, partner, or follow our work.',
-         og_desc='A grassroots initiative helping people and animals across borders — projects in the UK, Arizona and Guatemala. Volunteer, partner, or follow our work.',
-         tw_desc='A grassroots initiative helping people and animals across borders — projects in the UK, Arizona and Guatemala.',
+              'across borders, with projects in the UK and Guatemala, and past work in Arizona (USA). Volunteer, partner, or follow our work.',
+         og_desc='A grassroots initiative helping people and animals across borders — projects in the UK and Guatemala, and past work in Arizona. Volunteer, partner, or follow our work.',
+         tw_desc='A grassroots initiative helping people and animals across borders — projects in the UK and Guatemala, and past work in Arizona.',
          parts=['_hero', 'home-explore', '_ig'], jsonld=True),
     dict(file='about.html', key='about', title='About — ' + BRAND,
          desc='Who Rising Light UK is: a grassroots humanitarian initiative born in London, what it has done so far and how its work is funded.',
          parts=['about-intro', '_story', '_partners', '_impact']),   # _story: the timeline; _partners: hidden until partners agree
     dict(file='work.html', key='work', title='Our Work — ' + BRAND,
-         desc='Where Rising Light UK works (London, Arizona and Guatemala) and the world’s current Orange and Red disaster alerts '
+         desc='Where Rising Light UK works and has worked (London, Arizona and Guatemala) and the world’s current Orange and Red disaster alerts '
               'from the Global Disaster Awareness and Coordination System (GDACS).',
          parts=['_reach', '_globe'], scripts=['globe']),
     dict(file='events.html', key='events', title='Events — ' + BRAND,
