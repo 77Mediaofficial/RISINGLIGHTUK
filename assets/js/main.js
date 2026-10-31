@@ -815,8 +815,8 @@ const LOCATIONS=[
 /* Per-location card copy + label placement (indexes match LOCATIONS). */
 const MAP_INFO=[
   {co:'51.5072° N · 0.1276° W',  tag:'',       body:'Home base — outreach, The Clothes Run and events across London and Surrey.'},
-  {co:'34.0489° N · 111.0937° W',tag:'tag-up', body:'One week in 2026 — we handed out water on the streets to people who are homeless or living with addiction to fentanyl and other drugs.'},
-  {co:'15.7835° N · 90.2308° W', tag:'',       body:'International projects — help for families and animals in Guatemala.'}
+  {co:'34.0489° N · 111.0937° W',tag:'tag-up', body:'One week in April 2026 — we handed out water on the streets to people who are homeless or living with addiction to fentanyl and other drugs.'},
+  {co:'15.7835° N · 90.2308° W', tag:'',       body:'February to April 2026 — a one-off project caring for stray animals.'}
 ];
 /* One view everywhere: the FULL world (Antarctica cropped). An earlier build
    cropped phones to an Atlantic window for tap spacing, but half the planet

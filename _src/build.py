@@ -19,9 +19,9 @@ BRAND = 'Rising Light UK'
 PAGES = [
     dict(file='index.html', key='home', title=BRAND + ' — Compassion Has No Borders',
          desc='Rising Light UK — Compassion Has No Borders. A grassroots humanitarian initiative helping people and animals '
-              'across borders, with projects in the UK and Guatemala, and past work in Arizona (USA). Volunteer, partner, or follow our work.',
-         og_desc='A grassroots initiative helping people and animals across borders — projects in the UK and Guatemala, and past work in Arizona. Volunteer, partner, or follow our work.',
-         tw_desc='A grassroots initiative helping people and animals across borders — projects in the UK and Guatemala, and past work in Arizona.',
+              'across borders, with projects in the UK and past work in Guatemala and Arizona (USA). Volunteer, partner, or follow our work.',
+         og_desc='A grassroots initiative helping people and animals across borders — projects in the UK and past work in Guatemala and Arizona. Volunteer, partner, or follow our work.',
+         tw_desc='A grassroots initiative helping people and animals across borders — projects in the UK and past work in Guatemala and Arizona.',
          parts=['_hero', 'home-explore', '_ig'], jsonld=True),
     dict(file='about.html', key='about', title='About — ' + BRAND,
          desc='Who Rising Light UK is: a grassroots humanitarian initiative born in London, what it has done so far and how its work is funded.',
