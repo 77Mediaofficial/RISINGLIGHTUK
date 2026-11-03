@@ -2,14 +2,14 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-11-02T23:53:14Z",
+  "generatedAt": "2026-11-03T12:49:47Z",
   "count": 1,
   "dropped": 0,
   "events": [
     {
       "id": "TC-1001346",
-      "lat": 15.1,
-      "lng": 80.5,
+      "lat": 15.8,
+      "lng": 80.2,
       "title": "Tropical Cyclone MURASU-26",
       "priority": 2,
       "description": "Red is the highest of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
@@ -20,10 +20,10 @@
       "country": "India",
       "place": "MURASU-26",
       "from": "2026-11-01T00:00:00Z",
-      "to": "2026-11-02T18:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001346&episodeid=8&eventtype=TC",
+      "to": "2026-11-03T06:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001346&episodeid=10&eventtype=TC",
       "agency": "JTWC",
-      "episode": 8
+      "episode": 10
     }
   ]
 }
