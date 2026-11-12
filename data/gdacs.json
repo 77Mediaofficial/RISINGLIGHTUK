@@ -2,8 +2,28 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-11-07T11:44:56Z",
-  "count": 0,
+  "generatedAt": "2026-11-12T13:47:16Z",
+  "count": 1,
   "dropped": 0,
-  "events": []
+  "events": [
+    {
+      "id": "DR-1023877",
+      "lat": 7.108,
+      "lng": -66.675,
+      "title": "Drought Northern South America, Panama…",
+      "priority": 1,
+      "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
+      "type": "DR",
+      "typeLabel": "Drought",
+      "alert": "Orange",
+      "severityText": "1,735,191 km² affected",
+      "country": "Aruba and 8 more countries",
+      "place": "Northern South America, Panama…",
+      "from": "2022-09-21T00:00:00Z",
+      "to": "2026-11-12T08:28:56Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1023877&episodeid=14&eventtype=DR",
+      "agency": "GDO",
+      "episode": 14
+    }
+  ]
 }
