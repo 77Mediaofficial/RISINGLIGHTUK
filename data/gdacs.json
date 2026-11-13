@@ -2,7 +2,7 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-11-12T13:47:16Z",
+  "generatedAt": "2026-11-13T13:08:50Z",
   "count": 1,
   "dropped": 0,
   "events": [
@@ -20,7 +20,7 @@
       "country": "Aruba and 8 more countries",
       "place": "Northern South America, Panama…",
       "from": "2022-09-21T00:00:00Z",
-      "to": "2026-11-12T08:28:56Z",
+      "to": "2026-11-11T00:00:00Z",
       "url": "https://www.gdacs.org/report.aspx?eventid=1023877&episodeid=14&eventtype=DR",
       "agency": "GDO",
       "episode": 14
