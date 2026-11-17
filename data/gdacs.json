@@ -2,14 +2,14 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-11-17T00:49:45Z",
-  "count": 2,
+  "generatedAt": "2026-11-17T14:28:07Z",
+  "count": 1,
   "dropped": 0,
   "events": [
     {
       "id": "TC-1001351",
-      "lat": 11.3,
-      "lng": 86.7,
+      "lat": 12,
+      "lng": 87.3,
       "title": "Tropical Cyclone AKVAN-26",
       "priority": 1,
       "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
@@ -20,29 +20,10 @@
       "country": "India",
       "place": "AKVAN-26",
       "from": "2026-11-16T18:00:00Z",
-      "to": "2026-11-16T18:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001351&episodeid=1&eventtype=TC",
+      "to": "2026-11-17T06:00:00Z",
+      "url": "https://www.gdacs.org/report.aspx?eventid=1001351&episodeid=3&eventtype=TC",
       "agency": "JTWC",
-      "episode": 1
-    },
-    {
-      "id": "DR-1023877",
-      "lat": 7.108,
-      "lng": -66.675,
-      "title": "Drought Northern South America, Panama…",
-      "priority": 1,
-      "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
-      "type": "DR",
-      "typeLabel": "Drought",
-      "alert": "Orange",
-      "severityText": "1,735,191 km² affected",
-      "country": "Aruba and 8 more countries",
-      "place": "Northern South America, Panama…",
-      "from": "2022-09-21T00:00:00Z",
-      "to": "2026-11-14T00:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1023877&episodeid=14&eventtype=DR",
-      "agency": "GDO",
-      "episode": 14
+      "episode": 3
     }
   ]
 }
