@@ -2,28 +2,8 @@
   "source": "GDACS",
   "sourceName": "Global Disaster Awareness and Coordination System",
   "sourceUrl": "https://www.gdacs.org/",
-  "generatedAt": "2026-11-19T14:27:30Z",
-  "count": 1,
+  "generatedAt": "2026-11-19T23:35:49Z",
+  "count": 0,
   "dropped": 0,
-  "events": [
-    {
-      "id": "TC-1001351",
-      "lat": 16,
-      "lng": 85.3,
-      "title": "Tropical Cyclone AKVAN-26",
-      "priority": 1,
-      "description": "Orange is the middle of GDACS's three alert levels (Green, Orange, Red) for the possible need for international assistance.",
-      "type": "TC",
-      "typeLabel": "Tropical cyclone",
-      "alert": "Orange",
-      "severityText": "Maximum wind 83 km/h",
-      "country": "India",
-      "place": "AKVAN-26",
-      "from": "2026-11-16T18:00:00Z",
-      "to": "2026-11-19T12:00:00Z",
-      "url": "https://www.gdacs.org/report.aspx?eventid=1001351&episodeid=12&eventtype=TC",
-      "agency": "JTWC",
-      "episode": 12
-    }
-  ]
+  "events": []
 }
